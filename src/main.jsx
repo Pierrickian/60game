@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { AnimatePresence, motion } from 'framer-motion'
 import './style.css'
@@ -34,71 +34,13 @@ function countRemaining(deck, label) {
   return deck.filter((card) => card.label === label).length
 }
 
-function useCanvasFx() {
-  const canvasRef = useRef(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    const context = canvas.getContext('2d')
-    const particles = Array.from({ length: 48 }, () => ({
-      x: Math.random(),
-      y: Math.random(),
-      r: 0.8 + Math.random() * 2.4,
-      speed: 0.0004 + Math.random() * 0.0012,
-      alpha: 0.16 + Math.random() * 0.5
-    }))
-
-    let animationFrame = 0
-
-    function resize() {
-      canvas.width = window.innerWidth * window.devicePixelRatio
-      canvas.height = window.innerHeight * window.devicePixelRatio
-    }
-
-    function draw() {
-      context.clearRect(0, 0, canvas.width, canvas.height)
-
-      particles.forEach((particle) => {
-        particle.y -= particle.speed
-        if (particle.y < -0.05) particle.y = 1.05
-
-        const x = particle.x * canvas.width
-        const y = particle.y * canvas.height
-        const gradient = context.createRadialGradient(x, y, 0, x, y, particle.r * 8)
-        gradient.addColorStop(0, `rgba(255, 226, 120, ${particle.alpha})`)
-        gradient.addColorStop(1, 'rgba(120, 90, 255, 0)')
-
-        context.fillStyle = gradient
-        context.beginPath()
-        context.arc(x, y, particle.r * 8, 0, Math.PI * 2)
-        context.fill()
-      })
-
-      animationFrame = requestAnimationFrame(draw)
-    }
-
-    resize()
-    draw()
-    window.addEventListener('resize', resize)
-
-    return () => {
-      cancelAnimationFrame(animationFrame)
-      window.removeEventListener('resize', resize)
-    }
-  }, [])
-
-  return canvasRef
-}
-
 function Stat({ tone, icon, label, value }) {
   return (
-    <motion.div className={`stat-card ${tone}`} layout>
+    <div className={`stat-card ${tone}`}>
       <span className="stat-icon">{icon}</span>
       <span className="stat-label">{label}</span>
-      <motion.strong key={value} initial={{ scale: 0.72 }} animate={{ scale: 1 }}>
-        {value}
-      </motion.strong>
-    </motion.div>
+      <strong>{value}</strong>
+    </div>
   )
 }
 
@@ -106,31 +48,22 @@ function DeckStack({ remaining }) {
   return (
     <div className="deck-zone">
       <div className="plate plate-blue" />
-      <motion.div
-        className="deck-stack"
-        animate={{ y: [0, -8, 0], rotateZ: [-1, 1, -1] }}
-        transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }}
-      >
+      <div className="deck-stack">
         <div className="deck-shadow-card card-layer-3" />
         <div className="deck-shadow-card card-layer-2" />
         <div className="deck-back">
-          <div className="card-border" />
           <span className="deck-logo">60</span>
           <span className="deck-subtitle">GAME</span>
           <small>{remaining}</small>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }
 
 function FaceCard({ card, empty = false }) {
   if (!card || empty) {
-    return (
-      <div className="face-card empty-face">
-        <strong>?</strong>
-      </div>
-    )
+    return <div className="face-card empty-face"><strong>?</strong></div>
   }
 
   return (
@@ -147,26 +80,22 @@ function DiscardPile({ card, won, points }) {
   return (
     <div className="discard-zone">
       <div className="plate plate-purple" />
-      <motion.div
-        className="discard-card-wrap"
-        animate={won ? { scale: [1, 1.08, 1] } : { scale: 1 }}
-        transition={{ duration: 0.38 }}
-      >
+      <div className={`discard-card-wrap ${won ? 'impact-lite' : ''}`}>
         <FaceCard card={card} empty={!card} />
         <AnimatePresence>
           {points ? (
             <motion.div
               className="gain-pop"
-              initial={{ opacity: 0, y: 30, scale: 0.45 }}
-              animate={{ opacity: 1, y: -44, scale: 1 }}
-              exit={{ opacity: 0, y: -88, scale: 1.15 }}
-              transition={{ duration: 0.42 }}
+              initial={{ opacity: 0, y: 20, scale: 0.75 }}
+              animate={{ opacity: 1, y: -34, scale: 1 }}
+              exit={{ opacity: 0, y: -56, scale: 1 }}
+              transition={{ duration: 0.28 }}
             >
               +{points}
             </motion.div>
           ) : null}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </div>
   )
 }
@@ -177,8 +106,7 @@ function PredictionCard({ card, remaining, disabled, onGuess }) {
       className={`prediction-card theme-${card.theme}`}
       disabled={disabled || remaining <= 0}
       onClick={() => onGuess(card.label)}
-      whileTap={{ scale: 0.94 }}
-      whileHover={{ scale: 1.03, y: -4 }}
+      whileTap={{ scale: 0.96 }}
     >
       <span className="prediction-value">{card.label}</span>
       <span className="prediction-icon">{card.icon}</span>
@@ -194,10 +122,10 @@ function FlyingCard({ card }) {
     <motion.div
       key={card.id}
       className="flying-card"
-      initial={{ x: '-38vw', y: 30, rotate: -18, scale: 0.72, opacity: 0.98 }}
-      animate={{ x: '36vw', y: -36, rotate: 12, scale: 0.96, opacity: 1 }}
-      exit={{ opacity: 0, scale: 0.9 }}
-      transition={{ duration: 0.58, ease: [0.2, 0.85, 0.25, 1] }}
+      initial={{ x: '-34vw', y: 18, rotate: -14, scale: 0.74, opacity: 0.98 }}
+      animate={{ x: '34vw', y: -18, rotate: 10, scale: 0.9, opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.42, ease: 'easeOut' }}
     >
       <FaceCard card={card} />
     </motion.div>
@@ -205,7 +133,6 @@ function FlyingCard({ card }) {
 }
 
 function App() {
-  const canvasRef = useCanvasFx()
   const [started, setStarted] = useState(false)
   const [deck, setDeck] = useState(() => buildDeck())
   const [discard, setDiscard] = useState([])
@@ -244,7 +171,7 @@ function App() {
     setPoints(null)
     setWon(false)
 
-    if (navigator.vibrate) navigator.vibrate(isWin ? [18, 24, 18] : 10)
+    if (navigator.vibrate) navigator.vibrate(isWin ? 18 : 8)
 
     setTimeout(() => {
       setDiscard((cards) => [...cards, drawnCard])
@@ -267,35 +194,29 @@ function App() {
       setTimeout(() => {
         setPoints(null)
         setWon(false)
-      }, 720)
-    }, 610)
+      }, 520)
+    }, 460)
   }
 
   const gameOver = started && deck.length === 0 && !flyingCard
 
   return (
     <main className="game-shell">
-      <canvas ref={canvasRef} className="fx-canvas" />
       <div className="cinematic-bg" />
 
       {!started ? (
-        <motion.button
-          className="start-screen"
-          onClick={newGame}
-          initial={{ opacity: 0, scale: 0.92 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
+        <button className="start-screen" onClick={newGame}>
           <span>60game</span>
           <strong>Card Arcade</strong>
           <em>Tap to play</em>
-        </motion.button>
+        </button>
       ) : gameOver ? (
-        <motion.section className="end-screen" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        <section className="end-screen">
           <span>Congrats!</span>
           <strong>{score}</strong>
           <em>Best {best}</em>
           <button onClick={newGame}>New Game</button>
-        </motion.section>
+        </section>
       ) : (
         <>
           <header className="top-stats">
@@ -305,8 +226,8 @@ function App() {
           </header>
 
           <section className="quick-info">
-            <div><span>LAST CARD</span><strong>{lastCard?.label || '-'}</strong></div>
-            <div><span>CARDS LEFT</span><strong>{deck.length}</strong></div>
+            <div><span>LAST</span><strong>{lastCard?.label || '-'}</strong></div>
+            <div><span>CARDS</span><strong>{deck.length}</strong></div>
           </section>
 
           <section className="play-stage">
