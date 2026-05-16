@@ -57,7 +57,8 @@ function startGame() {
     discard: [],
     score: 0,
     lastCard: null,
-    pointsPopup: null
+    pointsPopup: null,
+    movingCard: null
   }
 
   function render() {
@@ -73,7 +74,6 @@ function startGame() {
       `
 
       document.querySelector('#restart-button').addEventListener('click', startGame)
-
       return
     }
 
@@ -84,38 +84,42 @@ function startGame() {
           <div class="hud-pill">${state.deck.length} left</div>
         </div>
 
-        <section class="table-layout">
-          <div class="table-center">
+        <section class="table-layout split-layout">
+          <div class="table-half left-half">
             <div class="deck-stack floating">
               <div class="deck-card-3d"></div>
               <div class="deck-card-3d layer-2"></div>
               <div class="deck-card-3d layer-3"></div>
             </div>
+          </div>
 
-            <div class="discard-wrapper">
-              <div class="discard-card revealed flip-in">
+          <div class="table-half right-half">
+            <div class="discard-wrapper fixed-discard">
+              <div class="discard-card solid-card ${state.lastCard ? 'flip-in' : ''}">
                 ${state.lastCard ? state.lastCard.label : '?'}
               </div>
 
               ${state.pointsPopup ? `
-                <div class="points-popup pop-anim">
-                  +${state.pointsPopup}
-                </div>
+                <div class="points-popup pop-anim">+${state.pointsPopup}</div>
               ` : ''}
             </div>
           </div>
 
-          <div class="guess-grid compact-grid">
-            ${CARD_TYPES.map((card) => `
-              <button class="guess-button arcade-button" data-guess="${card.label}">
-                <span class="remaining-badge">
-                  ${countRemaining(state.deck, card.label)}
-                </span>
-                <span>${card.label}</span>
-              </button>
-            `).join('')}
-          </div>
+          ${state.movingCard ? `
+            <div class="moving-card travel-card">
+              ${state.movingCard.label}
+            </div>
+          ` : ''}
         </section>
+
+        <div class="guess-grid compact-grid big-grid">
+          ${CARD_TYPES.map((card) => `
+            <button class="guess-button arcade-button" data-guess="${card.label}">
+              <span class="remaining-badge">${countRemaining(state.deck, card.label)}</span>
+              <span class="button-label">${card.label}</span>
+            </button>
+          `).join('')}
+        </div>
       </main>
     `
 
@@ -124,24 +128,30 @@ function startGame() {
         const guess = button.dataset.guess
         const drawnCard = state.deck.shift()
 
-        state.lastCard = drawnCard
-        state.discard.push(drawnCard)
-
-        if (guess === drawnCard.label) {
-          state.score += drawnCard.value
-          state.pointsPopup = drawnCard.value
-        } else {
-          state.pointsPopup = null
-        }
-
+        state.movingCard = drawnCard
         render()
 
-        if (state.pointsPopup) {
-          setTimeout(() => {
+        setTimeout(() => {
+          state.lastCard = drawnCard
+          state.discard.push(drawnCard)
+          state.movingCard = null
+
+          if (guess === drawnCard.label) {
+            state.score += drawnCard.value
+            state.pointsPopup = drawnCard.value
+          } else {
             state.pointsPopup = null
-            render()
-          }, 900)
-        }
+          }
+
+          render()
+
+          if (state.pointsPopup) {
+            setTimeout(() => {
+              state.pointsPopup = null
+              render()
+            }, 900)
+          }
+        }, 520)
       })
     })
   }
