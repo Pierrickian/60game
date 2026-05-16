@@ -11,7 +11,7 @@ const CARD_TYPES = [
   { label: 'JOKER', value: 0, count: 2, theme: 'black', gem: '♛' }
 ]
 
-const PARTICLES = Array.from({ length: 22 }, (_, index) => ({
+const PARTICLES = Array.from({ length: 18 }, (_, index) => ({
   id: index,
   left: Math.round(Math.random() * 100),
   top: Math.round(Math.random() * 100),
@@ -51,9 +51,7 @@ function getCardType(label) {
 }
 
 function playTapFeedback(isWin) {
-  if (navigator.vibrate) {
-    navigator.vibrate(isWin ? [18, 30, 18] : 12)
-  }
+  if (navigator.vibrate) navigator.vibrate(isWin ? [18, 24, 18] : 10)
 }
 
 function renderParticles() {
@@ -63,6 +61,21 @@ function renderParticles() {
       style="left:${particle.left}%; top:${particle.top}%; animation-delay:${particle.delay}s; width:${particle.size}px; height:${particle.size}px;"
     ></span>
   `).join('')
+}
+
+function renderCardFace(card, extraClass = '') {
+  if (!card) {
+    return `<div class="play-card empty-card ${extraClass}"><span class="revealed-value">?</span></div>`
+  }
+
+  return `
+    <div class="play-card theme-${card.theme} ${extraClass}">
+      <span class="corner top-left">${card.label}</span>
+      <span class="revealed-value">${card.label}</span>
+      <span class="card-gem">${card.gem}</span>
+      <span class="corner bottom-right">${card.label}</span>
+    </div>
+  `
 }
 
 function renderHome() {
@@ -115,46 +128,43 @@ function startGame() {
       return
     }
 
-    const lastCard = state.lastCard || { label: '?', theme: 'neutral', gem: '◆' }
-    const lastCardType = getCardType(lastCard.label) || lastCard
+    const lastCardType = state.lastCard ? getCardType(state.lastCard.label) : null
 
     root.innerHTML = `
       <main class="app-shell game-layout ${state.scorePulse ? 'score-hit' : ''}">
         <div class="ambient-layer">${renderParticles()}</div>
 
-        <div class="hud-row premium-hud">
+        <header class="top-hud">
           <div class="hud-stat score-stat">
             <span class="hud-icon">🏆</span>
             <span class="hud-label">Score</span>
             <strong>${state.score}</strong>
           </div>
-
           <div class="hud-stat best-stat">
             <span class="hud-icon">♛</span>
             <span class="hud-label">Best</span>
             <strong>${state.best}</strong>
           </div>
-
           <div class="hud-stat left-stat">
             <span class="hud-icon">★</span>
             <span class="hud-label">Left</span>
             <strong>${state.deck.length}</strong>
           </div>
-        </div>
+        </header>
 
-        <section class="info-row">
-          <div class="info-panel last-panel">
-            <span>Last card</span>
+        <section class="mini-info-row">
+          <div class="mini-info">
+            <span>Last</span>
             <strong>${state.lastCard ? state.lastCard.label : '-'}</strong>
           </div>
-          <div class="info-panel left-panel">
-            <span>Cards left</span>
+          <div class="mini-info left-mini">
+            <span>Cards</span>
             <strong>${state.deck.length}</strong>
           </div>
         </section>
 
-        <section class="table-layout split-layout">
-          <div class="table-half left-half">
+        <section class="table-stage">
+          <div class="card-zone deck-zone">
             <div class="glow-ring blue-ring"></div>
             <div class="deck-stack floating">
               <div class="deck-card-3d deck-face"><span>60</span><small>GAME</small></div>
@@ -166,15 +176,10 @@ function startGame() {
 
           <div class="arc-trail ${state.movingCard ? 'trail-on' : ''}"></div>
 
-          <div class="table-half right-half">
+          <div class="card-zone discard-zone">
             <div class="glow-ring purple-ring ${state.hitBurst ? 'ring-hit' : ''}"></div>
-            <div class="discard-wrapper fixed-discard ${state.hitBurst ? 'impact-hit' : ''}">
-              <div class="discard-card solid-card theme-${lastCardType.theme}">
-                <span class="corner top-left">${state.lastCard ? state.lastCard.label : ''}</span>
-                <span class="revealed-value">${state.lastCard ? state.lastCard.label : '?'}</span>
-                <span class="corner bottom-right">${state.lastCard ? state.lastCard.label : ''}</span>
-              </div>
-
+            <div class="discard-wrapper ${state.hitBurst ? 'impact-hit' : ''}">
+              ${renderCardFace(lastCardType, 'discard-card')}
               ${state.pointsPopup ? `
                 <div class="points-popup pop-anim">+${state.pointsPopup}</div>
                 <div class="star-burst burst-anim"></div>
@@ -186,26 +191,23 @@ function startGame() {
             <div class="moving-card travel-card theme-${state.movingCard.theme}">
               <span class="corner top-left">${state.movingCard.label}</span>
               <span class="revealed-value">${state.movingCard.label}</span>
+              <span class="card-gem">${state.movingCard.gem}</span>
               <span class="corner bottom-right">${state.movingCard.label}</span>
             </div>
           ` : ''}
         </section>
 
-        <div class="guess-grid big-grid">
+        <section class="guess-grid">
           ${CARD_TYPES.map((card) => `
             <button class="guess-button arcade-button theme-${card.theme}" data-guess="${card.label}" ${state.isLocked ? 'disabled' : ''}>
               <span class="button-label">${card.label}</span>
               <span class="button-gem">${card.gem}</span>
-              <span class="remaining-text">${countRemaining(state.deck, card.label)} left</span>
+              <span class="remaining-text">${countRemaining(state.deck, card.label)} LEFT</span>
             </button>
           `).join('')}
-        </div>
-
-        <button class="new-game-button bottom-new-game" id="new-game-button">New Game</button>
+        </section>
       </main>
     `
-
-    document.querySelector('#new-game-button').addEventListener('click', startGame)
 
     document.querySelectorAll('[data-guess]').forEach((button) => {
       button.addEventListener('click', () => {
@@ -244,8 +246,8 @@ function startGame() {
             state.scorePulse = false
             state.pointsPopup = null
             render()
-          }, 820)
-        }, 620)
+          }, 760)
+        }, 600)
       })
     })
   }
