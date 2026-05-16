@@ -11,6 +11,14 @@ const CARD_TYPES = [
   { label: 'JOKER', value: 0, count: 2, theme: 'black', gem: '♛' }
 ]
 
+const PARTICLES = Array.from({ length: 22 }, (_, index) => ({
+  id: index,
+  left: Math.round(Math.random() * 100),
+  top: Math.round(Math.random() * 100),
+  delay: (Math.random() * 5).toFixed(2),
+  size: Math.round(2 + Math.random() * 4)
+}))
+
 function shuffle(array) {
   const copy = [...array]
 
@@ -42,9 +50,25 @@ function getCardType(label) {
   return CARD_TYPES.find((card) => card.label === label)
 }
 
+function playTapFeedback(isWin) {
+  if (navigator.vibrate) {
+    navigator.vibrate(isWin ? [18, 30, 18] : 12)
+  }
+}
+
+function renderParticles() {
+  return PARTICLES.map((particle) => `
+    <span
+      class="sparkle"
+      style="left:${particle.left}%; top:${particle.top}%; animation-delay:${particle.delay}s; width:${particle.size}px; height:${particle.size}px;"
+    ></span>
+  `).join('')
+}
+
 function renderHome() {
   root.innerHTML = `
     <main class="app-shell home-shell">
+      <div class="ambient-layer">${renderParticles()}</div>
       <button class="hero-card interactive-card pulse-card" id="start-button">
         <p class="eyebrow">60game</p>
         <h1>Card Game</h1>
@@ -65,6 +89,8 @@ function startGame() {
     lastCard: null,
     pointsPopup: null,
     movingCard: null,
+    hitBurst: false,
+    scorePulse: false,
     isLocked: false
   }
 
@@ -75,7 +101,8 @@ function startGame() {
 
       root.innerHTML = `
         <main class="app-shell home-shell">
-          <section class="hero-card end-screen animated-in">
+          <div class="ambient-layer">${renderParticles()}</div>
+          <section class="hero-card end-screen animated-in finale-card">
             <p class="eyebrow">Congrats!</p>
             <h1>${state.score}</h1>
             <p class="final-best">Best ${state.best}</p>
@@ -92,7 +119,9 @@ function startGame() {
     const lastCardType = getCardType(lastCard.label) || lastCard
 
     root.innerHTML = `
-      <main class="app-shell game-layout">
+      <main class="app-shell game-layout ${state.scorePulse ? 'score-hit' : ''}">
+        <div class="ambient-layer">${renderParticles()}</div>
+
         <div class="hud-row premium-hud">
           <div class="hud-stat score-stat">
             <span class="hud-icon">🏆</span>
@@ -131,14 +160,15 @@ function startGame() {
               <div class="deck-card-3d deck-face"><span>60</span><small>GAME</small></div>
               <div class="deck-card-3d layer-2"></div>
               <div class="deck-card-3d layer-3"></div>
+              <div class="deck-shine"></div>
             </div>
           </div>
 
           <div class="arc-trail ${state.movingCard ? 'trail-on' : ''}"></div>
 
           <div class="table-half right-half">
-            <div class="glow-ring purple-ring"></div>
-            <div class="discard-wrapper fixed-discard">
+            <div class="glow-ring purple-ring ${state.hitBurst ? 'ring-hit' : ''}"></div>
+            <div class="discard-wrapper fixed-discard ${state.hitBurst ? 'impact-hit' : ''}">
               <div class="discard-card solid-card theme-${lastCardType.theme}">
                 <span class="corner top-left">${state.lastCard ? state.lastCard.label : ''}</span>
                 <span class="revealed-value">${state.lastCard ? state.lastCard.label : '?'}</span>
@@ -147,6 +177,7 @@ function startGame() {
 
               ${state.pointsPopup ? `
                 <div class="points-popup pop-anim">+${state.pointsPopup}</div>
+                <div class="star-burst burst-anim"></div>
               ` : ''}
             </div>
           </div>
@@ -186,28 +217,35 @@ function startGame() {
         state.isLocked = true
         state.movingCard = drawnCard
         state.pointsPopup = null
+        state.hitBurst = false
+        state.scorePulse = false
         render()
 
         setTimeout(() => {
+          const isWin = guess === drawnCard.label
+
           state.lastCard = drawnCard
           state.discard.push(drawnCard)
           state.movingCard = null
+          state.hitBurst = true
 
-          if (guess === drawnCard.label) {
+          if (isWin) {
             state.score += drawnCard.value
             state.pointsPopup = drawnCard.value
+            state.scorePulse = true
           }
 
+          playTapFeedback(isWin)
           state.isLocked = false
           render()
 
-          if (state.pointsPopup) {
-            setTimeout(() => {
-              state.pointsPopup = null
-              render()
-            }, 800)
-          }
-        }, 560)
+          setTimeout(() => {
+            state.hitBurst = false
+            state.scorePulse = false
+            state.pointsPopup = null
+            render()
+          }, 820)
+        }, 620)
       })
     })
   }
