@@ -34,22 +34,21 @@ function buildDeck() {
   return shuffle(deck)
 }
 
+function countRemaining(deck, label) {
+  return deck.filter((card) => card.label === label).length
+}
+
 function renderHome() {
   root.innerHTML = `
     <main class="app-shell">
-      <button class="hero-card interactive-card" id="start-button">
+      <button class="hero-card interactive-card pulse-card" id="start-button">
         <p class="eyebrow">60game</p>
         <h1>Card game playground</h1>
-        <p class="description">
-          Clique pour démarrer la partie.
-        </p>
       </button>
     </main>
   `
 
-  document
-    .querySelector('#start-button')
-    .addEventListener('click', startGame)
+  document.querySelector('#start-button').addEventListener('click', startGame)
 }
 
 function startGame() {
@@ -58,72 +57,64 @@ function startGame() {
     discard: [],
     score: 0,
     lastCard: null,
-    message: 'Choisis une carte pour deviner la prochaine pioche.'
+    pointsPopup: null
   }
 
   function render() {
-    const remaining = state.deck.length
-
-    if (remaining === 0) {
+    if (state.deck.length === 0) {
       root.innerHTML = `
         <main class="app-shell">
-          <section class="hero-card end-screen">
+          <section class="hero-card end-screen animated-in">
             <p class="eyebrow">Congrats!</p>
             <h1>${state.score}</h1>
-            <p class="description">Score final obtenu sur les 60 cartes.</p>
-            <button class="guess-button" id="restart-button">
-              Rejouer
-            </button>
+            <button class="guess-button" id="restart-button">Replay</button>
           </section>
         </main>
       `
 
-      document
-        .querySelector('#restart-button')
-        .addEventListener('click', startGame)
+      document.querySelector('#restart-button').addEventListener('click', startGame)
 
       return
     }
 
     root.innerHTML = `
       <main class="app-shell game-layout">
-        <section class="top-bar">
-          <div class="score-panel">
-            <span class="panel-label">Score</span>
-            <strong>${state.score}</strong>
-          </div>
+        <div class="hud-row">
+          <div class="hud-pill score-big">${state.score}</div>
+          <div class="hud-pill">${state.deck.length} left</div>
+        </div>
 
-          <div class="score-panel">
-            <span class="panel-label">Pioche restante</span>
-            <strong>${remaining}</strong>
-          </div>
-        </section>
-
-        <section class="board-layout">
-          <div class="deck-zone">
-            <div class="deck-card">
-              <span>Deck</span>
+        <section class="table-layout">
+          <div class="table-center">
+            <div class="deck-stack floating">
+              <div class="deck-card-3d"></div>
+              <div class="deck-card-3d layer-2"></div>
+              <div class="deck-card-3d layer-3"></div>
             </div>
 
-            <div class="discard-zone">
-              <div class="discard-card ${state.lastCard ? 'revealed' : ''}">
+            <div class="discard-wrapper">
+              <div class="discard-card revealed flip-in">
                 ${state.lastCard ? state.lastCard.label : '?'}
               </div>
-              <span class="discard-label">Défausse</span>
+
+              ${state.pointsPopup ? `
+                <div class="points-popup pop-anim">
+                  +${state.pointsPopup}
+                </div>
+              ` : ''}
             </div>
           </div>
 
-          <section class="controls-panel">
-            <p class="description status-message">${state.message}</p>
-
-            <div class="guess-grid">
-              ${CARD_TYPES.map((card) => `
-                <button class="guess-button" data-guess="${card.label}">
-                  ${card.label}
-                </button>
-              `).join('')}
-            </div>
-          </section>
+          <div class="guess-grid compact-grid">
+            ${CARD_TYPES.map((card) => `
+              <button class="guess-button arcade-button" data-guess="${card.label}">
+                <span class="remaining-badge">
+                  ${countRemaining(state.deck, card.label)}
+                </span>
+                <span>${card.label}</span>
+              </button>
+            `).join('')}
+          </div>
         </section>
       </main>
     `
@@ -138,12 +129,19 @@ function startGame() {
 
         if (guess === drawnCard.label) {
           state.score += drawnCard.value
-          state.message = `Bravo ! Tu as trouvé ${drawnCard.label} et gagné ${drawnCard.value} points.`
+          state.pointsPopup = drawnCard.value
         } else {
-          state.message = `Raté ! La carte était ${drawnCard.label}.`
+          state.pointsPopup = null
         }
 
         render()
+
+        if (state.pointsPopup) {
+          setTimeout(() => {
+            state.pointsPopup = null
+            render()
+          }, 900)
+        }
       })
     })
   }
