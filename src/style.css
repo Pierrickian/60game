@@ -1,8 +1,8 @@
 :root {
   color-scheme: dark;
   font-family: Inter, system-ui, sans-serif;
-  background: #11121a;
-  color: #f5f5f5;
+  background: #0b1020;
+  color: white;
 }
 
 * {
@@ -11,10 +11,12 @@
 
 body {
   margin: 0;
+  overflow: hidden;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top, rgba(87, 115, 255, 0.28), transparent 40%),
-    #11121a;
+    radial-gradient(circle at top, rgba(84, 120, 255, 0.32), transparent 40%),
+    radial-gradient(circle at bottom, rgba(180, 80, 255, 0.18), transparent 40%),
+    #0b1020;
 }
 
 button {
@@ -22,185 +24,294 @@ button {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100vh;
+  width: 100vw;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 18px;
 }
 
 .hero-card {
-  width: min(760px, 100%);
-  border-radius: 28px;
-  padding: 40px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px);
+  width: min(820px, 100%);
+  border-radius: 32px;
+  padding: 48px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 30px 100px rgba(0,0,0,0.45);
 }
 
 .interactive-card {
-  color: inherit;
-  text-align: left;
   cursor: pointer;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease;
+  color: inherit;
+  transition: transform 160ms ease;
 }
 
 .interactive-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(255, 255, 255, 0.28);
+  transform: translateY(-6px) scale(1.01);
+}
+
+.pulse-card {
+  animation: pulseGlow 2s infinite ease-in-out;
 }
 
 .eyebrow {
   margin: 0 0 12px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
   opacity: 0.7;
 }
 
 h1 {
-  margin: 0 0 16px;
-  font-size: clamp(3rem, 10vw, 6rem);
-  line-height: 0.9;
-}
-
-.description {
   margin: 0;
-  max-width: 42rem;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  opacity: 0.82;
+  line-height: 0.9;
+  font-size: clamp(3rem, 10vw, 6rem);
 }
 
 .game-layout {
-  width: min(1100px, 100%);
-  align-content: start;
-  gap: 24px;
+  width: min(1400px, 100%);
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 18px;
 }
 
-.top-bar {
+.hud-row {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.score-panel {
-  min-width: 180px;
-  padding: 18px 22px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.hud-pill {
+  min-width: 120px;
+  padding: 14px 22px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-weight: 800;
+  font-size: 1.2rem;
+  backdrop-filter: blur(10px);
 }
 
-.score-panel strong {
-  display: block;
-  margin-top: 6px;
-  font-size: 2rem;
+.score-big {
+  font-size: 1.5rem;
 }
 
-.panel-label {
-  opacity: 0.72;
-}
-
-.board-layout {
+.table-layout {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 24px;
+  grid-template-columns: 36vh 1fr;
+  gap: 18px;
+  min-height: 0;
 }
 
-.deck-zone {
-  display: grid;
-  gap: 24px;
-}
-
-.deck-card,
-.discard-card {
-  aspect-ratio: 0.7;
-  border-radius: 28px;
+.table-center {
   display: grid;
   place-items: center;
-  font-size: 3rem;
-  font-weight: 800;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
+  position: relative;
 }
 
-.deck-card {
+.deck-stack {
+  position: relative;
+  width: 22vh;
+  height: 32vh;
+}
+
+.deck-card-3d,
+.discard-card {
+  position: absolute;
+  inset: 0;
+  border-radius: 26px;
+  display: grid;
+  place-items: center;
+  font-size: clamp(2rem, 6vh, 5rem);
+  font-weight: 900;
+  transform-style: preserve-3d;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.4);
+}
+
+.deck-card-3d {
   background:
-    linear-gradient(135deg, rgba(87, 115, 255, 0.7), rgba(121, 53, 255, 0.5));
+    linear-gradient(145deg, #4d73ff, #6c4dff);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.layer-2 {
+  transform: translate(8px, 8px);
+  opacity: 0.8;
+}
+
+.layer-3 {
+  transform: translate(16px, 16px);
+  opacity: 0.5;
+}
+
+.floating {
+  animation: floating 2.8s infinite ease-in-out;
+}
+
+.discard-wrapper {
+  position: absolute;
+  right: -2vh;
+  width: 22vh;
+  height: 32vh;
 }
 
 .discard-card {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.discard-card.revealed {
-  color: white;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04));
+    linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+  border: 1px solid rgba(255,255,255,0.16);
 }
 
-.discard-zone {
-  display: grid;
-  gap: 10px;
+.flip-in {
+  animation: flipIn 420ms ease;
 }
 
-.discard-label {
-  text-align: center;
-  opacity: 0.7;
-}
-
-.controls-panel {
-  border-radius: 28px;
-  padding: 28px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.status-message {
-  margin-bottom: 24px;
+.compact-grid {
+  align-content: center;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .guess-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 14px;
+  gap: 12px;
 }
 
-.guess-button {
-  min-height: 72px;
+.arcade-button {
+  position: relative;
+  min-height: 11vh;
   border: 0;
-  border-radius: 18px;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  background: rgba(255,255,255,0.08);
   color: white;
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-size: clamp(1rem, 2.6vh, 2rem);
+  font-weight: 900;
+  cursor: pointer;
   transition:
     transform 120ms ease,
     background 120ms ease;
+  overflow: hidden;
 }
 
-.guess-button:hover {
-  transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.16);
+.arcade-button:hover {
+  transform: translateY(-3px) scale(1.02);
+  background: rgba(255,255,255,0.16);
+}
+
+.remaining-badge {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  min-width: 30px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.35);
+  font-size: 0.8rem;
+}
+
+.points-popup {
+  position: absolute;
+  top: -8vh;
+  right: 2vh;
+  font-size: clamp(2rem, 5vh, 4rem);
+  font-weight: 900;
+  color: #ffe66d;
+  text-shadow: 0 0 24px rgba(255,230,109,0.8);
+}
+
+.pop-anim {
+  animation: pointsPop 900ms ease forwards;
 }
 
 .end-screen {
   text-align: center;
 }
 
-.end-screen .guess-button {
-  margin-top: 24px;
-  width: 100%;
+.animated-in {
+  animation: fadeUp 500ms ease;
+}
+
+.guess-button {
+  border: 0;
+  border-radius: 18px;
+  padding: 18px 24px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+@keyframes floating {
+  0%,100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes flipIn {
+  from {
+    opacity: 0;
+    transform: rotateY(90deg) translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: rotateY(0deg) translateY(0px);
+  }
+}
+
+@keyframes pointsPop {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.6);
+  }
+
+  20% {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) scale(1.1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%,100% {
+    box-shadow: 0 0 0 rgba(255,255,255,0);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(100,140,255,0.35);
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0px);
+  }
 }
 
 @media (max-width: 900px) {
-  .board-layout {
+  .table-layout {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
   }
 
-  .deck-zone {
-    grid-template-columns: repeat(2, 1fr);
+  .table-center {
+    min-height: 34vh;
+  }
+
+  .compact-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .arcade-button {
+    min-height: 9vh;
   }
 }
