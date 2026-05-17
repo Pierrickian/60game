@@ -1,6 +1,6 @@
 .combo-status {
   position: relative;
-  z-index: 3;
+  z-index: 8;
   min-height: 30px;
   margin-top: -2px;
   display: grid;
@@ -30,16 +30,18 @@
 
 .multideck-stage {
   position: relative;
+  z-index: 8;
   display: block;
   height: 100%;
-  min-height: 0;
-  overflow: hidden;
+  min-height: 180px;
+  overflow: visible;
   padding: 0;
+  isolation: isolate;
 }
 
 .combo-table {
   position: absolute;
-  z-index: 2;
+  z-index: 20;
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
@@ -49,23 +51,27 @@
   height: 72%;
   left: 10%;
   top: 14%;
+  pointer-events: none;
 }
 
 .combo-table .deck-zone,
 .combo-table .discard-zone {
   min-width: 0;
   min-height: 0;
+  z-index: 21;
 }
 
 .combo-table .deck-stack,
 .combo-table .discard-card-wrap,
 .combo-table .flying-card {
   width: min(28vw, 144px);
+  z-index: 22;
 }
 
 .combo-table .plate {
   width: min(34vw, 172px);
   height: min(34vw, 172px);
+  z-index: 0;
 }
 
 .combo-table .mini-ribbon {
@@ -74,6 +80,7 @@
   top: 50%;
   height: 2px;
   opacity: .42;
+  z-index: 20;
 }
 
 .main-combo-table .primary-deck {
@@ -198,6 +205,10 @@
 
 @media (max-width: 380px) {
   .combo-status { min-height: 24px; }
+
+  .multideck-stage {
+    min-height: 165px;
+  }
 
   .tables-1 .combo-table:nth-child(1) {
     left: 6%;
