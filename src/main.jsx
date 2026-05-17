@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 import ReactDOM from 'react-dom/client'
 import { AnimatePresence, motion } from 'framer-motion'
 import './style.css'
@@ -101,12 +101,12 @@ function BetClone({ bet }) {
     : bet.result === 'loss'
       ? { x: '24vw', y: '38dvh', rotate: 28, scale: 0.64, opacity: 0 }
       : { x: '24vw', y: '18dvh', rotate: -2, scale: 0.78, opacity: 1 }
-  return <motion.div className={`bet-clone theme-${bet.card.theme} bet-${bet.result}`} initial={{ x: startX, y: startY, scale: 0.66, opacity: 0.94 }} animate={animate} exit={{ opacity: 0, scale: 0.45 }} transition={{ duration: bet.result === 'pending' ? 0.34 : 0.5, ease: 'easeOut' }}><span>{bet.card.label}</span><small>{bet.card.icon}</small></motion.div>
+  return <motion.div className={`bet-clone theme-${bet.card.theme} bet-${bet.result}`} initial={{ x: startX, y: startY, scale: 0.66, opacity: 0.94 }} animate={animate} exit={{ opacity: 0, scale: 0.45 }} transition={{ duration: bet.result === 'pending' ? 0.18 : 0.32, ease: 'easeOut' }}><span>{bet.card.label}</span><small>{bet.card.icon}</small></motion.div>
 }
 
 function TableSlot({ table }) {
   const points = table.lastHit && table.lastCard ? table.lastCard.value : null
-  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .18 }}><DeckStack remaining={table.deck.length} isMain={table.isMain} /><div className="arc-ribbon mini-ribbon" /><DiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} points={points} revealId={table.revealId} showCombo={table.showCombo} /></motion.div>
+  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><DeckStack remaining={table.deck.length} isMain={table.isMain} /><div className="arc-ribbon mini-ribbon" /><DiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} points={points} revealId={table.revealId} showCombo={table.showCombo} /></motion.div>
 }
 
 function EndPanel({ score, best, stats, onPlay }) {
@@ -117,13 +117,14 @@ function App() {
   const [started, setStarted] = useState(false)
   const [tables, setTables] = useState(() => makeTables(buildDeck(), 1))
   const [combo, setCombo] = useState(0)
+  const comboRef = useRef(0)
+  const fxTokenRef = useRef(0)
   const [score, setScore] = useState(0)
   const [scoreBump, setScoreBump] = useState(0)
   const [best, setBest] = useState(() => Number(localStorage.getItem('60game-best') || 0))
   const [bets, setBets] = useState([])
   const [comboPopup, setComboPopup] = useState(null)
   const [frontCombo, setFrontCombo] = useState(null)
-  const [resettingCombo, setResettingCombo] = useState(false)
   const [showEnd, setShowEnd] = useState(false)
   const [stats, setStats] = useState({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 })
 
@@ -132,30 +133,40 @@ function App() {
   const lastCard = mainTable.lastCard
   const remainingByType = useMemo(() => Object.fromEntries(CARD_TYPES.map((type) => [type.label, countRemaining(mainDeck, type.label)])), [mainDeck])
 
-  function clearFx() {
-    setTables((currentTables) => currentTables.map((table) => ({ ...table, showCombo: false })))
-    setFrontCombo(null)
+  function scheduleFxClear(token, delay = 430) {
+    window.setTimeout(() => {
+      if (fxTokenRef.current !== token) return
+      setTables((currentTables) => currentTables.map((table) => ({ ...table, showCombo: false })))
+      setFrontCombo(null)
+      setComboPopup(null)
+    }, delay)
   }
 
   function newGame() {
-    setTables(makeTables(buildDeck(), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setComboPopup(null); setFrontCombo(null); setResettingCombo(false); setShowEnd(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setStarted(true)
+    comboRef.current = 0
+    fxTokenRef.current += 1
+    setTables(makeTables(buildDeck(), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setComboPopup(null); setFrontCombo(null); setShowEnd(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setStarted(true)
   }
 
   function guess(label, buttonIndex) {
-    if (resettingCombo || showEnd) return
+    if (showEnd) return
+    fxTokenRef.current += 1
+    const fxToken = fxTokenRef.current
     setTables((currentTables) => {
-      if (currentTables[0].deck.length === 0) return currentTables
-      const betId = `bet-${Date.now()}-${buttonIndex}`
+      const currentMain = currentTables.find((table) => table.isMain) || currentTables[0]
+      if (!currentMain || currentMain.deck.length === 0) return currentTables
+
+      const previousCombo = comboRef.current
+      const betId = `bet-${Date.now()}-${buttonIndex}-${Math.random().toString(36).slice(2)}`
       const revealedTables = currentTables.map((table) => {
-        const sourceDeck = table.deck.length > 0 ? table.deck : shuffle(currentTables[0].deck)
+        const sourceDeck = table.deck.length > 0 ? table.deck : shuffle(currentMain.deck)
         const [drawnCard, ...nextDeck] = sourceDeck
         const hit = drawnCard?.label === label
         return { ...table, deck: nextDeck, lastCard: drawnCard, lastHit: hit, lastMiss: !hit, revealId: (table.revealId || 0) + 1, showCombo: false }
       })
       const hits = revealedTables.filter((table) => table.lastHit && table.lastCard)
       const isWin = hits.length > 0
-      const nextCombo = isWin ? combo + 1 : 0
-      const popup = isWin ? comboText(nextCombo) : combo > 0 ? 'COMBO BREAK' : null
+      const nextCombo = isWin ? previousCombo + 1 : 0
       const referenceTable = hits[0] || revealedTables.find((table) => table.isMain) || revealedTables[0]
       const referenceDeck = referenceTable.deck
       const roundPoints = hits.reduce((total, table) => total + (table.lastCard?.value || 0), 0)
@@ -164,13 +175,14 @@ function App() {
       const orderedPrevious = revealedTables.map((table) => ({ ...table, showCombo: nextCombo >= 2 && table.lastHit }))
 
       setBets((items) => [...items, { id: betId, card: getCardType(label), buttonIndex, result: 'pending' }])
-      setTimeout(() => setBets((items) => items.map((bet) => bet.id === betId ? { ...bet, result: isWin ? 'win' : 'loss' } : bet)), 160)
-      setTimeout(() => setBets((items) => items.filter((bet) => bet.id !== betId)), 780)
-      setComboPopup(popup)
+      window.setTimeout(() => setBets((items) => items.map((bet) => bet.id === betId ? { ...bet, result: isWin ? 'win' : 'loss' } : bet)), 80)
+      window.setTimeout(() => setBets((items) => items.filter((bet) => bet.id !== betId)), 420)
       if (navigator.vibrate) navigator.vibrate(isWin ? 18 : 8)
 
       if (isWin) {
+        comboRef.current = nextCombo
         setCombo(nextCombo)
+        setComboPopup(nextCombo >= 2 ? comboText(nextCombo) : null)
         setStats((currentStats) => ({ hits: currentStats.hits + hits.length, bestCombo: Math.max(currentStats.bestCombo, nextCombo), maxDecks: Math.max(currentStats.maxDecks, nextCount), jokers: currentStats.jokers + jokerHits }))
         setScore((currentScore) => {
           const multiplied = jokerHits > 0 ? currentScore * (2 ** jokerHits) : currentScore
@@ -181,21 +193,18 @@ function App() {
         setScoreBump((value) => value + 1)
         if (nextCombo >= 2) setFrontCombo(`${comboText(nextCombo) || 'COMBO'} x${nextCombo}`)
         if (jokerHits > 0) setFrontCombo(`x${2 ** jokerHits} SCORE`)
-        setTimeout(clearFx, 760)
-        setTimeout(() => setComboPopup(null), 900)
-        setTimeout(() => { if (referenceDeck.length === 0) setShowEnd(true) }, 720)
+        scheduleFxClear(fxToken)
+        window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, 520)
         return makeTables(referenceDeck, nextCount, orderedPrevious, referenceTable.id)
       }
 
-      setResettingCombo(true)
-      setTimeout(() => {
-        setCombo(0)
-        setComboPopup(null)
-        setResettingCombo(false)
-        setTables(makeTables(referenceDeck, 1, [referenceTable], referenceTable.id))
-        if (referenceDeck.length === 0) setShowEnd(true)
-      }, combo > 0 ? 850 : 720)
-      return revealedTables
+      comboRef.current = 0
+      setCombo(0)
+      setComboPopup(previousCombo > 0 ? 'COMBO BREAK' : null)
+      setFrontCombo(null)
+      scheduleFxClear(fxToken, previousCombo > 0 ? 520 : 220)
+      window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, 520)
+      return makeTables(referenceDeck, 1, [referenceTable], referenceTable.id)
     })
   }
 
