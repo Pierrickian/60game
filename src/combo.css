@@ -65,7 +65,29 @@
 .combo-table .discard-card-wrap,
 .combo-table .flying-card {
   width: min(28vw, 144px);
+  border-radius: clamp(13px, 4vw, 24px);
   z-index: 22;
+}
+
+.combo-table .face-card,
+.combo-table .deck-back,
+.combo-table .deck-shadow-card {
+  border-radius: clamp(13px, 4vw, 24px);
+}
+
+.combo-table .face-card strong {
+  max-width: 86%;
+  overflow: hidden;
+  text-align: center;
+  font-size: clamp(2.2rem, 11vw, 5.4rem);
+  letter-spacing: -.08em;
+}
+
+.combo-table .joker-face-text {
+  font-size: clamp(.8rem, 4.2vw, 1.8rem) !important;
+  letter-spacing: -.09em;
+  max-width: 92%;
+  white-space: nowrap;
 }
 
 .combo-table .plate {
@@ -116,6 +138,10 @@
   width: min(21vw, 110px);
 }
 
+.tables-2 .combo-table .face-card strong {
+  font-size: clamp(1.8rem, 8vw, 4rem);
+}
+
 .tables-4 .combo-table {
   width: 49%;
   height: 39%;
@@ -129,11 +155,22 @@
 .tables-4 .combo-table .deck-stack,
 .tables-4 .combo-table .discard-card-wrap {
   width: min(13.5vw, 72px);
+  border-radius: clamp(9px, 2.7vw, 15px);
+}
+
+.tables-4 .combo-table .face-card,
+.tables-4 .combo-table .deck-back,
+.tables-4 .combo-table .deck-shadow-card {
+  border-radius: clamp(9px, 2.7vw, 15px);
 }
 
 .tables-4 .combo-table .plate {
   width: min(16vw, 86px);
   height: min(16vw, 86px);
+}
+
+.tables-4 .combo-table .face-card strong {
+  font-size: clamp(1.2rem, 5.8vw, 2.6rem);
 }
 
 .tables-6 .combo-table,
@@ -162,6 +199,16 @@
 .tables-8 .combo-table .deck-stack,
 .tables-8 .combo-table .discard-card-wrap {
   width: min(9.4vw, 50px);
+  border-radius: clamp(7px, 2vw, 11px);
+}
+
+.tables-6 .combo-table .face-card,
+.tables-6 .combo-table .deck-back,
+.tables-6 .combo-table .deck-shadow-card,
+.tables-8 .combo-table .face-card,
+.tables-8 .combo-table .deck-back,
+.tables-8 .combo-table .deck-shadow-card {
+  border-radius: clamp(7px, 2vw, 11px);
 }
 
 .tables-6 .combo-table .plate,
@@ -182,7 +229,99 @@
 
 .tables-6 .combo-table .face-card strong,
 .tables-8 .combo-table .face-card strong {
-  font-size: clamp(1rem, 4.2vw, 1.85rem);
+  font-size: clamp(.82rem, 3.8vw, 1.55rem);
+  letter-spacing: -.1em;
+}
+
+.tables-6 .combo-table .joker-face-text,
+.tables-8 .combo-table .joker-face-text {
+  font-size: clamp(.46rem, 2.4vw, .82rem) !important;
+}
+
+.discard-drop {
+  position: absolute;
+  inset: 0;
+  animation: discardLand .18s ease-out;
+}
+
+.local-combo-label {
+  position: absolute;
+  left: 50%;
+  top: -16%;
+  z-index: 60;
+  transform: translateX(-50%);
+  font-size: clamp(.58rem, 3vw, 1.1rem);
+  font-weight: 1000;
+  letter-spacing: .12em;
+  color: #fff2a0;
+  text-shadow:
+    0 2px 0 #9d4b00,
+    0 0 12px rgba(255, 216, 74, .9),
+    0 0 24px rgba(255, 118, 44, .55);
+  pointer-events: none;
+}
+
+.front-combo {
+  position: absolute;
+  z-index: 120;
+  left: 50%;
+  top: 2%;
+  transform: translateX(-50%);
+  width: 96%;
+  pointer-events: none;
+  text-align: center;
+  font-size: clamp(2.2rem, 13vw, 5.2rem);
+  line-height: .82;
+  font-weight: 1000;
+  font-family: Impact, Haettenschweiler, 'Arial Black', system-ui, sans-serif;
+  letter-spacing: -.05em;
+  color: #fff8b2;
+  -webkit-text-stroke: 2px #5b1c8f;
+  text-shadow:
+    0 4px 0 #ff5f2e,
+    0 9px 0 rgba(91, 28, 143, .9),
+    0 0 18px rgba(255, 233, 92, .9),
+    0 0 42px rgba(255, 82, 198, .65);
+}
+
+.front-combo::after {
+  content: '';
+  position: absolute;
+  inset: -24% 18%;
+  z-index: -1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 234, 91, .35), rgba(255, 64, 188, .18) 42%, transparent 72%);
+  filter: blur(10px);
+}
+
+.session-panel {
+  gap: 18px;
+}
+
+.session-stats {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.session-stats div {
+  border-radius: 18px;
+  padding: 10px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.session-stats small {
+  display: block;
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.58);
+}
+
+.session-stats b {
+  font-size: 1.45rem;
 }
 
 .joker-prediction-card {
@@ -193,8 +332,14 @@
 
 .joker-prediction-card .prediction-value,
 .joker-face-text {
-  font-size: clamp(1rem, 4vw, 1.8rem);
-  letter-spacing: -.05em;
+  font-size: clamp(.75rem, 3.6vw, 1.45rem) !important;
+  letter-spacing: -.06em;
+  white-space: nowrap;
+}
+
+@keyframes discardLand {
+  0% { opacity: .65; transform: translateY(-18%) rotate(-5deg) scale(.92); }
+  100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
 }
 
 @keyframes comboMissPulse {
@@ -227,5 +372,10 @@
   .tables-8 .combo-table .deck-stack,
   .tables-8 .combo-table .discard-card-wrap {
     width: min(8.6vw, 43px);
+  }
+
+  .front-combo {
+    font-size: clamp(2rem, 12vw, 4rem);
+    -webkit-text-stroke: 1.4px #5b1c8f;
   }
 }
