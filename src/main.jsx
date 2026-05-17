@@ -49,6 +49,7 @@ function DeckStack({ remaining }) {
     <div className="deck-zone">
       <div className="plate plate-blue" />
       <div className="deck-stack">
+        <div className="deck-shadow-card card-layer-4" />
         <div className="deck-shadow-card card-layer-3" />
         <div className="deck-shadow-card card-layer-2" />
         <div className="deck-back">
@@ -68,10 +69,8 @@ function FaceCard({ card, empty = false }) {
 
   return (
     <div className={`face-card theme-${card.theme}`}>
-      <span className="face-corner top">{card.label}</span>
       <strong>{card.label}</strong>
       <span className="face-icon">{card.icon}</span>
-      <span className="face-corner bottom">{card.label}</span>
     </div>
   )
 }
