@@ -41,6 +41,26 @@
   opacity: .72;
 }
 
+.prediction-card[aria-disabled='true'] {
+  opacity: .32 !important;
+  filter: grayscale(1) saturate(.15) brightness(.78) !important;
+  border-color: rgba(255,255,255,.08) !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+
+.prediction-card[aria-disabled='true']::before,
+.prediction-card[aria-disabled='true']::after {
+  opacity: .08 !important;
+}
+
+.prediction-card[aria-disabled='true'] .prediction-value,
+.prediction-card[aria-disabled='true'] .prediction-icon,
+.prediction-card[aria-disabled='true'] .prediction-left {
+  color: rgba(255,255,255,.36) !important;
+  text-shadow: none !important;
+}
+
 .bet-win {
   animation: betWinGlow .5s ease-in-out infinite alternate;
 }
