@@ -17,31 +17,59 @@ const CARD_TYPES = [
 ]
 
 const COMBO_LABELS = { 2: 'GREAT', 3: 'AMAZING', 4: 'IMPRESSIVE', 5: 'AWESOME' }
-
-function buildDeck() {
-  const cards = CARD_TYPES.flatMap((type) => Array.from({ length: type.count }, (_, index) => ({ ...type, id: `${type.label}-${index}` })))
-  for (let i = cards.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[cards[i], cards[j]] = [cards[j], cards[i]]
-  }
-  return cards
-}
-
 const countRemaining = (deck, label) => deck.filter((card) => card.label === label).length
 const getCardType = (label) => CARD_TYPES.find((card) => card.label === label)
 const comboText = (combo) => combo >= 6 ? 'GOD IS PLAYING' : COMBO_LABELS[combo]
+
+function shuffle(cards) {
+  const copy = [...cards]
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+function buildDeck() {
+  return shuffle(CARD_TYPES.flatMap((type) => Array.from({ length: type.count }, (_, index) => ({ ...type, id: `${type.label}-${index}` }))))
+}
+
+function activeTableCount(combo) {
+  if (combo <= 0) return 1
+  return Math.min(combo + 1, 8)
+}
+
+function tableLayoutClass(count) {
+  if (count <= 1) return 'tables-1'
+  if (count <= 2) return 'tables-2'
+  if (count <= 4) return 'tables-4'
+  if (count <= 6) return 'tables-6'
+  return 'tables-8'
+}
+
+function makeTables(mainCards, count, previousTables = []) {
+  return Array.from({ length: count }, (_, index) => {
+    const previous = previousTables[index]
+    return {
+      id: index === 0 ? 'main' : `combo-${index}`,
+      isMain: index === 0,
+      deck: index === 0 ? mainCards : shuffle(mainCards),
+      lastCard: previous?.lastCard || null,
+      lastHit: previous?.lastHit || false
+    }
+  })
+}
 
 function Stat({ tone, icon, label, value }) {
   return <div className={`stat-card ${tone}`}><span className="stat-icon">{icon}</span><span className="stat-label">{label}</span><strong>{value}</strong></div>
 }
 
-function ComboBar({ combo, popup }) {
-  const gems = Array.from({ length: Math.min(combo, 10) })
-  return <div className="combo-wrap"><div className="combo-track">{gems.map((_, index) => <span className="combo-gem" key={index} />)}<AnimatePresence>{popup ? <motion.span className="combo-flying-gem" initial={{ opacity: 0, x: '40vw', y: '28dvh', scale: .4 }} animate={{ opacity: 1, x: 0, y: 0, scale: 1 }} exit={{ opacity: 0, scale: .4 }} transition={{ duration: .48, ease: 'easeOut' }} /> : null}</AnimatePresence></div><AnimatePresence>{popup ? <motion.div className="combo-popup" initial={{ opacity: 0, y: 12, scale: .8 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: .28 }}>{popup}</motion.div> : null}</AnimatePresence></div>
+function ComboStatus({ combo, popup }) {
+  return <div className="combo-status"><span>{combo > 0 ? `${activeTableCount(combo)} DECKS` : '1 DECK'}</span><AnimatePresence>{popup ? <motion.strong initial={{ opacity: 0, y: 12, scale: .84 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: .28 }}>{popup}</motion.strong> : null}</AnimatePresence></div>
 }
 
-function DeckStack({ remaining }) {
-  return <div className="deck-zone"><div className="plate plate-blue" /><div className="deck-stack"><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className="deck-back"><span className="deck-logo">60</span><span className="deck-subtitle">GAME</span><small>{remaining}</small></div></div></div>
+function DeckStack({ remaining, isMain }) {
+  return <div className="deck-zone"><div className="plate plate-blue" /><div className="deck-stack"><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className={`deck-back ${isMain ? 'primary-deck' : ''}`}><span className="deck-logo">60</span><span className="deck-subtitle">GAME</span>{isMain ? <small>{remaining}</small> : null}</div></div></div>
 }
 
 function FaceCard({ card, empty = false }) {
@@ -57,10 +85,6 @@ function PredictionCard({ card, index, remaining, onGuess }) {
   return <motion.button className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''}`} disabled={remaining <= 0} onClick={() => onGuess(card.label, index)} whileTap={{ scale: 0.96 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span><span className="prediction-left">{remaining} LEFT</span></motion.button>
 }
 
-function FlyingCard({ card }) {
-  return <motion.div className="flying-card" initial={{ x: '-34vw', y: 18, rotate: -14, scale: 0.74, opacity: 0.98 }} animate={{ x: '34vw', y: -18, rotate: 10, scale: 0.9, opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.42, ease: 'easeOut' }}><FaceCard card={card} /></motion.div>
-}
-
 function BetClone({ bet }) {
   const col = bet.buttonIndex % 4
   const row = Math.floor(bet.buttonIndex / 4)
@@ -74,65 +98,68 @@ function BetClone({ bet }) {
   return <motion.div className={`bet-clone theme-${bet.card.theme} bet-${bet.result}`} initial={{ x: startX, y: startY, scale: 0.66, opacity: 0.94 }} animate={animate} exit={{ opacity: 0, scale: 0.45 }} transition={{ duration: bet.result === 'pending' ? 0.34 : 0.5, ease: 'easeOut' }}><span>{bet.card.label}</span><small>{bet.card.icon}</small></motion.div>
 }
 
+function TableSlot({ table }) {
+  const points = table.lastHit && table.lastCard ? (table.lastCard.label === 'JOKER' ? 'x2' : `+${table.lastCard.value}`) : null
+  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''}`} layout initial={{ opacity: 0, scale: .76 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: .72 }} transition={{ duration: .24 }}><DeckStack remaining={table.deck.length} isMain={table.isMain} /><div className="arc-ribbon mini-ribbon" /><DiscardPile card={table.lastCard} won={table.lastHit} points={points} /></motion.div>
+}
+
 function App() {
   const [started, setStarted] = useState(false)
-  const [deck, setDeck] = useState(() => buildDeck())
-  const [discard, setDiscard] = useState([])
+  const [tables, setTables] = useState(() => makeTables(buildDeck(), 1))
+  const [combo, setCombo] = useState(0)
   const [score, setScore] = useState(0)
   const [best, setBest] = useState(() => Number(localStorage.getItem('60game-best') || 0))
-  const [flyingCards, setFlyingCards] = useState([])
   const [bets, setBets] = useState([])
-  const [points, setPoints] = useState(null)
-  const [won, setWon] = useState(false)
-  const [combo, setCombo] = useState(0)
   const [comboPopup, setComboPopup] = useState(null)
-  const lastCard = discard.at(-1)
-  const remainingByType = useMemo(() => Object.fromEntries(CARD_TYPES.map((type) => [type.label, countRemaining(deck, type.label)])), [deck])
+
+  const mainTable = tables[0]
+  const mainDeck = mainTable.deck
+  const lastCard = mainTable.lastCard
+  const remainingByType = useMemo(() => Object.fromEntries(CARD_TYPES.map((type) => [type.label, countRemaining(mainDeck, type.label)])), [mainDeck])
 
   function newGame() {
-    setDeck(buildDeck()); setDiscard([]); setScore(0); setFlyingCards([]); setBets([]); setPoints(null); setWon(false); setCombo(0); setComboPopup(null); setStarted(true)
+    setTables(makeTables(buildDeck(), 1)); setCombo(0); setScore(0); setBets([]); setComboPopup(null); setStarted(true)
   }
 
   function guess(label, buttonIndex) {
-    setDeck((currentDeck) => {
-      if (currentDeck.length === 0) return currentDeck
-      const [drawnCard, ...nextDeck] = currentDeck
-      const isWin = label === drawnCard.label
-      const id = `${drawnCard.id}-${currentDeck.length}-${buttonIndex}`
-      const betId = `bet-${id}`
-      setFlyingCards((cards) => [...cards, { ...drawnCard, flightId: id }])
+    setTables((currentTables) => {
+      if (currentTables[0].deck.length === 0) return currentTables
+      const betId = `bet-${Date.now()}-${buttonIndex}`
+      const revealedTables = currentTables.map((table) => {
+        const sourceDeck = table.deck.length > 0 ? table.deck : shuffle(currentTables[0].deck)
+        const [drawnCard, ...nextDeck] = sourceDeck
+        return { ...table, deck: nextDeck, lastCard: drawnCard, lastHit: drawnCard?.label === label }
+      })
+      const hits = revealedTables.filter((table) => table.lastHit && table.lastCard)
+      const isWin = hits.length > 0
+      const nextCombo = isWin ? combo + 1 : 0
+      const popup = comboText(nextCombo)
+      const mainRemaining = revealedTables[0].deck
+      const roundPoints = hits.reduce((total, table) => total + (table.lastCard?.value || 0), 0)
+      const jokerHits = hits.filter((table) => table.lastCard?.label === 'JOKER').length
+      const nextCount = activeTableCount(nextCombo)
+
       setBets((items) => [...items, { id: betId, card: getCardType(label), buttonIndex, result: 'pending' }])
-      setPoints(null); setWon(false); setComboPopup(null)
+      setTimeout(() => setBets((items) => items.map((bet) => bet.id === betId ? { ...bet, result: isWin ? 'win' : 'loss' } : bet)), 160)
+      setTimeout(() => setBets((items) => items.filter((bet) => bet.id !== betId)), 780)
+      setCombo(nextCombo)
+      setComboPopup(isWin ? popup : null)
       if (navigator.vibrate) navigator.vibrate(isWin ? 18 : 8)
-      setTimeout(() => {
-        setDiscard((cards) => [...cards, drawnCard])
-        setFlyingCards((cards) => cards.filter((card) => card.flightId !== id))
-        setBets((items) => items.map((bet) => bet.id === betId ? { ...bet, result: isWin ? 'win' : 'loss' } : bet))
-        setWon(isWin)
-        if (isWin) {
-          setCombo((currentCombo) => {
-            const nextCombo = currentCombo + 1
-            const nextPopup = comboText(nextCombo)
-            if (nextPopup) setComboPopup(nextPopup)
-            return nextCombo
-          })
-          setScore((currentScore) => {
-            const nextScore = drawnCard.label === 'JOKER' ? currentScore * 2 : currentScore + drawnCard.value
-            setBest((currentBest) => { const nextBest = Math.max(currentBest, nextScore); localStorage.setItem('60game-best', String(nextBest)); return nextBest })
-            return nextScore
-          })
-          setPoints(drawnCard.label === 'JOKER' ? 'x2' : `+${drawnCard.value}`)
-        } else {
-          setCombo(0)
-        }
-        setTimeout(() => { setPoints(null); setWon(false); setBets((items) => items.filter((bet) => bet.id !== betId)); setComboPopup(null) }, 900)
-      }, 460)
-      return nextDeck
+      if (isWin) {
+        setScore((currentScore) => {
+          const multipliedScore = jokerHits > 0 ? currentScore * (2 ** jokerHits) : currentScore
+          const nextScore = multipliedScore + roundPoints
+          setBest((currentBest) => { const nextBest = Math.max(currentBest, nextScore); localStorage.setItem('60game-best', String(nextBest)); return nextBest })
+          return nextScore
+        })
+      }
+      setTimeout(() => setComboPopup(null), 900)
+      return makeTables(mainRemaining, nextCount, isWin ? revealedTables : [revealedTables[0]])
     })
   }
 
-  const gameOver = started && deck.length === 0 && flyingCards.length === 0
-  return <main className="game-shell"><div className="cinematic-bg" />{!started ? <button className="start-screen" onClick={newGame}><span>60game</span><strong>Card Arcade</strong><em>Tap to play</em></button> : gameOver ? <section className="end-screen"><span>Congrats!</span><strong>{score}</strong><em>Best {best}</em><button onClick={newGame}>New Game</button></section> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="★" label="Left" value={deck.length} /></header><ComboBar combo={combo} popup={comboPopup} /><section className="quick-info"><div><span>LAST</span><strong>{lastCard?.label || '-'}</strong></div><div><span>CARDS</span><strong>{deck.length}</strong></div></section><section className="play-stage"><DeckStack remaining={deck.length} /><div className={`arc-ribbon ${flyingCards.length > 0 ? 'active' : ''}`} /><DiscardPile card={lastCard} won={won} points={points} /><AnimatePresence>{flyingCards.map((card) => <FlyingCard key={card.flightId} card={card} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section><section className="prediction-grid">{CARD_TYPES.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} />)}</section></>}</main>
+  const gameOver = started && mainDeck.length === 0
+  return <main className="game-shell"><div className="cinematic-bg" />{!started ? <button className="start-screen" onClick={newGame}><span>60game</span><strong>Card Arcade</strong><em>Tap to play</em></button> : gameOver ? <section className="end-screen"><span>Congrats!</span><strong>{score}</strong><em>Best {best}</em><button onClick={newGame}>New Game</button></section> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="★" label="Left" value={mainDeck.length} /></header><ComboStatus combo={combo} popup={comboPopup} /><section className="quick-info"><div><span>LAST</span><strong>{lastCard?.label || '-'}</strong></div><div><span>CARDS</span><strong>{mainDeck.length}</strong></div></section><section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <TableSlot key={table.id} table={table} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section><section className="prediction-grid">{CARD_TYPES.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} />)}</section></>}</main>
 }
 
 ReactDOM.createRoot(document.getElementById('app')).render(<App />)
