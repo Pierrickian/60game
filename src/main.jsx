@@ -139,7 +139,8 @@ function App() {
       const isWin = hits.length > 0
       const nextCombo = isWin ? combo + 1 : 0
       const popup = isWin ? comboText(nextCombo) : combo > 0 ? 'COMBO BREAK' : null
-      const mainRemaining = revealedTables[0].deck
+      const referenceTable = hits[0] || revealedTables[0]
+      const referenceDeck = referenceTable.deck
       const roundPoints = hits.reduce((total, table) => total + (table.lastCard?.value || 0), 0)
       const nextCount = activeTableCount(nextCombo)
 
@@ -157,7 +158,7 @@ function App() {
           return nextScore
         })
         setTimeout(() => setComboPopup(null), 900)
-        return makeTables(mainRemaining, nextCount, revealedTables)
+        return makeTables(referenceDeck, nextCount, [referenceTable, ...revealedTables.filter((table) => table !== referenceTable)])
       }
 
       setResettingCombo(true)
@@ -165,7 +166,7 @@ function App() {
         setCombo(0)
         setComboPopup(null)
         setResettingCombo(false)
-        setTables(makeTables(mainRemaining, 1, [revealedTables[0]]))
+        setTables(makeTables(referenceDeck, 1, [referenceTable]))
       }, combo > 0 ? 850 : 250)
       return revealedTables
     })
