@@ -35,8 +35,8 @@ function buildDeck() {
 }
 
 function activeTableCount(combo) {
-  if (combo <= 0) return 1
-  return Math.min(combo + 1, 8)
+  if (combo < 2) return 1
+  return Math.min(combo, 8)
 }
 
 function tableLayoutClass(count) {
@@ -66,7 +66,7 @@ function Stat({ tone, icon, label, value }) {
 }
 
 function ComboStatus({ combo, popup }) {
-  return <div className={`combo-status ${popup === 'COMBO BREAK' ? 'combo-break' : ''}`}><span>{combo > 0 ? `${activeTableCount(combo)} DECKS` : '1 DECK'}</span><AnimatePresence>{popup ? <motion.strong initial={{ opacity: 0, y: 12, scale: .84 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: .28 }}>{popup}</motion.strong> : null}</AnimatePresence></div>
+  return <div className={`combo-status ${popup === 'COMBO BREAK' ? 'combo-break' : ''}`}><span>{combo >= 2 ? `${activeTableCount(combo)} DECKS` : '1 DECK'}</span><AnimatePresence>{popup ? <motion.strong initial={{ opacity: 0, y: 12, scale: .84 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: .28 }}>{popup}</motion.strong> : null}</AnimatePresence></div>
 }
 
 function DeckStack({ remaining, isMain }) {
