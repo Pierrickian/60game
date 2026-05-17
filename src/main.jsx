@@ -69,8 +69,8 @@ function Stat({ tone, icon, label, value, bumpKey }) {
   return <motion.div key={`${label}-${bumpKey || 0}`} className={`stat-card ${tone}`} initial={{ scale: 1 }} animate={{ scale: bumpKey ? [1, 1.1, 1] : 1 }} transition={{ duration: .24 }}><span className="stat-icon">{icon}</span><span className="stat-label">{label}</span><strong>{value}</strong></motion.div>
 }
 
-function ComboStatus({ combo, popup }) {
-  return <div className={`combo-status ${popup === 'COMBO BREAK' ? 'combo-break' : ''}`}><span>{combo >= 2 ? `${activeTableCount(combo)} DECKS` : '1 DECK'}</span><AnimatePresence>{popup ? <motion.strong initial={{ opacity: 0, y: 12, scale: .84 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: .28 }}>{popup}</motion.strong> : null}</AnimatePresence></div>
+function ComboStatus({ combo }) {
+  return <div className="combo-status"><span>{combo >= 2 ? `${activeTableCount(combo)} DECKS` : '1 DECK'}</span></div>
 }
 
 function DeckStack({ remaining, isMain }) {
@@ -88,7 +88,16 @@ function DiscardPile({ card, won, miss, points, revealId, showCombo }) {
 }
 
 function PredictionCard({ card, index, remaining, onGuess }) {
-  return <motion.button className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''}`} disabled={remaining <= 0} onClick={() => onGuess(card.label, index)} whileTap={{ scale: 0.96 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span><span className="prediction-left">{remaining} LEFT</span></motion.button>
+  const unavailable = remaining <= 0
+  function handlePress(event) {
+    if (unavailable) {
+      event.preventDefault()
+      if (navigator.vibrate) navigator.vibrate([90, 35, 90])
+      return
+    }
+    onGuess(card.label, index)
+  }
+  return <motion.button className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''}`} aria-disabled={unavailable} onClick={handlePress} whileTap={{ scale: unavailable ? 1 : 0.96 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span><span className="prediction-left">{remaining} LEFT</span></motion.button>
 }
 
 function BetClone({ bet }) {
@@ -109,6 +118,11 @@ function TableSlot({ table }) {
   return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><DeckStack remaining={table.deck.length} isMain={table.isMain} /><div className="arc-ribbon mini-ribbon" /><DiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} points={points} revealId={table.revealId} showCombo={table.showCombo} /></motion.div>
 }
 
+function ComboBreakOverlay({ breakFx }) {
+  if (!breakFx) return null
+  return <motion.div className="combo-break-overlay" initial={{ opacity: 0, y: 26, scale: .68 }} animate={{ opacity: 1, y: 0, scale: [1, 1.06, 1] }} exit={{ opacity: 0, y: -34, scale: .88 }} transition={{ duration: .34 }}><strong>COMBO BREAK</strong><motion.span initial={{ color: '#ffdf38' }} animate={{ color: '#ff3f1f' }} transition={{ duration: .48 }}>x{breakFx.from} → x0</motion.span></motion.div>
+}
+
 function EndPanel({ score, best, stats, onPlay }) {
   return <section className="end-screen session-panel"><span>Congrats!</span><strong>{score}</strong><em>Best {best}</em><div className="session-stats"><div><small>Hits</small><b>{stats.hits}</b></div><div><small>Best combo</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>Max decks</small><b>{stats.maxDecks}</b></div><div><small>Jokers</small><b>{stats.jokers}</b></div></div><button onClick={onPlay}>Play</button></section>
 }
@@ -123,8 +137,8 @@ function App() {
   const [scoreBump, setScoreBump] = useState(0)
   const [best, setBest] = useState(() => Number(localStorage.getItem('60game-best') || 0))
   const [bets, setBets] = useState([])
-  const [comboPopup, setComboPopup] = useState(null)
   const [frontCombo, setFrontCombo] = useState(null)
+  const [breakFx, setBreakFx] = useState(null)
   const [showEnd, setShowEnd] = useState(false)
   const [stats, setStats] = useState({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 })
 
@@ -138,14 +152,14 @@ function App() {
       if (fxTokenRef.current !== token) return
       setTables((currentTables) => currentTables.map((table) => ({ ...table, showCombo: false })))
       setFrontCombo(null)
-      setComboPopup(null)
+      setBreakFx(null)
     }, delay)
   }
 
   function newGame() {
     comboRef.current = 0
     fxTokenRef.current += 1
-    setTables(makeTables(buildDeck(), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setComboPopup(null); setFrontCombo(null); setShowEnd(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setStarted(true)
+    setTables(makeTables(buildDeck(), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setFrontCombo(null); setBreakFx(null); setShowEnd(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setStarted(true)
   }
 
   function guess(label, buttonIndex) {
@@ -182,7 +196,7 @@ function App() {
       if (isWin) {
         comboRef.current = nextCombo
         setCombo(nextCombo)
-        setComboPopup(nextCombo >= 2 ? comboText(nextCombo) : null)
+        setBreakFx(null)
         setStats((currentStats) => ({ hits: currentStats.hits + hits.length, bestCombo: Math.max(currentStats.bestCombo, nextCombo), maxDecks: Math.max(currentStats.maxDecks, nextCount), jokers: currentStats.jokers + jokerHits }))
         setScore((currentScore) => {
           const multiplied = jokerHits > 0 ? currentScore * (2 ** jokerHits) : currentScore
@@ -200,16 +214,16 @@ function App() {
 
       comboRef.current = 0
       setCombo(0)
-      setComboPopup(previousCombo > 0 ? 'COMBO BREAK' : null)
       setFrontCombo(null)
-      scheduleFxClear(fxToken, previousCombo > 0 ? 520 : 220)
+      setBreakFx(previousCombo > 0 ? { id: fxToken, from: previousCombo } : null)
+      scheduleFxClear(fxToken, previousCombo > 0 ? 720 : 220)
       window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, 520)
       return makeTables(referenceDeck, 1, [referenceTable], referenceTable.id)
     })
   }
 
   const gameOver = started && showEnd
-  return <main className="game-shell"><div className="cinematic-bg" />{!started ? <button className="start-screen" onClick={newGame}><span>60game</span><strong>Card Arcade</strong><em>Tap to play</em></button> : gameOver ? <EndPanel score={score} best={best} stats={stats} onPlay={newGame} /> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="★" label="Left" value={mainDeck.length} /></header><ComboStatus combo={combo} popup={comboPopup} /><section className="quick-info"><div><span>LAST</span><strong>{lastCard?.label || '-'}</strong></div><div><span>CARDS</span><strong>{mainDeck.length}</strong></div></section><section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <TableSlot key={table.id} table={table} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence><AnimatePresence>{frontCombo ? <motion.div className="front-combo" initial={{ opacity: 0, y: 28, scale: .65 }} animate={{ opacity: 1, y: 0, scale: [1, 1.08, 1] }} exit={{ opacity: 0, y: -36, scale: .9 }} transition={{ duration: .32 }}>{frontCombo}</motion.div> : null}</AnimatePresence></section><section className="prediction-grid">{CARD_TYPES.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} />)}</section></>}</main>
+  return <main className="game-shell"><div className="cinematic-bg" />{!started ? <button className="start-screen" onClick={newGame}><span>60game</span><strong>Card Arcade</strong><em>Tap to play</em></button> : gameOver ? <EndPanel score={score} best={best} stats={stats} onPlay={newGame} /> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="★" label="Left" value={mainDeck.length} /></header><ComboStatus combo={combo} /><section className="quick-info"><div><span>LAST</span><strong>{lastCard?.label || '-'}</strong></div><div><span>CARDS</span><strong>{mainDeck.length}</strong></div></section><section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <TableSlot key={table.id} table={table} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence><AnimatePresence>{frontCombo ? <motion.div className="front-combo" initial={{ opacity: 0, y: 28, scale: .65 }} animate={{ opacity: 1, y: 0, scale: [1, 1.08, 1] }} exit={{ opacity: 0, y: -36, scale: .9 }} transition={{ duration: .32 }}>{frontCombo}</motion.div> : null}</AnimatePresence><AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} /> : null}</AnimatePresence></section><section className="prediction-grid">{CARD_TYPES.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} />)}</section></>}</main>
 }
 
 ReactDOM.createRoot(document.getElementById('app')).render(<App />)
