@@ -1,48 +1,174 @@
-.combo-wrap {
+.combo-status {
   position: relative;
   z-index: 3;
-  display: grid;
-  gap: 6px;
+  min-height: 30px;
   margin-top: -2px;
-}
-
-.combo-track {
-  position: relative;
-  min-height: 14px;
-  border-radius: 999px;
-  padding: 4px 8px;
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  background: rgba(255, 220, 80, .08);
-  border: 1px solid rgba(255, 220, 80, .14);
-  overflow: hidden;
-}
-
-.combo-gem,
-.combo-flying-gem {
-  width: 10px;
-  height: 10px;
-  border-radius: 3px;
-  transform: rotate(45deg);
-  background: linear-gradient(145deg, #fff6a6, #ffca3a);
-  box-shadow: 0 0 16px rgba(255, 216, 74, .72);
-}
-
-.combo-flying-gem {
-  position: absolute;
-  right: 8px;
-  top: 2px;
-}
-
-.combo-popup {
+  display: grid;
+  place-items: center;
   text-align: center;
-  font-size: .72rem;
+}
+
+.combo-status span {
+  font-size: .62rem;
+  font-weight: 950;
+  letter-spacing: .18em;
+  color: rgba(255,255,255,.6);
+}
+
+.combo-status strong {
+  font-size: .78rem;
   font-weight: 1000;
   letter-spacing: .18em;
   color: #ffe77b;
   text-shadow: 0 0 18px rgba(255, 216, 74, .64);
 }
+
+.combo-status.combo-break strong {
+  color: #ff6b7f;
+  text-shadow: 0 0 18px rgba(255, 55, 80, .7);
+}
+
+.multideck-stage {
+  position: relative;
+  display: block;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.combo-table {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(78vw, 420px);
+  height: min(33dvh, 245px);
+  transform-origin: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+  isolation: isolate;
+}
+
+.combo-table .deck-zone,
+.combo-table .discard-zone {
+  min-width: 0;
+  min-height: 0;
+}
+
+.combo-table .deck-stack,
+.combo-table .discard-card-wrap,
+.combo-table .flying-card {
+  width: min(27vw, 140px);
+}
+
+.combo-table .plate {
+  width: min(32vw, 160px);
+  height: min(32vw, 160px);
+}
+
+.combo-table .mini-ribbon {
+  left: 34%;
+  right: 34%;
+  top: 50%;
+  height: 2px;
+  opacity: .42;
+}
+
+.main-combo-table .primary-deck {
+  outline: 2px solid rgba(255, 222, 101, .9);
+  box-shadow:
+    0 0 0 4px rgba(255, 222, 101, .13),
+    0 24px 50px rgba(0,0,0,.44),
+    0 0 32px rgba(255, 222, 101, .45);
+}
+
+.combo-table-miss {
+  animation: comboMissPulse .55s ease;
+}
+
+.tables-1 .combo-table:nth-child(1) {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.tables-2 .combo-table:nth-child(1) {
+  transform: translate(-50%, -50%) translateY(-23%) scale(.74);
+}
+
+.tables-2 .combo-table:nth-child(2) {
+  transform: translate(-50%, -50%) translateY(23%) scale(.74);
+}
+
+.tables-4 .combo-table {
+  width: min(54vw, 300px);
+  height: min(22dvh, 165px);
+}
+
+.tables-4 .combo-table .deck-stack,
+.tables-4 .combo-table .discard-card-wrap {
+  width: min(18vw, 92px);
+}
+
+.tables-4 .combo-table .plate {
+  width: min(22vw, 112px);
+  height: min(22vw, 112px);
+}
+
+.tables-4 .combo-table:nth-child(1) { transform: translate(-50%, -50%) translate(-25%, -28%) scale(.76); }
+.tables-4 .combo-table:nth-child(2) { transform: translate(-50%, -50%) translate(25%, -28%) scale(.76); }
+.tables-4 .combo-table:nth-child(3) { transform: translate(-50%, -50%) translate(-25%, 28%) scale(.76); }
+.tables-4 .combo-table:nth-child(4) { transform: translate(-50%, -50%) translate(25%, 28%) scale(.76); }
+
+.tables-6 .combo-table,
+.tables-8 .combo-table {
+  width: min(43vw, 242px);
+  height: min(17dvh, 126px);
+}
+
+.tables-6 .combo-table .deck-stack,
+.tables-6 .combo-table .discard-card-wrap,
+.tables-8 .combo-table .deck-stack,
+.tables-8 .combo-table .discard-card-wrap {
+  width: min(14vw, 72px);
+}
+
+.tables-6 .combo-table .plate,
+.tables-8 .combo-table .plate {
+  width: min(17vw, 88px);
+  height: min(17vw, 88px);
+}
+
+.tables-6 .combo-table .deck-logo,
+.tables-8 .combo-table .deck-logo {
+  font-size: clamp(1.5rem, 5.5vw, 2.4rem);
+}
+
+.tables-6 .combo-table .deck-subtitle,
+.tables-8 .combo-table .deck-subtitle {
+  font-size: .42rem;
+}
+
+.tables-6 .combo-table .face-card strong,
+.tables-8 .combo-table .face-card strong {
+  font-size: clamp(1.5rem, 6vw, 2.8rem);
+}
+
+.tables-6 .combo-table:nth-child(1) { transform: translate(-50%, -50%) translate(-34%, -31%) scale(.76); }
+.tables-6 .combo-table:nth-child(2) { transform: translate(-50%, -50%) translate(34%, -31%) scale(.76); }
+.tables-6 .combo-table:nth-child(3) { transform: translate(-50%, -50%) translate(-34%, 0%) scale(.76); }
+.tables-6 .combo-table:nth-child(4) { transform: translate(-50%, -50%) translate(34%, 0%) scale(.76); }
+.tables-6 .combo-table:nth-child(5) { transform: translate(-50%, -50%) translate(-34%, 31%) scale(.76); }
+.tables-6 .combo-table:nth-child(6) { transform: translate(-50%, -50%) translate(34%, 31%) scale(.76); }
+
+.tables-8 .combo-table:nth-child(1) { transform: translate(-50%, -50%) translate(-34%, -36%) scale(.68); }
+.tables-8 .combo-table:nth-child(2) { transform: translate(-50%, -50%) translate(34%, -36%) scale(.68); }
+.tables-8 .combo-table:nth-child(3) { transform: translate(-50%, -50%) translate(-34%, -12%) scale(.68); }
+.tables-8 .combo-table:nth-child(4) { transform: translate(-50%, -50%) translate(34%, -12%) scale(.68); }
+.tables-8 .combo-table:nth-child(5) { transform: translate(-50%, -50%) translate(-34%, 12%) scale(.68); }
+.tables-8 .combo-table:nth-child(6) { transform: translate(-50%, -50%) translate(34%, 12%) scale(.68); }
+.tables-8 .combo-table:nth-child(7) { transform: translate(-50%, -50%) translate(-34%, 36%) scale(.68); }
+.tables-8 .combo-table:nth-child(8) { transform: translate(-50%, -50%) translate(34%, 36%) scale(.68); }
 
 .joker-prediction-card {
   min-width: 0;
@@ -54,4 +180,26 @@
 .joker-face-text {
   font-size: clamp(1rem, 4vw, 1.8rem);
   letter-spacing: -.05em;
+}
+
+@keyframes comboMissPulse {
+  0% { filter: saturate(1); }
+  45% { filter: saturate(1.4) hue-rotate(-18deg); }
+  100% { filter: saturate(1); }
+}
+
+@media (max-width: 380px) {
+  .combo-status { min-height: 24px; }
+
+  .tables-1 .combo-table:nth-child(1) {
+    transform: translate(-50%, -50%) scale(.96);
+  }
+
+  .tables-2 .combo-table:nth-child(1) {
+    transform: translate(-50%, -50%) translateY(-22%) scale(.66);
+  }
+
+  .tables-2 .combo-table:nth-child(2) {
+    transform: translate(-50%, -50%) translateY(22%) scale(.66);
+  }
 }
