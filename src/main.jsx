@@ -114,12 +114,13 @@ function ComboBreakCountdown({ from }) {
   useEffect(() => {
     setValue(from)
     const timers = []
+    const stepDurationMs = Math.max(16, 2000 / Math.max(1, from))
     for (let next = from - 1, step = 1; next >= 0; next -= 1, step += 1) {
-      timers.push(window.setTimeout(() => setValue(next), step * 320))
+      timers.push(window.setTimeout(() => setValue(next), Math.round(step * stepDurationMs)))
     }
     return () => timers.forEach(window.clearTimeout)
   }, [from])
-  return <motion.span key={value} className={value === 0 ? 'break-countdown zero' : 'break-countdown'} initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ duration: .16 }}>x{value}</motion.span>
+  return <motion.span key={value} className={value === 0 ? 'break-countdown zero' : 'break-countdown'} initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ duration: .12 }}>x{value}</motion.span>
 }
 
 function ComboBreakOverlay({ breakFx }) {
@@ -224,7 +225,7 @@ function App() {
       setCombo(0)
       setFrontCombo(null)
       setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo } : null)
-      scheduleFxClear(fxToken, previousCombo >= 2 ? 2720 : 220)
+      scheduleFxClear(fxToken, previousCombo >= 2 ? 2400 : 220)
       window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, 520)
       return makeTables(referenceDeck, 1, [referenceTable], referenceTable.id)
     })
