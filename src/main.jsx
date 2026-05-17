@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { AnimatePresence, motion } from 'framer-motion'
 import './style.css'
 import './bet.css'
+import './combo.css'
 
 const CARD_TYPES = [
   { label: '2', value: 2, count: 30, theme: 'green', icon: '◆' },
@@ -15,6 +16,8 @@ const CARD_TYPES = [
   { label: 'JOKER', value: 0, count: 2, theme: 'joker', icon: '♛' }
 ]
 
+const COMBO_LABELS = { 2: 'GREAT', 3: 'AMAZING', 4: 'IMPRESSIVE', 5: 'AWESOME' }
+
 function buildDeck() {
   const cards = CARD_TYPES.flatMap((type) => Array.from({ length: type.count }, (_, index) => ({ ...type, id: `${type.label}-${index}` })))
   for (let i = cards.length - 1; i > 0; i -= 1) {
@@ -26,9 +29,15 @@ function buildDeck() {
 
 const countRemaining = (deck, label) => deck.filter((card) => card.label === label).length
 const getCardType = (label) => CARD_TYPES.find((card) => card.label === label)
+const comboText = (combo) => combo >= 6 ? 'GOD IS PLAYING' : COMBO_LABELS[combo]
 
 function Stat({ tone, icon, label, value }) {
   return <div className={`stat-card ${tone}`}><span className="stat-icon">{icon}</span><span className="stat-label">{label}</span><strong>{value}</strong></div>
+}
+
+function ComboBar({ combo, popup }) {
+  const gems = Array.from({ length: Math.min(combo, 10) })
+  return <div className="combo-wrap"><div className="combo-track">{gems.map((_, index) => <span className="combo-gem" key={index} />)}<AnimatePresence>{popup ? <motion.span className="combo-flying-gem" initial={{ opacity: 0, x: '40vw', y: '28dvh', scale: .4 }} animate={{ opacity: 1, x: 0, y: 0, scale: 1 }} exit={{ opacity: 0, scale: .4 }} transition={{ duration: .48, ease: 'easeOut' }} /> : null}</AnimatePresence></div><AnimatePresence>{popup ? <motion.div className="combo-popup" initial={{ opacity: 0, y: 12, scale: .8 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -18 }} transition={{ duration: .28 }}>{popup}</motion.div> : null}</AnimatePresence></div>
 }
 
 function DeckStack({ remaining }) {
@@ -37,15 +46,15 @@ function DeckStack({ remaining }) {
 
 function FaceCard({ card, empty = false }) {
   if (!card || empty) return <div className="face-card empty-face"><strong>?</strong></div>
-  return <div className={`face-card theme-${card.theme}`}><strong>{card.label}</strong><span className="face-icon">{card.icon}</span></div>
+  return <div className={`face-card theme-${card.theme}`}><strong className={card.theme === 'joker' ? 'joker-face-text' : ''}>{card.label}</strong><span className="face-icon">{card.icon}</span></div>
 }
 
 function DiscardPile({ card, won, points }) {
-  return <div className="discard-zone"><div className="plate plate-purple" /><div className={`discard-card-wrap ${won ? 'impact-lite' : ''}`}><FaceCard card={card} empty={!card} /><AnimatePresence>{points ? <motion.div className="gain-pop" initial={{ opacity: 0, y: 20, scale: 0.75 }} animate={{ opacity: 1, y: -34, scale: 1 }} exit={{ opacity: 0, y: -56, scale: 1 }} transition={{ duration: 0.28 }}>+{points}</motion.div> : null}</AnimatePresence></div></div>
+  return <div className="discard-zone"><div className="plate plate-purple" /><div className={`discard-card-wrap ${won ? 'impact-lite' : ''}`}><FaceCard card={card} empty={!card} /><AnimatePresence>{points ? <motion.div className="gain-pop" initial={{ opacity: 0, y: 20, scale: 0.75 }} animate={{ opacity: 1, y: -34, scale: 1 }} exit={{ opacity: 0, y: -56, scale: 1 }} transition={{ duration: 0.28 }}>{points}</motion.div> : null}</AnimatePresence></div></div>
 }
 
 function PredictionCard({ card, index, remaining, onGuess }) {
-  return <motion.button className={`prediction-card theme-${card.theme}`} disabled={remaining <= 0} onClick={() => onGuess(card.label, index)} whileTap={{ scale: 0.96 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span><span className="prediction-left">{remaining} LEFT</span></motion.button>
+  return <motion.button className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''}`} disabled={remaining <= 0} onClick={() => onGuess(card.label, index)} whileTap={{ scale: 0.96 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span><span className="prediction-left">{remaining} LEFT</span></motion.button>
 }
 
 function FlyingCard({ card }) {
@@ -75,11 +84,13 @@ function App() {
   const [bets, setBets] = useState([])
   const [points, setPoints] = useState(null)
   const [won, setWon] = useState(false)
+  const [combo, setCombo] = useState(0)
+  const [comboPopup, setComboPopup] = useState(null)
   const lastCard = discard.at(-1)
   const remainingByType = useMemo(() => Object.fromEntries(CARD_TYPES.map((type) => [type.label, countRemaining(deck, type.label)])), [deck])
 
   function newGame() {
-    setDeck(buildDeck()); setDiscard([]); setScore(0); setFlyingCards([]); setBets([]); setPoints(null); setWon(false); setStarted(true)
+    setDeck(buildDeck()); setDiscard([]); setScore(0); setFlyingCards([]); setBets([]); setPoints(null); setWon(false); setCombo(0); setComboPopup(null); setStarted(true)
   }
 
   function guess(label, buttonIndex) {
@@ -91,7 +102,7 @@ function App() {
       const betId = `bet-${id}`
       setFlyingCards((cards) => [...cards, { ...drawnCard, flightId: id }])
       setBets((items) => [...items, { id: betId, card: getCardType(label), buttonIndex, result: 'pending' }])
-      setPoints(null); setWon(false)
+      setPoints(null); setWon(false); setComboPopup(null)
       if (navigator.vibrate) navigator.vibrate(isWin ? 18 : 8)
       setTimeout(() => {
         setDiscard((cards) => [...cards, drawnCard])
@@ -99,21 +110,29 @@ function App() {
         setBets((items) => items.map((bet) => bet.id === betId ? { ...bet, result: isWin ? 'win' : 'loss' } : bet))
         setWon(isWin)
         if (isWin) {
+          setCombo((currentCombo) => {
+            const nextCombo = currentCombo + 1
+            const nextPopup = comboText(nextCombo)
+            if (nextPopup) setComboPopup(nextPopup)
+            return nextCombo
+          })
           setScore((currentScore) => {
-            const nextScore = currentScore + drawnCard.value
+            const nextScore = drawnCard.label === 'JOKER' ? currentScore * 2 : currentScore + drawnCard.value
             setBest((currentBest) => { const nextBest = Math.max(currentBest, nextScore); localStorage.setItem('60game-best', String(nextBest)); return nextBest })
             return nextScore
           })
-          setPoints(drawnCard.value)
+          setPoints(drawnCard.label === 'JOKER' ? 'x2' : `+${drawnCard.value}`)
+        } else {
+          setCombo(0)
         }
-        setTimeout(() => { setPoints(null); setWon(false); setBets((items) => items.filter((bet) => bet.id !== betId)) }, 720)
+        setTimeout(() => { setPoints(null); setWon(false); setBets((items) => items.filter((bet) => bet.id !== betId)); setComboPopup(null) }, 900)
       }, 460)
       return nextDeck
     })
   }
 
   const gameOver = started && deck.length === 0 && flyingCards.length === 0
-  return <main className="game-shell"><div className="cinematic-bg" />{!started ? <button className="start-screen" onClick={newGame}><span>60game</span><strong>Card Arcade</strong><em>Tap to play</em></button> : gameOver ? <section className="end-screen"><span>Congrats!</span><strong>{score}</strong><em>Best {best}</em><button onClick={newGame}>New Game</button></section> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="★" label="Left" value={deck.length} /></header><section className="quick-info"><div><span>LAST</span><strong>{lastCard?.label || '-'}</strong></div><div><span>CARDS</span><strong>{deck.length}</strong></div></section><section className="play-stage"><DeckStack remaining={deck.length} /><div className={`arc-ribbon ${flyingCards.length > 0 ? 'active' : ''}`} /><DiscardPile card={lastCard} won={won} points={points} /><AnimatePresence>{flyingCards.map((card) => <FlyingCard key={card.flightId} card={card} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section><section className="prediction-grid">{CARD_TYPES.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} />)}</section></>}</main>
+  return <main className="game-shell"><div className="cinematic-bg" />{!started ? <button className="start-screen" onClick={newGame}><span>60game</span><strong>Card Arcade</strong><em>Tap to play</em></button> : gameOver ? <section className="end-screen"><span>Congrats!</span><strong>{score}</strong><em>Best {best}</em><button onClick={newGame}>New Game</button></section> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="★" label="Left" value={deck.length} /></header><ComboBar combo={combo} popup={comboPopup} /><section className="quick-info"><div><span>LAST</span><strong>{lastCard?.label || '-'}</strong></div><div><span>CARDS</span><strong>{deck.length}</strong></div></section><section className="play-stage"><DeckStack remaining={deck.length} /><div className={`arc-ribbon ${flyingCards.length > 0 ? 'active' : ''}`} /><DiscardPile card={lastCard} won={won} points={points} /><AnimatePresence>{flyingCards.map((card) => <FlyingCard key={card.flightId} card={card} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section><section className="prediction-grid">{CARD_TYPES.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} />)}</section></>}</main>
 }
 
 ReactDOM.createRoot(document.getElementById('app')).render(<App />)
