@@ -1,0 +1,57 @@
+.combo-wrap {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 6px;
+  margin-top: -2px;
+}
+
+.combo-track {
+  position: relative;
+  min-height: 14px;
+  border-radius: 999px;
+  padding: 4px 8px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  background: rgba(255, 220, 80, .08);
+  border: 1px solid rgba(255, 220, 80, .14);
+  overflow: hidden;
+}
+
+.combo-gem,
+.combo-flying-gem {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  transform: rotate(45deg);
+  background: linear-gradient(145deg, #fff6a6, #ffca3a);
+  box-shadow: 0 0 16px rgba(255, 216, 74, .72);
+}
+
+.combo-flying-gem {
+  position: absolute;
+  right: 8px;
+  top: 2px;
+}
+
+.combo-popup {
+  text-align: center;
+  font-size: .72rem;
+  font-weight: 1000;
+  letter-spacing: .18em;
+  color: #ffe77b;
+  text-shadow: 0 0 18px rgba(255, 216, 74, .64);
+}
+
+.joker-prediction-card {
+  min-width: 0;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.joker-prediction-card .prediction-value,
+.joker-face-text {
+  font-size: clamp(1rem, 4vw, 1.8rem);
+  letter-spacing: -.05em;
+}
