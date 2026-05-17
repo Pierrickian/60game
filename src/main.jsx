@@ -120,7 +120,7 @@ function TableSlot({ table }) {
 
 function ComboBreakOverlay({ breakFx }) {
   if (!breakFx) return null
-  return <motion.div className="combo-break-overlay" initial={{ opacity: 0, y: 26, scale: .68 }} animate={{ opacity: 1, y: 0, scale: [1, 1.06, 1] }} exit={{ opacity: 0, y: -34, scale: .88 }} transition={{ duration: .34 }}><strong>COMBO BREAK</strong><motion.span initial={{ color: '#ffdf38' }} animate={{ color: '#ff3f1f' }} transition={{ duration: .48 }}>x{breakFx.from} → x0</motion.span></motion.div>
+  return <motion.div className="combo-break-overlay" initial={{ opacity: 0, y: 26, scale: .68 }} animate={{ opacity: 1, y: 0, scale: [1, 1.06, 1] }} exit={{ opacity: 0, y: -34, scale: .88 }} transition={{ duration: .34 }}><strong>COMBO BREAK</strong><motion.span initial={{ color: '#ffdf38' }} animate={{ color: '#ff3f1f' }} transition={{ duration: 2.48 }}>x{breakFx.from} → x0</motion.span></motion.div>
 }
 
 function EndPanel({ score, best, stats, onPlay }) {
@@ -215,8 +215,8 @@ function App() {
       comboRef.current = 0
       setCombo(0)
       setFrontCombo(null)
-      setBreakFx(previousCombo > 0 ? { id: fxToken, from: previousCombo } : null)
-      scheduleFxClear(fxToken, previousCombo > 0 ? 720 : 220)
+      setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo } : null)
+      scheduleFxClear(fxToken, previousCombo >= 2 ? 2720 : 220)
       window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, 520)
       return makeTables(referenceDeck, 1, [referenceTable], referenceTable.id)
     })
