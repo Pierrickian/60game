@@ -1,0 +1,85 @@
+.bet-clone {
+  position: absolute;
+  z-index: 16;
+  left: 50%;
+  top: 45%;
+  width: min(19vw, 86px);
+  aspect-ratio: .72;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.28);
+  box-shadow:
+    0 18px 34px rgba(0,0,0,.38),
+    inset 0 1px 0 rgba(255,255,255,.24);
+  pointer-events: none;
+}
+
+.bet-clone::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 0 35%, rgba(255,255,255,.26) 48%, transparent 60% 100%);
+  opacity: .28;
+}
+
+.bet-clone span {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(1.35rem, 5vw, 2.4rem);
+  font-weight: 1000;
+  line-height: .9;
+  text-shadow: 0 5px 12px rgba(0,0,0,.24);
+}
+
+.bet-clone small {
+  position: absolute;
+  z-index: 1;
+  bottom: 12%;
+  font-size: .72rem;
+  opacity: .72;
+}
+
+.bet-win {
+  animation: betWinGlow .5s ease-in-out infinite alternate;
+}
+
+.bet-loss {
+  filter: saturate(1.4) hue-rotate(-22deg);
+  box-shadow:
+    0 18px 34px rgba(120,0,0,.34),
+    0 0 24px rgba(255,44,70,.4),
+    inset 0 1px 0 rgba(255,255,255,.18);
+}
+
+.bet-loss::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 33, 58, .28);
+  z-index: 1;
+}
+
+@keyframes betWinGlow {
+  from {
+    box-shadow:
+      0 18px 34px rgba(0,0,0,.36),
+      0 0 16px rgba(255,238,112,.42),
+      inset 0 1px 0 rgba(255,255,255,.24);
+  }
+
+  to {
+    box-shadow:
+      0 18px 34px rgba(0,0,0,.36),
+      0 0 34px rgba(255,238,112,.88),
+      inset 0 1px 0 rgba(255,255,255,.32);
+  }
+}
+
+@media (max-width: 380px) {
+  .bet-clone {
+    width: min(18vw, 72px);
+    border-radius: 15px;
+  }
+}
