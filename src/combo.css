@@ -1,0 +1,406 @@
+.combo-status {
+  position: relative;
+  z-index: 8;
+  min-height: 24px;
+  margin-top: -6px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.combo-status span {
+  font-size: .62rem;
+  font-weight: 950;
+  letter-spacing: .18em;
+  color: rgba(255,255,255,.6);
+}
+
+.combo-status strong {
+  font-size: .78rem;
+  font-weight: 1000;
+  letter-spacing: .18em;
+  color: #ffe77b;
+  text-shadow: 0 0 18px rgba(255, 216, 74, .64);
+}
+
+.combo-status.combo-break strong {
+  color: #ff6b7f;
+  text-shadow: 0 0 18px rgba(255, 55, 80, .7);
+}
+
+.multideck-stage {
+  position: relative;
+  z-index: 8;
+  display: block;
+  height: 100%;
+  min-height: 210px;
+  overflow: visible;
+  padding: 0 0 8px;
+  isolation: isolate;
+}
+
+.combo-table {
+  position: absolute;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  justify-items: center;
+  isolation: isolate;
+  width: 80%;
+  height: 72%;
+  left: 10%;
+  top: 14%;
+  pointer-events: none;
+}
+
+.combo-table .deck-zone,
+.combo-table .discard-zone {
+  min-width: 0;
+  min-height: 0;
+  z-index: 21;
+}
+
+.combo-table .deck-stack,
+.combo-table .discard-card-wrap,
+.combo-table .flying-card {
+  width: min(28vw, 144px);
+  border-radius: clamp(13px, 4vw, 24px);
+  z-index: 22;
+}
+
+.combo-table .face-card,
+.combo-table .deck-back,
+.combo-table .deck-shadow-card {
+  border-radius: clamp(13px, 4vw, 24px);
+}
+
+.combo-table .face-card strong {
+  max-width: 86%;
+  overflow: hidden;
+  text-align: center;
+  font-size: clamp(2.2rem, 11vw, 5.4rem);
+  letter-spacing: -.08em;
+}
+
+.combo-table .joker-face-text {
+  font-size: clamp(.8rem, 4.2vw, 1.8rem) !important;
+  letter-spacing: -.09em;
+  max-width: 92%;
+  white-space: nowrap;
+}
+
+.combo-table .plate {
+  width: min(34vw, 172px);
+  height: min(34vw, 172px);
+  z-index: 0;
+}
+
+.combo-table .mini-ribbon {
+  left: 34%;
+  right: 34%;
+  top: 50%;
+  height: 2px;
+  opacity: .42;
+  z-index: 20;
+}
+
+.main-combo-table .primary-deck {
+  outline: 2px solid rgba(255, 222, 101, .9);
+  box-shadow:
+    0 0 0 4px rgba(255, 222, 101, .13),
+    0 24px 50px rgba(0,0,0,.44),
+    0 0 32px rgba(255, 222, 101, .45);
+}
+
+.combo-table-miss {
+  animation: comboMissPulse .55s ease;
+}
+
+.tables-1 .combo-table:nth-child(1) {
+  left: 8%;
+  top: 4%;
+  width: 84%;
+  height: 88%;
+}
+
+.tables-2 .combo-table {
+  left: 8%;
+  width: 84%;
+  height: 39%;
+}
+
+.tables-2 .combo-table:nth-child(1) { top: 2%; }
+.tables-2 .combo-table:nth-child(2) { top: 49%; }
+
+.tables-2 .combo-table .deck-stack,
+.tables-2 .combo-table .discard-card-wrap {
+  width: min(21vw, 110px);
+}
+
+.tables-2 .combo-table .face-card strong {
+  font-size: clamp(1.8rem, 8vw, 4rem);
+}
+
+.tables-4 .combo-table {
+  width: 49%;
+  height: 39%;
+}
+
+.tables-4 .combo-table:nth-child(1) { left: 0%; top: 2%; }
+.tables-4 .combo-table:nth-child(2) { left: 51%; top: 2%; }
+.tables-4 .combo-table:nth-child(3) { left: 0%; top: 49%; }
+.tables-4 .combo-table:nth-child(4) { left: 51%; top: 49%; }
+
+.tables-4 .combo-table .deck-stack,
+.tables-4 .combo-table .discard-card-wrap {
+  width: min(13.5vw, 72px);
+  border-radius: clamp(9px, 2.7vw, 15px);
+}
+
+.tables-4 .combo-table .face-card,
+.tables-4 .combo-table .deck-back,
+.tables-4 .combo-table .deck-shadow-card {
+  border-radius: clamp(9px, 2.7vw, 15px);
+}
+
+.tables-4 .combo-table .plate {
+  width: min(16vw, 86px);
+  height: min(16vw, 86px);
+}
+
+.tables-4 .combo-table .face-card strong {
+  font-size: clamp(1.2rem, 5.8vw, 2.6rem);
+}
+
+.tables-6 .combo-table,
+.tables-8 .combo-table {
+  width: 49%;
+  height: 21%;
+}
+
+.tables-6 .combo-table:nth-child(1),
+.tables-8 .combo-table:nth-child(1) { left: 0%; top: 0%; }
+.tables-6 .combo-table:nth-child(2),
+.tables-8 .combo-table:nth-child(2) { left: 51%; top: 0%; }
+.tables-6 .combo-table:nth-child(3),
+.tables-8 .combo-table:nth-child(3) { left: 0%; top: 24.5%; }
+.tables-6 .combo-table:nth-child(4),
+.tables-8 .combo-table:nth-child(4) { left: 51%; top: 24.5%; }
+.tables-6 .combo-table:nth-child(5),
+.tables-8 .combo-table:nth-child(5) { left: 0%; top: 49%; }
+.tables-6 .combo-table:nth-child(6),
+.tables-8 .combo-table:nth-child(6) { left: 51%; top: 49%; }
+.tables-8 .combo-table:nth-child(7) { left: 0%; top: 73.5%; }
+.tables-8 .combo-table:nth-child(8) { left: 51%; top: 73.5%; }
+
+.tables-6 .combo-table .deck-stack,
+.tables-6 .combo-table .discard-card-wrap,
+.tables-8 .combo-table .deck-stack,
+.tables-8 .combo-table .discard-card-wrap {
+  width: min(9.4vw, 50px);
+  border-radius: clamp(7px, 2vw, 11px);
+}
+
+.tables-6 .combo-table .face-card,
+.tables-6 .combo-table .deck-back,
+.tables-6 .combo-table .deck-shadow-card,
+.tables-8 .combo-table .face-card,
+.tables-8 .combo-table .deck-back,
+.tables-8 .combo-table .deck-shadow-card {
+  border-radius: clamp(7px, 2vw, 11px);
+}
+
+.tables-6 .combo-table .plate,
+.tables-8 .combo-table .plate {
+  width: min(11vw, 58px);
+  height: min(11vw, 58px);
+}
+
+.tables-6 .combo-table .deck-logo,
+.tables-8 .combo-table .deck-logo {
+  font-size: clamp(1rem, 4vw, 1.7rem);
+}
+
+.tables-6 .combo-table .deck-subtitle,
+.tables-8 .combo-table .deck-subtitle {
+  font-size: .32rem;
+}
+
+.tables-6 .combo-table .face-card strong,
+.tables-8 .combo-table .face-card strong {
+  font-size: clamp(.82rem, 3.8vw, 1.55rem);
+  letter-spacing: -.1em;
+}
+
+.tables-6 .combo-table .joker-face-text,
+.tables-8 .combo-table .joker-face-text {
+  font-size: clamp(.46rem, 2.4vw, .82rem) !important;
+}
+
+.discard-drop {
+  position: absolute;
+  inset: 0;
+  animation: discardLand .18s ease-out;
+}
+
+.local-combo-label {
+  position: absolute;
+  left: 50%;
+  top: -16%;
+  z-index: 60;
+  transform: translateX(-50%);
+  font-size: clamp(.58rem, 3vw, 1.1rem);
+  font-weight: 950;
+  letter-spacing: .1em;
+  color: #ffe88a;
+  text-shadow:
+    0 0 10px rgba(255, 216, 74, .8),
+    0 0 20px rgba(255, 118, 44, .35);
+  pointer-events: none;
+}
+
+.front-combo,
+.combo-break-overlay {
+  position: fixed;
+  z-index: 120;
+  left: 50vw;
+  top: clamp(116px, 20dvh, 158px);
+  transform: translateX(-50%);
+  width: min(92vw, 620px);
+  pointer-events: none;
+  text-align: center;
+  display: grid;
+  justify-items: center;
+  place-content: center;
+  font-family: Inter, ui-rounded, system-ui, sans-serif;
+}
+
+.front-combo {
+  font-size: clamp(1.9rem, 9.5vw, 4rem);
+  line-height: .92;
+  font-weight: 1000;
+  letter-spacing: -.035em;
+  color: #fff7c9;
+  text-shadow:
+    0 2px 0 rgba(117, 58, 0, .95),
+    0 0 16px rgba(255, 221, 92, .85),
+    0 0 36px rgba(255, 151, 71, .42);
+}
+
+.front-combo::after,
+.combo-break-overlay::after {
+  content: '';
+  position: absolute;
+  inset: -42% 12%;
+  z-index: -1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 221, 91, .2), rgba(255, 94, 94, .08) 48%, transparent 72%);
+  filter: blur(14px);
+}
+
+.combo-break-overlay strong {
+  font-size: clamp(1.55rem, 8vw, 3.25rem);
+  line-height: .96;
+  font-weight: 1000;
+  letter-spacing: -.03em;
+  color: #ffe1c0;
+  text-shadow:
+    0 2px 0 rgba(95, 18, 0, .9),
+    0 0 18px rgba(255, 93, 52, .65);
+}
+
+.combo-break-overlay span {
+  margin-top: 2px;
+  font-size: clamp(1rem, 5.3vw, 2.2rem);
+  font-weight: 1000;
+  letter-spacing: -.02em;
+  text-shadow: 0 0 18px rgba(255, 120, 40, .75);
+}
+
+.session-panel {
+  gap: 18px;
+}
+
+.session-stats {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.session-stats div {
+  border-radius: 18px;
+  padding: 10px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.12);
+}
+
+.session-stats small {
+  display: block;
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.58);
+}
+
+.session-stats b {
+  font-size: 1.45rem;
+}
+
+.joker-prediction-card {
+  min-width: 0;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+.joker-prediction-card .prediction-value,
+.joker-face-text {
+  font-size: clamp(.75rem, 3.6vw, 1.45rem) !important;
+  letter-spacing: -.06em;
+  white-space: nowrap;
+}
+
+@keyframes discardLand {
+  0% { opacity: .65; transform: translateY(-18%) rotate(-5deg) scale(.92); }
+  100% { opacity: 1; transform: translateY(0) rotate(0) scale(1); }
+}
+
+@keyframes comboMissPulse {
+  0% { filter: saturate(1); }
+  45% { filter: saturate(1.4) hue-rotate(-18deg); }
+  100% { filter: saturate(1); }
+}
+
+@media (max-width: 380px) {
+  .combo-status { min-height: 20px; }
+
+  .multideck-stage {
+    min-height: 205px;
+  }
+
+  .tables-1 .combo-table:nth-child(1) {
+    left: 6%;
+    top: 4%;
+    width: 88%;
+    height: 86%;
+  }
+
+  .tables-2 .combo-table .deck-stack,
+  .tables-2 .combo-table .discard-card-wrap {
+    width: min(20vw, 90px);
+  }
+
+  .tables-6 .combo-table .deck-stack,
+  .tables-6 .combo-table .discard-card-wrap,
+  .tables-8 .combo-table .deck-stack,
+  .tables-8 .combo-table .discard-card-wrap {
+    width: min(8.6vw, 43px);
+  }
+
+  .front-combo,
+  .combo-break-overlay {
+    top: clamp(102px, 18dvh, 138px);
+    width: 94vw;
+  }
+}
