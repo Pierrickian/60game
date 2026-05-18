@@ -18,6 +18,7 @@ const CARD_TYPES = [
 
 const COMBO_LABELS = { 2: 'GREAT', 3: 'AMAZING', 4: 'IMPRESSIVE', 5: 'AWESOME', 6: 'GOD IS PLAYING' }
 const POST_GOD_LABELS = ['HAPPY BIRTHDAY', 'MY LORD', 'CHIRURGICAL', 'FIN LIMIER', 'OISEAU RARE', 'RENARD', 'LOUP', 'TIGRE', 'LION', 'DINOSAURE', 'METEORITE', 'SOLEIL', 'GALAXIE', 'COSMOS', 'UNIVERS', 'MULTIVERS', 'TROU NOIR', 'BIG BANG']
+const SCORE_SCREEN_DELAY_MS = 2000
 const countRemaining = (deck, label) => deck.filter((card) => card.label === label).length
 const getCardType = (label) => CARD_TYPES.find((card) => card.label === label)
 function comboText(combo) {
@@ -58,6 +59,124 @@ function makeTables(mainCards, count, previousTables = [], mainId = 'main') {
     const isMain = id === mainId || (!previousTables.some((table) => table.id === mainId) && index === 0)
     return { id, isMain, deck: isMain ? mainCards : shuffle(mainCards), lastCard: previous?.lastCard || null, lastHit: previous?.lastHit || false, lastMiss: previous?.lastMiss || false, revealId: previous?.revealId || 0, showCombo: false }
   })
+}
+
+function scoreShareText(score, best, stats) {
+  return `60game\nScore ${score}\nBest ${best}\nHits ${stats.hits}\nBest combo x${Math.max(1, stats.bestCombo)}\nMax decks ${stats.maxDecks}\nJokers ${stats.jokers}`
+}
+
+function makeScoreImage(score, best, stats) {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas')
+    const width = 900
+    const height = 1200
+    canvas.width = width
+    canvas.height = height
+    const context = canvas.getContext('2d')
+    if (!context) {
+      resolve(null)
+      return
+    }
+
+    const gradient = context.createLinearGradient(0, 0, width, height)
+    gradient.addColorStop(0, '#1b2250')
+    gradient.addColorStop(0.58, '#090d1b')
+    gradient.addColorStop(1, '#050711')
+    context.fillStyle = gradient
+    context.fillRect(0, 0, width, height)
+
+    context.fillStyle = 'rgba(255, 218, 104, 0.18)'
+    context.beginPath()
+    context.arc(width * 0.82, height * 0.18, 250, 0, Math.PI * 2)
+    context.fill()
+    context.fillStyle = 'rgba(76, 129, 255, 0.2)'
+    context.beginPath()
+    context.arc(width * 0.18, height * 0.78, 290, 0, Math.PI * 2)
+    context.fill()
+
+    context.strokeStyle = 'rgba(255, 255, 255, 0.22)'
+    context.lineWidth = 4
+    context.beginPath()
+    context.roundRect(72, 80, width - 144, height - 160, 44)
+    context.stroke()
+
+    context.textAlign = 'center'
+    context.fillStyle = 'rgba(255, 255, 255, 0.72)'
+    context.font = '700 34px system-ui, sans-serif'
+    context.fillText('60GAME SCORE', width / 2, 190)
+
+    context.fillStyle = '#ffffff'
+    context.font = '900 180px system-ui, sans-serif'
+    context.fillText(String(score), width / 2, 390)
+
+    context.fillStyle = '#ffe680'
+    context.font = '900 54px system-ui, sans-serif'
+    context.fillText(`BEST ${best}`, width / 2, 480)
+
+    const rows = [
+      ['Hits', stats.hits],
+      ['Best combo', `x${Math.max(1, stats.bestCombo)}`],
+      ['Max decks', stats.maxDecks],
+      ['Jokers', stats.jokers]
+    ]
+    context.textAlign = 'left'
+    rows.forEach(([label, value], index) => {
+      const y = 620 + index * 106
+      context.fillStyle = 'rgba(255, 255, 255, 0.1)'
+      context.beginPath()
+      context.roundRect(150, y - 58, 600, 78, 28)
+      context.fill()
+      context.fillStyle = 'rgba(255, 255, 255, 0.66)'
+      context.font = '700 30px system-ui, sans-serif'
+      context.fillText(label, 190, y - 8)
+      context.fillStyle = '#ffffff'
+      context.textAlign = 'right'
+      context.font = '900 40px system-ui, sans-serif'
+      context.fillText(String(value), 710, y - 10)
+      context.textAlign = 'left'
+    })
+
+    context.textAlign = 'center'
+    context.fillStyle = 'rgba(255, 255, 255, 0.54)'
+    context.font = '700 28px system-ui, sans-serif'
+    context.fillText('Shared from 60game', width / 2, 1080)
+
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        resolve(null)
+        return
+      }
+      resolve(new File([blob], '60game-score.png', { type: 'image/png' }))
+    }, 'image/png')
+  })
+}
+
+async function shareScore(score, best, stats) {
+  const text = scoreShareText(score, best, stats)
+  const file = await makeScoreImage(score, best, stats)
+  if (file && navigator.canShare?.({ files: [file] }) && navigator.share) {
+    try {
+      await navigator.share({ title: '60game score', text, files: [file] })
+      return
+    } catch {
+      return
+    }
+  }
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: '60game score', text })
+      return
+    } catch {
+      return
+    }
+  }
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+}
+
+function WhatsAppIcon() {
+  return <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16.03 4C9.4 4 4 9.35 4 15.93c0 2.1.55 4.13 1.6 5.92L4 28l6.32-1.56a12.1 12.1 0 0 0 5.71 1.44C22.66 27.88 28 22.53 28 15.93S22.66 4 16.03 4Zm0 21.84c-1.82 0-3.6-.5-5.16-1.45l-.37-.22-3.75.93.96-3.64-.24-.38a9.83 9.83 0 0 1-1.47-5.15c0-5.45 4.5-9.89 10.03-9.89 5.51 0 9.99 4.44 9.99 9.89 0 5.47-4.48 9.91-9.99 9.91Zm5.5-7.4c-.3-.15-1.78-.87-2.06-.97-.28-.1-.48-.15-.68.15-.2.3-.78.97-.96 1.17-.18.2-.35.23-.65.08-.3-.15-1.27-.46-2.42-1.48a9.06 9.06 0 0 1-1.67-2.06c-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.68-1.63-.93-2.23-.25-.58-.5-.5-.68-.51l-.58-.01c-.2 0-.53.08-.8.38-.28.3-1.05 1.02-1.05 2.48s1.08 2.88 1.23 3.08c.15.2 2.13 3.23 5.16 4.53.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.78-.72 2.03-1.42.25-.7.25-1.3.18-1.42-.08-.13-.28-.2-.58-.35Z" /></svg>
 }
 
 function Stat({ tone, icon, label, value, bumpKey }) {
@@ -134,7 +253,7 @@ function FrontComboOverlay({ combo }) {
 }
 
 function EndPanel({ score, best, stats, onPlay }) {
-  return <section className="end-screen session-panel"><span>Congrats!</span><strong>{score}</strong><em>Best {best}</em><div className="session-stats"><div><small>Hits</small><b>{stats.hits}</b></div><div><small>Best combo</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>Max decks</small><b>{stats.maxDecks}</b></div><div><small>Jokers</small><b>{stats.jokers}</b></div></div><button onClick={onPlay}>Play</button></section>
+  return <section className="end-screen session-panel"><span>Congrats!</span><strong>{score}</strong><em>Best {best}</em><div className="session-stats"><div><small>Hits</small><b>{stats.hits}</b></div><div><small>Best combo</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>Max decks</small><b>{stats.maxDecks}</b></div><div><small>Jokers</small><b>{stats.jokers}</b></div></div><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}><button onClick={onPlay}>Play</button><button onClick={() => shareScore(score, best, stats)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#25D366', color: 'white' }}><WhatsAppIcon />Share</button></div></section>
 }
 
 function App() {
@@ -218,7 +337,7 @@ function App() {
         }
         if (jokerHits > 0) setFrontCombo({ title: 'SCORE', multiplier: 2 ** jokerHits, boom: false })
         scheduleFxClear(fxToken, frontCombo?.boom ? 2000 : 430)
-        window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, 520)
+        window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, SCORE_SCREEN_DELAY_MS)
         return makeTables(referenceDeck, nextCount, orderedPrevious, referenceTable.id)
       }
       comboRef.current = 0
@@ -226,7 +345,7 @@ function App() {
       setFrontCombo(null)
       setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo } : null)
       scheduleFxClear(fxToken, previousCombo >= 2 ? 2400 : 220)
-      window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, 520)
+      window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, SCORE_SCREEN_DELAY_MS)
       return makeTables(referenceDeck, 1, [referenceTable], referenceTable.id)
     })
   }
