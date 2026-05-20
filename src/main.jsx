@@ -152,17 +152,17 @@ function makeScoreImage(score, best, stats) {
 }
 
 async function shareScore(score, best, stats) {
-  const text = scoreShareText(score, best, stats)
   const file = await makeScoreImage(score, best, stats)
   if (file && navigator.canShare?.({ files: [file] }) && navigator.share) {
     try {
-      await navigator.share({ title: '60game score', text, files: [file] })
+      await navigator.share({ files: [file] })
       return
     } catch {
       return
     }
   }
 
+  const text = scoreShareText(score, best, stats)
   if (navigator.share) {
     try {
       await navigator.share({ title: '60game score', text })
@@ -174,6 +174,7 @@ async function shareScore(score, best, stats) {
 
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
 }
+
 
 function WhatsAppIcon() {
   return <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16.03 4C9.4 4 4 9.35 4 15.93c0 2.1.55 4.13 1.6 5.92L4 28l6.32-1.56a12.1 12.1 0 0 0 5.71 1.44C22.66 27.88 28 22.53 28 15.93S22.66 4 16.03 4Zm0 21.84c-1.82 0-3.6-.5-5.16-1.45l-.37-.22-3.75.93.96-3.64-.24-.38a9.83 9.83 0 0 1-1.47-5.15c0-5.45 4.5-9.89 10.03-9.89 5.51 0 9.99 4.44 9.99 9.89 0 5.47-4.48 9.91-9.99 9.91Zm5.5-7.4c-.3-.15-1.78-.87-2.06-.97-.28-.1-.48-.15-.68.15-.2.3-.78.97-.96 1.17-.18.2-.35.23-.65.08-.3-.15-1.27-.46-2.42-1.48a9.06 9.06 0 0 1-1.67-2.06c-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.68-1.63-.93-2.23-.25-.58-.5-.5-.68-.51l-.58-.01c-.2 0-.53.08-.8.38-.28.3-1.05 1.02-1.05 2.48s1.08 2.88 1.23 3.08c.15.2 2.13 3.23 5.16 4.53.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.78-.72 2.03-1.42.25-.7.25-1.3.18-1.42-.08-.13-.28-.2-.58-.35Z" /></svg>
