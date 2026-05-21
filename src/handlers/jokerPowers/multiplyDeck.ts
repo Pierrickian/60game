@@ -10,3 +10,11 @@ export const multiplyDeck: JokerPowerHandler = {
     return [...baseDeck, ...clones]
   }
 }
+
+
+export const multiplyScore: JokerPowerHandler = {
+  id: 'multiplyScore',
+  apply(context) {
+    return context.deck
+  }
+}

@@ -654,29 +654,33 @@ button {
 
 .game-over-banner {
   position: fixed;
-  inset: 0;
+  left: 50%;
+  top: 25dvh;
+  transform: translateX(-50%);
   z-index: 40;
   display: grid;
   place-items: center;
   pointer-events: none;
   font-family: 'Press Start 2P', 'ArcadeClassic', 'Courier New', monospace;
-  font-size: clamp(32px, 8vw, 96px);
+  font-size: clamp(42px, 10vw, 120px);
   letter-spacing: 0.14em;
   color: #ffefac;
-  text-shadow: 0 0 24px rgba(255, 191, 75, 0.82), 0 0 44px rgba(245, 77, 20, 0.52);
+  font-weight: 900;
+  text-shadow: 0 0 30px rgba(255, 191, 75, 0.9), 0 0 60px rgba(245, 77, 20, 0.66), 0 0 90px rgba(34, 9, 6, 0.55);
 }
 
 .win-overlay {
-  position: absolute;
-  top: clamp(22px, 6vh, 56px);
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 50;
   font-family: 'Press Start 2P', 'ArcadeClassic', 'Courier New', monospace;
-  font-size: clamp(40px, 11vw, 130px);
+  font-size: clamp(64px, 16vw, 200px);
   color: #fff3ae;
   letter-spacing: 0.15em;
-  text-shadow: 0 0 18px rgba(255, 213, 95, 0.95), 0 0 56px rgba(255, 133, 31, 0.72);
+  font-weight: 900;
+  text-shadow: 0 0 24px rgba(255, 213, 95, 0.98), 0 0 60px rgba(255, 133, 31, 0.85), 0 0 120px rgba(25, 10, 45, 0.75);
   pointer-events: none;
 }
 
