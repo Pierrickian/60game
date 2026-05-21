@@ -16,3 +16,4 @@ Ce dépôt sert de base IA-first pour créer, tester et faire évoluer un jeu de
 - `replit.md` : contexte de travail et règles agent.
 - `skills/agent-architecture/SKILL.md` : consignes à appliquer pour les refactors, le moteur, l'UI et les évolutions.
 - `architecture/ui.md` : direction d'architecture UI pour le jeu de cartes.
+- `architecture/gameplay-architecture.md` : règles d'architecture gameplay data-driven (niveaux, handlers, chargement de contenu).
