@@ -352,11 +352,14 @@ function App() {
         setCombo(nextCombo)
         setBreakFx(null)
         setStats((currentStats) => ({ hits: currentStats.hits + hits.length, bestCombo: Math.max(currentStats.bestCombo, nextCombo), maxDecks: Math.max(currentStats.maxDecks, nextCount), jokers: currentStats.jokers + jokerHits }))
-        const unlockedAchievements = evaluateAchievements(achievementRuntime, { isWin: true, card: hits[0]?.lastCard })
+        const unlockedAchievements = evaluateAchievements(achievementRuntime, { isWin: true, card: hits[0]?.lastCard, combo: nextCombo, levelConfig: currentLevel })
         if (unlockedAchievements.length > 0) {
           const ts = Date.now()
-          setAchievementPopups((items) => [...items, ...unlockedAchievements.map((a, idx) => ({ id: `${a.id}-${ts}-${idx}`, name: a.name, points: a.pointsReward }))])
-          window.setTimeout(() => setAchievementPopups((items) => items.slice(unlockedAchievements.length)), 4000)
+          setAchievementPopups((items) => [...items, ...unlockedAchievements.map((a, idx) => ({ id: `${a.id}-${ts}-${idx}`, name: a.name, points: a.pointsReward }))].slice(-3))
+          unlockedAchievements.forEach((a, idx) => {
+            const popupId = `${a.id}-${ts}-${idx}`
+            window.setTimeout(() => setAchievementPopups((items) => items.filter((p) => p.id !== popupId)), 4000 + idx * 180)
+          })
         }
         setScore((currentScore) => {
           const multiplied = jokerHits > 0 ? currentScore * (2 ** jokerHits) : currentScore
@@ -375,6 +378,7 @@ function App() {
         window.setTimeout(() => { if (fxTokenRef.current === fxToken && referenceDeck.length === 0) setShowEnd(true) }, SCORE_SCREEN_DELAY_MS)
         return makeTables(referenceDeck, nextCount, orderedPrevious, referenceTable.id)
       }
+      evaluateAchievements(achievementRuntime, { isWin: false, card: referenceTable.lastCard, combo: 0, levelConfig: currentLevel })
       comboRef.current = 0
       setCombo(0)
       setFrontCombo(null)

@@ -1,0 +1,10 @@
+{
+  "id": "comboska_que_pasa",
+  "name": "Comboska Qu\u00e9 Pasa",
+  "description": "Comboska Qu\u00e9 Pasa",
+  "pointsReward": 100,
+  "handler": "comboThreshold",
+  "params": {
+    "target": 15
+  }
+}

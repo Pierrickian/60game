@@ -1,0 +1,11 @@
+{
+  "id": "deus",
+  "name": "Deus",
+  "description": "Deus",
+  "pointsReward": 100,
+  "handler": "rankStreak",
+  "params": {
+    "rankIndex": 4,
+    "count": 2
+  }
+}

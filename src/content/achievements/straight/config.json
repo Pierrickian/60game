@@ -1,0 +1,10 @@
+{
+  "id": "straight",
+  "name": "Straight",
+  "description": "Straight",
+  "pointsReward": 75,
+  "handler": "straightThree",
+  "params": {
+    "count": 3
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "id": "brelan",
+  "name": "Brelan",
+  "description": "Brelan",
+  "pointsReward": 85,
+  "handler": "tripletNonMin",
+  "params": {
+    "count": 3
+  }
+}

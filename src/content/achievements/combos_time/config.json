@@ -1,0 +1,10 @@
+{
+  "id": "combos_time",
+  "name": "Combos Time",
+  "description": "Combos Time",
+  "pointsReward": 40,
+  "handler": "comboThreshold",
+  "params": {
+    "target": 5
+  }
+}

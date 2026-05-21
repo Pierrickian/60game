@@ -1,0 +1,10 @@
+{
+  "id": "combos_bingo",
+  "name": "Combos Bingo",
+  "description": "Combos Bingo",
+  "pointsReward": 70,
+  "handler": "comboThreshold",
+  "params": {
+    "target": 10
+  }
+}

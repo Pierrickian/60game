@@ -1,0 +1,11 @@
+{
+  "id": "flow_of_the_multiverse",
+  "name": "Flow of the Multiverse",
+  "description": "Flow of the Multiverse",
+  "pointsReward": 140,
+  "handler": "rankStreak",
+  "params": {
+    "rankIndex": 8,
+    "count": 2
+  }
+}

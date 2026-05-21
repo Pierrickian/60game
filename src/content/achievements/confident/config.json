@@ -1,0 +1,11 @@
+{
+  "id": "confident",
+  "name": "Confident",
+  "description": "Confident",
+  "pointsReward": 80,
+  "handler": "rankStreak",
+  "params": {
+    "rankIndex": 2,
+    "count": 2
+  }
+}

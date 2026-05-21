@@ -1,0 +1,11 @@
+{
+  "id": "hacker",
+  "name": "Hacker",
+  "description": "Hacker",
+  "pointsReward": 200,
+  "handler": "rankStreak",
+  "params": {
+    "rankIndex": 1,
+    "count": 8
+  }
+}
