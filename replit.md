@@ -131,3 +131,8 @@ Tout texte affiché au joueur doit pouvoir être localisé.
 - Favoriser les petits fichiers cohérents.
 - Garder `GameEngine` comme API principale.
 - Ajouter les nouveaux comportements via handlers ou systèmes dédiés.
+
+
+## Architecture gameplay (mandatory)
+
+Apply and keep aligned with `architecture/gameplay-architecture.md` for all gameplay/engine/content refactors.

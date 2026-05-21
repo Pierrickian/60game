@@ -1,15 +1,6 @@
-const root = document.querySelector('#app')
+import { GameEngine } from './engine/GameEngine'
 
-const CARD_TYPES = [
-  { label: '2', value: 2, count: 30, theme: 'green', gem: '◆' },
-  { label: '5', value: 5, count: 12, theme: 'blue', gem: '◆' },
-  { label: '10', value: 10, count: 6, theme: 'purple', gem: '◆' },
-  { label: '15', value: 15, count: 4, theme: 'orange', gem: '◆' },
-  { label: '20', value: 20, count: 3, theme: 'red', gem: '◆' },
-  { label: '30', value: 30, count: 2, theme: 'cyan', gem: '◆' },
-  { label: '60', value: 60, count: 1, theme: 'gold', gem: '◆' },
-  { label: 'JOKER', value: 0, count: 2, theme: 'black', gem: '♛' }
-]
+const root = document.querySelector('#app')
 
 const PARTICLES = Array.from({ length: 18 }, (_, index) => ({
   id: index,
@@ -19,36 +10,6 @@ const PARTICLES = Array.from({ length: 18 }, (_, index) => ({
   size: Math.round(2 + Math.random() * 4)
 }))
 
-function shuffle(array) {
-  const copy = [...array]
-
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[copy[i], copy[j]] = [copy[j], copy[i]]
-  }
-
-  return copy
-}
-
-function buildDeck() {
-  const deck = []
-
-  CARD_TYPES.forEach((card) => {
-    for (let i = 0; i < card.count; i += 1) {
-      deck.push({ ...card })
-    }
-  })
-
-  return shuffle(deck)
-}
-
-function countRemaining(deck, label) {
-  return deck.filter((card) => card.label === label).length
-}
-
-function getCardType(label) {
-  return CARD_TYPES.find((card) => card.label === label)
-}
 
 function playTapFeedback(isWin) {
   if (navigator.vibrate) navigator.vibrate(isWin ? [18, 24, 18] : 10)
@@ -95,11 +56,9 @@ function renderHome() {
 
 function startGame() {
   const state = {
-    deck: buildDeck(),
-    discard: [],
+    engine: new GameEngine(),
     score: 0,
     best: Number(localStorage.getItem('60game-best') || 0),
-    lastCard: null,
     pointsPopup: null,
     movingCard: null,
     hitBurst: false,
@@ -108,7 +67,7 @@ function startGame() {
   }
 
   function render() {
-    if (state.deck.length === 0) {
+    if (state.engine.isFinished()) {
       state.best = Math.max(state.best, state.score)
       localStorage.setItem('60game-best', String(state.best))
 
@@ -128,7 +87,8 @@ function startGame() {
       return
     }
 
-    const lastCardType = state.lastCard ? getCardType(state.lastCard.label) : null
+    const cardTypes = state.engine.state.cardTypes
+    const lastCardType = state.engine.state.lastCard
 
     root.innerHTML = `
       <main class="app-shell game-layout ${state.scorePulse ? 'score-hit' : ''}">
@@ -148,18 +108,18 @@ function startGame() {
           <div class="hud-stat left-stat">
             <span class="hud-icon">★</span>
             <span class="hud-label">Left</span>
-            <strong>${state.deck.length}</strong>
+            <strong>${state.engine.state.deck.length}</strong>
           </div>
         </header>
 
         <section class="mini-info-row">
           <div class="mini-info">
             <span>Last</span>
-            <strong>${state.lastCard ? state.lastCard.label : '-'}</strong>
+            <strong>${state.engine.state.lastCard ? state.engine.state.lastCard.label : '-'}</strong>
           </div>
           <div class="mini-info left-mini">
             <span>Cards</span>
-            <strong>${state.deck.length}</strong>
+            <strong>${state.engine.state.deck.length}</strong>
           </div>
         </section>
 
@@ -198,11 +158,11 @@ function startGame() {
         </section>
 
         <section class="guess-grid">
-          ${CARD_TYPES.map((card) => `
+          ${cardTypes.map((card) => `
             <button class="guess-button arcade-button theme-${card.theme}" data-guess="${card.label}" ${state.isLocked ? 'disabled' : ''}>
               <span class="button-label">${card.label}</span>
               <span class="button-gem">${card.gem}</span>
-              <span class="remaining-text">${countRemaining(state.deck, card.label)} LEFT</span>
+              <span class="remaining-text">${state.engine.state.remainingCounts[card.label] ?? 0} LEFT</span>
             </button>
           `).join('')}
         </section>
@@ -214,26 +174,24 @@ function startGame() {
         if (state.isLocked) return
 
         const guess = button.dataset.guess
-        const drawnCard = state.deck.shift()
-
         state.isLocked = true
-        state.movingCard = drawnCard
+        const topCard = state.engine.state.deck[0]
+        state.movingCard = topCard || null
         state.pointsPopup = null
         state.hitBurst = false
         state.scorePulse = false
         render()
 
         setTimeout(() => {
-          const isWin = guess === drawnCard.label
+          const resolution = state.engine.draw(guess)
+          const isWin = Boolean(resolution?.isWin)
 
-          state.lastCard = drawnCard
-          state.discard.push(drawnCard)
           state.movingCard = null
           state.hitBurst = true
+          state.score = state.engine.state.score
 
-          if (isWin) {
-            state.score += drawnCard.value
-            state.pointsPopup = drawnCard.value
+          if (isWin && resolution) {
+            state.pointsPopup = resolution.pointsAwarded
             state.scorePulse = true
           }
 
