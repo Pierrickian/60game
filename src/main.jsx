@@ -336,6 +336,7 @@ function App() {
     const activeLevel = levelConfigs[levelId] ?? levelConfigs[levelsRegistry.startingLevel]
     comboRef.current = 0
     fxTokenRef.current += 1
+    previousUnlockedStarsRef.current = new Set()
     setTables(makeTables(buildDeckForLevel(activeLevel), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setFrontCombo(null); setBreakFx(null); setShowEnd(false); setShowGameOverBanner(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setShowLevelIntro(true); setStarted(true); setAchievementRuntime(createAchievementRuntime(activeLevel)); setAchievementPopups([]); setStarPopups([]); setJokerPowerPopups([]); setCardCountBumps({}); setTotalDrawn(0); setPrecisionHits(0); starPopupTimersRef.current.forEach((timerMeta) => window.clearTimeout(timerMeta.timerId)); starPopupTimersRef.current.clear()
   }
 
@@ -422,7 +423,10 @@ function App() {
               if (selectedPower.handler === 'multiplyScore') jokerScoreMultiplier = Number(selectedPower?.params?.factor || 2)
               const afterCounts = Object.fromEntries(cardTypes.map((type) => [type.label, referenceDeck.filter((card) => card.label === type.label).length]))
               const changed = Object.keys(afterCounts).filter((label) => afterCounts[label] !== beforeCounts[label])
-              if (changed.length > 0) setCardCountBumps((current) => changed.reduce((acc, label) => ({ ...acc, [label]: (acc[label] || 0) + 1 }), { ...current }))
+              if (changed.length > 0) {
+                referenceDeck = shuffle(referenceDeck)
+                setCardCountBumps((current) => changed.reduce((acc, label) => ({ ...acc, [label]: (acc[label] || 0) + 1 }), { ...current }))
+              }
               const popupId = `${selectedPower.id}-${Date.now()}-${Math.random().toString(36).slice(2,6)}`
               setJokerPowerPopups((items) => [...items, { id: popupId, text: selectedPower.popupText }].slice(-2))
               window.setTimeout(() => setJokerPowerPopups((items) => items.filter((p) => p.id !== popupId)), 1700)
@@ -472,6 +476,7 @@ function App() {
     setBreakFx(null)
     setBets([])
     setShowLevelIntro(false)
+    previousUnlockedStarsRef.current = new Set()
   }
 
   const runtimeStars = getStarModel(currentLevel, { achievementCount: achievementRuntime.filter((a) => a.unlocked).length, score, totalDrawn, precisionHits })
@@ -488,8 +493,12 @@ function App() {
     const lostPrecision = precisionWasUnlocked && !precisionIsNowUnlocked
     const popupEntries = []
     const ts = Date.now()
-    freshlyUnlocked.forEach((star, index) => popupEntries.push({ id: `star-${star.id}-${ts}-${index}`, name: star.name, state: 'unlocked' }))
-    if (lostPrecision) popupEntries.push({ id: `star-precision-lost-${ts}`, name: 'Precision', state: 'lost' })
+    const hasDrawnHalfDeck = totalDrawn >= Math.ceil(totalCards / 2)
+    freshlyUnlocked.forEach((star, index) => {
+      if (star.id === 'precision' && !hasDrawnHalfDeck) return
+      popupEntries.push({ id: `star-${star.id}-${ts}-${index}-${Math.random().toString(36).slice(2, 6)}`, name: star.name, state: 'unlocked' })
+    })
+    if (lostPrecision && hasDrawnHalfDeck) popupEntries.push({ id: `star-precision-lost-${ts}-${Math.random().toString(36).slice(2, 6)}`, name: 'Precision', state: 'lost' })
     if (popupEntries.length > 0) {
       const now = Date.now()
       const activePopupIds = []
@@ -511,7 +520,7 @@ function App() {
       })
     }
     previousUnlockedStarsRef.current = new Set(nextUnlocked.map((s) => s.id))
-  }, [started, showEnd, unlockedStarIds])
+  }, [started, showEnd, unlockedStarIds, totalDrawn, totalCards])
   useEffect(() => {
     return () => {
       starPopupTimersRef.current.forEach((timer) => window.clearTimeout(timer.timerId))
