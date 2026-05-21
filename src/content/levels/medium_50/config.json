@@ -1,0 +1,13 @@
+{
+  "id": "medium_50",
+  "name": "Medium 50",
+  "difficulty": "Medium",
+  "startingDeck": {
+    "2": 25,
+    "5": 10,
+    "10": 5,
+    "25": 2,
+    "50": 1,
+    "joker": 7
+  }
+}

@@ -466,3 +466,80 @@ button {
   .prediction-grid { gap: 6px; }
   .prediction-card { min-height: 70px; border-radius: 17px; }
 }
+
+.level-selector {
+  width: min(92vw, 720px);
+  max-height: 82dvh;
+  overflow: auto;
+  gap: 14px;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.level-card {
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 18px;
+  padding: 12px;
+  background: rgba(10,14,30,.62);
+  color: #fff;
+  text-align: left;
+  transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.level-card:active { transform: scale(.98); }
+.level-card:hover { transform: translateY(-2px); }
+.level-card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.level-card-top strong { font-size: .95rem; letter-spacing: .03em; }
+.level-card-top span { font-size: .72rem; opacity: .9; text-transform: uppercase; letter-spacing: .08em; }
+.level-card-meta { display: flex; gap: 10px; margin: 6px 0; opacity: .85; font-size: .78rem; }
+.level-card p { margin: 0; font-size: .78rem; color: rgba(255,255,255,.78); }
+.selected-level { border-color: #ffe680; box-shadow: 0 0 0 1px rgba(255,230,128,.4), 0 10px 28px rgba(255,196,77,.14); }
+.difficulty-super-easy { background: linear-gradient(145deg, rgba(76,228,255,.24), rgba(9,36,49,.58)); }
+.difficulty-easy { background: linear-gradient(145deg, rgba(76,255,174,.22), rgba(9,36,27,.58)); }
+.difficulty-medium { background: linear-gradient(145deg, rgba(255,194,77,.22), rgba(46,29,8,.58)); }
+.difficulty-hard { background: linear-gradient(145deg, rgba(255,99,124,.24), rgba(42,9,18,.6)); }
+
+@media (min-width: 720px) {
+  .level-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.level-select { display: block; text-align: left; overflow: auto; }
+.level-select em { display: block; margin: 10px 0 14px; }
+.level-select-grid { display: grid; gap: 10px; margin-top: 8px; }
+.level-pick { width: 100%; border: 1px solid rgba(255,255,255,.18); border-radius: 16px; background: rgba(11,16,35,.72); color: #fff; padding: 10px 12px; text-align: left; transition: transform .15s ease, border-color .2s ease; }
+.level-pick:active { transform: scale(.98); }
+.level-pick.active { border-color: #ffe680; box-shadow: 0 0 0 1px rgba(255,230,128,.45); }
+.level-pick b { display: block; font-size: .92rem; }
+.level-pick small { display: block; opacity: .8; margin-top: 2px; }
+.level-pick span { display: block; margin-top: 4px; color: rgba(255,255,255,.85); font-size: .8rem; }
+
+.game-shell.home-mode {
+  height: auto;
+  min-height: 100dvh;
+  overflow-y: auto;
+  display: block;
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+
+.level-select {
+  place-self: start stretch;
+  width: min(94vw, 760px);
+  min-height: auto;
+  margin: 0 auto;
+  display: block;
+  text-align: left;
+  overflow: visible;
+}
+
+.level-select strong {
+  font-size: clamp(2.1rem, 9vw, 3.4rem);
+}
+
+.level-select-grid {
+  margin-top: 16px;
+  padding-bottom: 16px;
+}

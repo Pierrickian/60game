@@ -1,0 +1,14 @@
+{
+  "id": "medium_48",
+  "name": "Medium 48",
+  "difficulty": "Medium",
+  "startingDeck": {
+    "2": 24,
+    "6": 8,
+    "8": 6,
+    "12": 4,
+    "24": 2,
+    "48": 1,
+    "joker": 3
+  }
+}
