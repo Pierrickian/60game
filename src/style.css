@@ -651,3 +651,31 @@ button {
   overflow: hidden;
   text-overflow: clip;
 }
+
+.game-over-banner {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-family: 'Press Start 2P', 'ArcadeClassic', 'Courier New', monospace;
+  font-size: clamp(32px, 8vw, 96px);
+  letter-spacing: 0.14em;
+  color: #ffefac;
+  text-shadow: 0 0 24px rgba(255, 191, 75, 0.82), 0 0 44px rgba(245, 77, 20, 0.52);
+}
+
+.win-overlay {
+  position: absolute;
+  top: clamp(22px, 6vh, 56px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  font-family: 'Press Start 2P', 'ArcadeClassic', 'Courier New', monospace;
+  font-size: clamp(40px, 11vw, 130px);
+  color: #fff3ae;
+  letter-spacing: 0.15em;
+  text-shadow: 0 0 18px rgba(255, 213, 95, 0.95), 0 0 56px rgba(255, 133, 31, 0.72);
+  pointer-events: none;
+}
