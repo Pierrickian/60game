@@ -635,3 +635,7 @@ button {
 .mini-stars i { font-style: normal; font-size:16px; }
 
 .mini-star { font-size: 16px; }
+
+.reward-popup.is-unlocked { border-color: rgba(255,216,103,.7); box-shadow: 0 10px 40px rgba(255,169,39,.4); }
+.reward-popup.is-lost { border-color: rgba(112,182,255,.9); box-shadow: 0 10px 40px rgba(71,143,255,.45); background: radial-gradient(circle at 20% 10%, rgba(210,232,255,.3), rgba(18,30,62,.92) 60%); }
+.reward-popup.is-lost b, .reward-popup.is-lost small { color: #cfe5ff; }

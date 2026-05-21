@@ -417,12 +417,17 @@ function App() {
     const nextUnlocked = runtimeStars.filter((s) => s.unlocked)
     const prev = previousUnlockedStarsRef.current
     const freshlyUnlocked = nextUnlocked.filter((s) => !prev.has(s.id))
-    if (freshlyUnlocked.length > 0) {
-      const ts = Date.now()
-      setStarPopups((items) => [...items, ...freshlyUnlocked.map((star, index) => ({ id: `star-${star.id}-${ts}-${index}`, name: star.name }))].slice(-4))
-      freshlyUnlocked.forEach((star, index) => {
-        const popupId = `star-${star.id}-${ts}-${index}`
-        window.setTimeout(() => setStarPopups((items) => items.filter((p) => p.id !== popupId)), 4000 + index * 220)
+    const precisionIsNowUnlocked = nextUnlocked.some((s) => s.id === 'precision')
+    const precisionWasUnlocked = prev.has('precision')
+    const lostPrecision = precisionWasUnlocked && !precisionIsNowUnlocked
+    const popupEntries = []
+    const ts = Date.now()
+    freshlyUnlocked.forEach((star, index) => popupEntries.push({ id: `star-${star.id}-${ts}-${index}`, name: star.name, state: 'unlocked' }))
+    if (lostPrecision) popupEntries.push({ id: `star-precision-lost-${ts}`, name: 'Precision', state: 'lost' })
+    if (popupEntries.length > 0) {
+      setStarPopups((items) => [...items, ...popupEntries].slice(-4))
+      popupEntries.forEach((popup, index) => {
+        window.setTimeout(() => setStarPopups((items) => items.filter((p) => p.id !== popup.id)), 4000 + index * 220)
       })
     }
     previousUnlockedStarsRef.current = new Set(nextUnlocked.map((s) => s.id))
