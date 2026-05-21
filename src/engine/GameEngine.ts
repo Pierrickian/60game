@@ -1,46 +1,38 @@
-import levelRegistryData from '../content/registry/levels.json'
-import level1Config from '../content/levels/level_1/config.json'
-import level1Rules from '../content/levels/level_1/rules.json'
 import { DeckEngine } from './DeckEngine'
+import { levelConfigs, levelRules, levelsRegistry } from './contentLoaders'
 import { RuleEngine } from './RuleEngine'
 import { ScoreEngine } from './ScoreEngine'
-import type { DrawResolution, LevelConfig, LevelRules, LevelsRegistry, RuntimeGameState } from './types'
-
-const levelConfigs: Record<string, LevelConfig> = {
-  level_1: level1Config as LevelConfig
-}
-
-const levelRulesMap: Record<string, LevelRules> = {
-  level_1: level1Rules as LevelRules
-}
+import type { DrawResolution, RuntimeGameState } from './types'
 
 export class GameEngine {
-  private readonly registry: LevelsRegistry
   private readonly rules
   readonly state: RuntimeGameState
 
   constructor(levelId?: string) {
-    this.registry = levelRegistryData as LevelsRegistry
-    const currentLevelId = levelId ?? this.registry.startingLevel
+    const currentLevelId = levelId ?? levelsRegistry.startingLevel
     const config = levelConfigs[currentLevelId]
-    const levelRules = levelRulesMap[currentLevelId]
+    const rulesForLevel = levelRules[currentLevelId]
 
     if (!config) throw new Error(`Missing level config for ${currentLevelId}`)
-    if (!levelRules) throw new Error(`Missing level rules for ${currentLevelId}`)
+    if (!rulesForLevel) throw new Error(`Missing level rules for ${currentLevelId}`)
 
-    this.rules = RuleEngine.resolve(levelRules)
+    this.rules = RuleEngine.resolve(rulesForLevel)
     this.state = {
       currentLevelId,
       deck: DeckEngine.buildDeck(config),
       discard: [],
       score: 0,
-      lastCard: null
+      lastCard: null,
+      cardTypes: DeckEngine.getCardTypes(config),
+      remainingCounts: DeckEngine.getRemainingCounts(config)
     }
   }
 
   draw(guess: string): DrawResolution | null {
     const drawnCard = this.state.deck.shift()
     if (!drawnCard) return null
+
+    this.state.remainingCounts[drawnCard.label] = Math.max((this.state.remainingCounts[drawnCard.label] ?? 0) - 1, 0)
 
     const resolvedCard = this.rules.jokerHandler.resolveCard(drawnCard)
     const isWin = guess === resolvedCard.label

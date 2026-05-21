@@ -16,6 +16,8 @@ export interface RuntimeGameState {
   discard: EngineCard[]
   score: number
   lastCard: EngineCard | null
+  cardTypes: EngineCard[]
+  remainingCounts: Record<string, number>
 }
 
 export interface EngineCard {

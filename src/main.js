@@ -11,11 +11,6 @@ const PARTICLES = Array.from({ length: 18 }, (_, index) => ({
 }))
 
 
-function countRemaining(deck, label) {
-  return deck.filter((card) => card.label === label).length
-}
-
-
 function playTapFeedback(isWin) {
   if (navigator.vibrate) navigator.vibrate(isWin ? [18, 24, 18] : 10)
 }
@@ -92,11 +87,7 @@ function startGame() {
       return
     }
 
-    const availableCards = state.engine.state.discard.concat(state.engine.state.deck).reduce((acc, card) => {
-      if (!acc[card.label]) acc[card.label] = card
-      return acc
-    }, {})
-    const cardTypes = Object.values(availableCards).sort((a,b)=>a.value-b.value)
+    const cardTypes = state.engine.state.cardTypes
     const lastCardType = state.engine.state.lastCard
 
     root.innerHTML = `
@@ -171,7 +162,7 @@ function startGame() {
             <button class="guess-button arcade-button theme-${card.theme}" data-guess="${card.label}" ${state.isLocked ? 'disabled' : ''}>
               <span class="button-label">${card.label}</span>
               <span class="button-gem">${card.gem}</span>
-              <span class="remaining-text">${countRemaining(state.engine.state.deck, card.label)} LEFT</span>
+              <span class="remaining-text">${state.engine.state.remainingCounts[card.label] ?? 0} LEFT</span>
             </button>
           `).join('')}
         </section>
