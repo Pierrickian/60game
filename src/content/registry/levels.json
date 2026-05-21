@@ -2,27 +2,6 @@
   "startingLevel": "classic_60",
   "levels": [
     {
-      "id": "easy_60"
-    },
-    {
-      "id": "classic_60"
-    },
-    {
-      "id": "medium_48"
-    },
-    {
-      "id": "medium_50"
-    },
-    {
-      "id": "hard_72"
-    },
-    {
-      "id": "easy_20"
-    },
-    {
-      "id": "easy_36"
-    },
-    {
       "id": "super_easy_12"
     },
     {
@@ -32,16 +11,37 @@
       "id": "easy_16"
     },
     {
+      "id": "easy_20"
+    },
+    {
       "id": "easy_24"
     },
     {
       "id": "easy_24_alt"
     },
     {
+      "id": "easy_36"
+    },
+    {
+      "id": "easy_60"
+    },
+    {
       "id": "medium_30"
     },
     {
       "id": "medium_44"
+    },
+    {
+      "id": "medium_48"
+    },
+    {
+      "id": "medium_50"
+    },
+    {
+      "id": "classic_60"
+    },
+    {
+      "id": "hard_72"
     }
   ]
 }
