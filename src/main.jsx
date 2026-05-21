@@ -233,7 +233,7 @@ function TableSlot({ table, totalCards }) {
 function LevelIntroCard({ level, levelNumber, totalCards, onPlay }) {
   const jokerCount = level.startingDeck.joker || 0
   const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker')
-  return <section className="level-intro-overlay"><article className="level-intro-card"><span>Level {levelNumber}</span><strong>{level.name}</strong><em>{level.difficulty || 'Hard'} • {totalCards} cards • {jokerCount} jokers</em><p>{nonJoker.join(' / ')}</p><button onClick={onPlay}>Play</button><div className="level-intro-verso"><small>Card verso</small><b>{totalCards}</b><i>GAME</i></div></article></section>
+  return <section className="level-intro-overlay"><article className="level-intro-card"><span>Level {levelNumber}</span><em>{level.difficulty || 'Hard'} • {totalCards} cards • {jokerCount} jokers</em><p>{nonJoker.join(' / ')}</p><button className="level-intro-play" onClick={onPlay}>Play</button></article></section>
 }
 
 function ComboBreakCountdown({ from }) {

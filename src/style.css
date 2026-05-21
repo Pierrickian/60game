@@ -560,13 +560,52 @@ button {
   width: min(90vw, 520px);
   border-radius: 26px;
   border: 1px solid rgba(255,255,255,.22);
-  background: linear-gradient(145deg, rgba(32,42,80,.95), rgba(8,11,27,.96));
-  box-shadow: 0 28px 90px rgba(0,0,0,.52);
-  padding: 24px;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 216, 103, .22), transparent 42%),
+    radial-gradient(circle at 80% 84%, rgba(85, 153, 255, .24), transparent 44%),
+    linear-gradient(145deg, rgba(32,42,80,.95), rgba(8,11,27,.96));
+  box-shadow: 0 28px 90px rgba(0,0,0,.52), inset 0 1px 0 rgba(255,255,255,.22);
+  padding: 28px 24px;
   text-align: center;
 }
 
-.level-intro-card p { opacity: .86; margin: 12px 0; }
-.level-intro-card button { margin-top: 12px; }
-.level-intro-verso { margin-top: 16px; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.05); }
-.level-intro-verso b { display: block; font-size: 2rem; }
+.level-intro-card span {
+  display: block;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.78);
+}
+
+.level-intro-card em {
+  display: block;
+  margin-top: 20px;
+  color: #ffe680;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: .06em;
+}
+
+.level-intro-card p {
+  opacity: .9;
+  margin: 14px 0 10px;
+  font-size: .95rem;
+  color: rgba(255,255,255,.88);
+}
+
+.level-intro-play {
+  margin-top: 14px;
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 34px;
+  background: linear-gradient(135deg, #ffe86a, #ff9f3f);
+  color: #24140a;
+  font-weight: 950;
+  font-size: 1rem;
+  box-shadow: 0 12px 34px rgba(255, 169, 57, .36);
+  transition: transform .16s ease, filter .2s ease;
+}
+
+.level-intro-play:active {
+  transform: scale(.97);
+  filter: brightness(.96);
+}
