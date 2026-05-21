@@ -506,3 +506,13 @@ button {
 @media (min-width: 720px) {
   .level-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+.level-select { display: block; text-align: left; overflow: auto; }
+.level-select em { display: block; margin: 10px 0 14px; }
+.level-select-grid { display: grid; gap: 10px; margin-top: 8px; }
+.level-pick { width: 100%; border: 1px solid rgba(255,255,255,.18); border-radius: 16px; background: rgba(11,16,35,.72); color: #fff; padding: 10px 12px; text-align: left; transition: transform .15s ease, border-color .2s ease; }
+.level-pick:active { transform: scale(.98); }
+.level-pick.active { border-color: #ffe680; box-shadow: 0 0 0 1px rgba(255,230,128,.45); }
+.level-pick b { display: block; font-size: .92rem; }
+.level-pick small { display: block; opacity: .8; margin-top: 2px; }
+.level-pick span { display: block; margin-top: 4px; color: rgba(255,255,255,.85); font-size: .8rem; }
