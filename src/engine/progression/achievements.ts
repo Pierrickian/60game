@@ -20,14 +20,22 @@ export function createAchievementRuntime(levelConfig) {
 
 export function evaluateAchievements(runtimeItems, draw) {
   const unlocked = []
+  if (!Array.isArray(runtimeItems)) return unlocked
+
   runtimeItems.forEach((item) => {
-    if (item.unlocked) return
+    if (!item || item.unlocked || !item.config) return
     const handler = achievementHandlers[item.config.handler]
-    if (!handler) return
-    if (handler(item, item.config.params || {}, draw)) {
-      item.unlocked = true
-      unlocked.push(item.config)
+    if (typeof handler !== 'function') return
+
+    try {
+      if (handler(item, item.config.params || {}, draw)) {
+        item.unlocked = true
+        unlocked.push(item.config)
+      }
+    } catch (error) {
+      console.error('[achievement] handler failure', item.config?.id, error)
     }
   })
+
   return unlocked
 }
