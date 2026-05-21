@@ -1,0 +1,11 @@
+{
+  "id": "source_of_life",
+  "name": "Source of Life",
+  "description": "Source of Life",
+  "pointsReward": 130,
+  "handler": "rankStreak",
+  "params": {
+    "rankIndex": 7,
+    "count": 2
+  }
+}

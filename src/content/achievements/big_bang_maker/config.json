@@ -1,0 +1,11 @@
+{
+  "id": "big_bang_maker",
+  "name": "Big Bang Maker",
+  "description": "Big Bang Maker",
+  "pointsReward": 120,
+  "handler": "rankStreak",
+  "params": {
+    "rankIndex": 6,
+    "count": 2
+  }
+}

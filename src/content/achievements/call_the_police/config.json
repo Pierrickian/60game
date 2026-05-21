@@ -1,0 +1,10 @@
+{
+  "id": "call_the_police",
+  "name": "Call the Police!",
+  "description": "Call the Police!",
+  "pointsReward": 170,
+  "handler": "comboThreshold",
+  "params": {
+    "target": 25
+  }
+}

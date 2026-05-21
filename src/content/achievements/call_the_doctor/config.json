@@ -1,0 +1,10 @@
+{
+  "id": "call_the_doctor",
+  "name": "Call the Doctor",
+  "description": "Call the Doctor",
+  "pointsReward": 130,
+  "handler": "comboThreshold",
+  "params": {
+    "target": 20
+  }
+}

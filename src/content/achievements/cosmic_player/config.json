@@ -1,0 +1,11 @@
+{
+  "id": "cosmic_player",
+  "name": "Cosmic Player",
+  "description": "Cosmic Player",
+  "pointsReward": 110,
+  "handler": "rankStreak",
+  "params": {
+    "rankIndex": 5,
+    "count": 2
+  }
+}

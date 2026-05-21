@@ -609,3 +609,8 @@ button {
   transform: scale(.97);
   filter: brightness(.96);
 }
+.mini-stars { display:flex; gap:4px; margin-top:6px; color:#ffd76b; font-size:12px; }
+.achievement-popup { position: fixed; right: 12px; top: 90px; z-index: 30; background: rgba(20,20,40,.86); border: 1px solid rgba(255,215,107,.55); color:#fff; padding:10px 12px; border-radius: 12px; box-shadow: 0 0 24px rgba(255,215,107,.35); }
+.star-panel { display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:10px; width:100%; margin:12px 0; }
+.star-row { background: rgba(255,255,255,.07); border-radius: 12px; padding: 8px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.star-row.on { box-shadow: 0 0 16px rgba(255,215,107,.35); }

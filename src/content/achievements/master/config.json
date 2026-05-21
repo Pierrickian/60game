@@ -1,0 +1,11 @@
+{
+  "id": "master",
+  "name": "Master",
+  "description": "Master",
+  "pointsReward": 90,
+  "handler": "rankStreak",
+  "params": {
+    "rankIndex": 3,
+    "count": 2
+  }
+}
