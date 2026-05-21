@@ -1,0 +1,1 @@
+{"id":"add_highest_x3","name":"Peak Storm","popupText":"+3 MAX","handler":"addHighestCard","weight":1,"params":{"count":3}}

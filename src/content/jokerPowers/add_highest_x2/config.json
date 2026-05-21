@@ -1,0 +1,1 @@
+{"id":"add_highest_x2","name":"Peak Surge","popupText":"+2 MAX","handler":"addHighestCard","weight":1,"params":{"count":2}}

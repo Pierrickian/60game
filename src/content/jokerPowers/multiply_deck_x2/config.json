@@ -1,0 +1,1 @@
+{"id":"score_x2","name":"Score Doubler","popupText":"SCORE x2","handler":"multiplyScore","weight":1,"params":{"factor":2}}

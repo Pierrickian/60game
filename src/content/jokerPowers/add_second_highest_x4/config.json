@@ -1,0 +1,1 @@
+{"id":"add_second_highest_x4","name":"Mid Echo","popupText":"+4 MID","handler":"addRankedHighestCard","weight":1,"params":{"count":4,"rank":2}}
