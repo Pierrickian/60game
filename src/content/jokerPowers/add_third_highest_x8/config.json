@@ -1,0 +1,1 @@
+{"id":"add_third_highest_x8","name":"LowMid Rush","popupText":"+8 LOWMID","handler":"addRankedHighestCard","weight":1,"params":{"count":8,"rank":3}}

@@ -1,0 +1,1 @@
+{"id":"multiply_deck_x2","name":"Deck Doubler","popupText":"DECK x2","handler":"multiplyDeck","weight":1,"params":{"factor":2}}
