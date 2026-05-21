@@ -1,0 +1,12 @@
+{
+  "id": "easy_24_alt",
+  "name": "Easy 24 Alt",
+  "difficulty": "Easy",
+  "startingDeck": {
+    "2": 12,
+    "4": 6,
+    "12": 2,
+    "24": 1,
+    "joker": 3
+  }
+}

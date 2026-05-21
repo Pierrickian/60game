@@ -1,6 +1,7 @@
 export interface LevelConfig {
   id: string
   name: string
+  difficulty?: string
   startingDeck: Record<string, number>
 }
 

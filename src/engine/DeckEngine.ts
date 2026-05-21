@@ -1,13 +1,8 @@
 import type { EngineCard, LevelConfig } from './types'
 
+const CARD_THEMES = ['green', 'blue', 'purple', 'orange', 'red', 'cyan', 'gold']
+
 const CARD_METADATA: Record<string, Omit<EngineCard, 'label'>> = {
-  '2': { value: 2, theme: 'green', gem: '◆' },
-  '5': { value: 5, theme: 'blue', gem: '◆' },
-  '10': { value: 10, theme: 'purple', gem: '◆' },
-  '15': { value: 15, theme: 'orange', gem: '◆' },
-  '20': { value: 20, theme: 'red', gem: '◆' },
-  '30': { value: 30, theme: 'cyan', gem: '◆' },
-  '60': { value: 60, theme: 'gold', gem: '◆' },
   joker: { value: 0, theme: 'black', gem: '♛' }
 }
 
@@ -39,13 +34,18 @@ export class DeckEngine {
 
   private static getCardType(rawLabel: string): EngineCard {
     const label = rawLabel === 'joker' ? 'JOKER' : rawLabel
-    const metadata = CARD_METADATA[rawLabel]
+    const metadata = CARD_METADATA[rawLabel] ?? DeckEngine.makeNumericCardMetadata(rawLabel)
 
-    if (!metadata) {
-      throw new Error(`Unknown card type in level config: ${rawLabel}`)
-    }
+    if (!metadata) throw new Error(`Unknown card type in level config: ${rawLabel}`)
 
     return { label, ...metadata }
+  }
+
+  private static makeNumericCardMetadata(rawLabel: string): Omit<EngineCard, 'label'> | null {
+    const numericValue = Number(rawLabel)
+    if (!Number.isFinite(numericValue) || numericValue <= 0) return null
+    const theme = CARD_THEMES[numericValue % CARD_THEMES.length]
+    return { value: numericValue, theme, gem: '◆' }
   }
 
   static shuffle(cards: EngineCard[]): EngineCard[] {

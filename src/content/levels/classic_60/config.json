@@ -1,0 +1,15 @@
+{
+  "id": "classic_60",
+  "name": "Classic 60",
+  "difficulty": "Hard",
+  "startingDeck": {
+    "2": 30,
+    "5": 12,
+    "10": 6,
+    "15": 4,
+    "20": 3,
+    "30": 2,
+    "60": 1,
+    "joker": 2
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "id": "super_easy_12",
+  "name": "Super Easy 12",
+  "difficulty": "Super Easy",
+  "startingDeck": {
+    "2": 6,
+    "6": 2,
+    "12": 1,
+    "joker": 3
+  }
+}
