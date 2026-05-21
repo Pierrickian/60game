@@ -213,12 +213,13 @@ function PredictionCard({ card, index, remaining, onGuess }) {
       if (navigator.vibrate) navigator.vibrate([90, 35, 90])
       return
     }
-    onGuess(card.label, index)
+    onGuess(card, index)
   }
   return <motion.button className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''}`} aria-disabled={unavailable} onClick={handlePress} whileTap={{ scale: unavailable ? 1 : 0.96 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span><span className="prediction-left">{remaining} LEFT</span></motion.button>
 }
 
 function BetClone({ bet }) {
+  if (!bet?.card) return null
   const col = bet.buttonIndex % 4
   const row = Math.floor(bet.buttonIndex / 4)
   const startX = `${(col - 1.5) * 24}vw`
@@ -287,7 +288,6 @@ function App() {
   const [stats, setStats] = useState({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 })
   const [achievementRuntime, setAchievementRuntime] = useState(() => createAchievementRuntime(currentLevel))
   const [achievementPopups, setAchievementPopups] = useState([])
-  const [starPopups, setStarPopups] = useState([])
   const [totalDrawn, setTotalDrawn] = useState(0)
   const [precisionHits, setPrecisionHits] = useState(0)
   const [progression, setProgression] = useState(() => JSON.parse(localStorage.getItem('60game-progression') || '{}'))
@@ -312,10 +312,11 @@ function App() {
     const activeLevel = levelConfigs[levelId] ?? levelConfigs[levelsRegistry.startingLevel]
     comboRef.current = 0
     fxTokenRef.current += 1
-    setTables(makeTables(buildDeckForLevel(activeLevel), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setFrontCombo(null); setBreakFx(null); setShowEnd(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setShowLevelIntro(true); setStarted(true); setAchievementRuntime(createAchievementRuntime(activeLevel)); setAchievementPopups([]); setStarPopups([]); setTotalDrawn(0); setPrecisionHits(0)
+    setTables(makeTables(buildDeckForLevel(activeLevel), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setFrontCombo(null); setBreakFx(null); setShowEnd(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setShowLevelIntro(true); setStarted(true); setAchievementRuntime(createAchievementRuntime(activeLevel)); setAchievementPopups([]); setTotalDrawn(0); setPrecisionHits(0)
   }
 
-  function guess(label, buttonIndex) {
+  function guess(predictedCard, buttonIndex) {
+    const label = predictedCard?.label
     if (showEnd) return
     fxTokenRef.current += 1
     const fxToken = fxTokenRef.current
@@ -340,7 +341,7 @@ function App() {
       const jokerHits = hits.filter((table) => table.lastCard?.label === 'JOKER').length
       const nextCount = activeTableCount(nextCombo)
       const orderedPrevious = revealedTables.map((table) => ({ ...table, showCombo: nextCombo >= 2 && table.lastHit }))
-      setBets((items) => [...items, { id: betId, card: getCardType(cardTypes, label), buttonIndex, result: 'pending' }])
+      setBets((items) => [...items, { id: betId, card: predictedCard || getCardType(cardTypes, label), buttonIndex, result: 'pending' }])
       window.setTimeout(() => setBets((items) => items.map((bet) => bet.id === betId ? { ...bet, result: isWin ? 'win' : 'loss' } : bet)), 80)
       window.setTimeout(() => setBets((items) => items.filter((bet) => bet.id !== betId)), 420)
       if (navigator.vibrate) navigator.vibrate(isWin ? 18 : 8)
