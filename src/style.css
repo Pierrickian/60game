@@ -516,3 +516,30 @@ button {
 .level-pick b { display: block; font-size: .92rem; }
 .level-pick small { display: block; opacity: .8; margin-top: 2px; }
 .level-pick span { display: block; margin-top: 4px; color: rgba(255,255,255,.85); font-size: .8rem; }
+
+.game-shell.home-mode {
+  height: auto;
+  min-height: 100dvh;
+  overflow-y: auto;
+  display: block;
+  padding-top: max(16px, env(safe-area-inset-top));
+}
+
+.level-select {
+  place-self: start stretch;
+  width: min(94vw, 760px);
+  min-height: auto;
+  margin: 0 auto;
+  display: block;
+  text-align: left;
+  overflow: visible;
+}
+
+.level-select strong {
+  font-size: clamp(2.1rem, 9vw, 3.4rem);
+}
+
+.level-select-grid {
+  margin-top: 16px;
+  padding-bottom: 16px;
+}
