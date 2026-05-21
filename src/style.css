@@ -654,9 +654,10 @@ button {
 
 .game-over-banner {
   position: fixed;
-  left: 50%;
+  left: 0;
+  right: 0;
   top: 25dvh;
-  transform: translateX(-50%);
+  text-align: center;
   z-index: 40;
   display: grid;
   place-items: center;

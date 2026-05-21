@@ -415,7 +415,8 @@ function App() {
                 makeCardFromLabel: (rawLabel) => {
                   if (rawLabel === 'JOKER') return { label: 'JOKER', value: 0, theme: 'joker', icon: '♛', id: `joker-${cardId}-${Math.random().toString(36).slice(2, 8)}` }
                   const value = Number(rawLabel)
-                  return { label: String(rawLabel), value, theme: 'green', icon: '◆', id: `num-${rawLabel}-${cardId}-${Math.random().toString(36).slice(2, 8)}` }
+                  const existingType = cardTypes.find((type) => type.label === String(rawLabel))
+                  return { label: String(rawLabel), value, theme: existingType?.theme || 'green', icon: existingType?.icon || '◆', id: `num-${rawLabel}-${cardId}-${Math.random().toString(36).slice(2, 8)}` }
                 }
               }, selectedPower.params)
               if (selectedPower.handler === 'multiplyScore') jokerScoreMultiplier = Number(selectedPower?.params?.factor || 2)
