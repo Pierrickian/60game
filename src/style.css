@@ -639,3 +639,15 @@ button {
 .reward-popup.is-unlocked { border-color: rgba(255,216,103,.7); box-shadow: 0 10px 40px rgba(255,169,39,.4); }
 .reward-popup.is-lost { border-color: rgba(112,182,255,.9); box-shadow: 0 10px 40px rgba(71,143,255,.45); background: radial-gradient(circle at 20% 10%, rgba(210,232,255,.3), rgba(18,30,62,.92) 60%); }
 .reward-popup.is-lost b, .reward-popup.is-lost small { color: #cfe5ff; }
+
+.animated-metric.metric-score-fit {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  white-space: nowrap;
+  font-size: clamp(24px, 6.4vw, 38px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: clip;
+}
