@@ -703,3 +703,56 @@ button {
   background: radial-gradient(circle at 50% 10%, rgba(255, 250, 232, 0.22), rgba(57, 24, 94, 0.92) 62%, rgba(10, 7, 22, 0.95));
   box-shadow: 0 0 36px rgba(255, 158, 50, 0.55), inset 0 0 24px rgba(255, 248, 176, 0.25);
 }
+
+.ruby-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  color: #ffd8a3;
+  border: 1px solid rgba(255, 180, 120, 0.7);
+  background: rgba(40, 14, 12, 0.7);
+}
+.ruby-counter span { color: #ff5c5c; text-shadow: 0 0 12px rgba(255, 70, 70, 0.8); }
+.score-scroll { overflow-y: auto; max-height: 92dvh; align-items: start; justify-items: center; }
+.achievement-list { width: 100%; display: grid; gap: 6px; margin-top: 12px; }
+.achievement-list h4 { margin: 0; }
+.achievement-list > div { display: grid; gap: 2px; padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,.06); color: #fff7d6; }
+.achievement-list small { color: rgba(255, 244, 210, 0.92); }
+
+.joker-choice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.joker-choice-btn {
+  pointer-events: auto;
+  min-width: min(84vw, 420px);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 212, 126, 0.9);
+  background: rgba(44, 16, 72, 0.88);
+  color: #fff7d8;
+  padding: 10px 14px;
+  display: grid;
+  gap: 3px;
+  position: relative;
+  box-shadow: 0 0 32px rgba(255, 171, 54, 0.45);
+}
+.joker-choice-add-btn {
+  pointer-events: auto;
+  min-width: min(84vw, 420px);
+  border-radius: 14px;
+  border: 1px solid rgba(189, 245, 255, 0.95);
+  background: linear-gradient(135deg, rgba(36, 70, 108, 0.95), rgba(18, 39, 78, 0.95));
+  color: #dff8ff;
+  padding: 12px 14px;
+  font-weight: 800;
+  box-shadow: 0 0 28px rgba(87, 191, 255, 0.45);
+}
