@@ -386,9 +386,7 @@ function App() {
       window.setTimeout(() => setBets((items) => items.filter((bet) => bet.id !== betId)), 420)
       if (navigator.vibrate) navigator.vibrate(isWin ? 18 : 8)
       if (isWin) {
-        const numericValues = Object.keys(currentLevel?.startingDeck || {}).filter((v) => v !== 'joker').map(Number).filter((v) => Number.isFinite(v))
-        const minCardValue = numericValues.length > 0 ? Math.min(...numericValues) : null
-        if (minCardValue != null && hits.some((h) => (h.lastCard?.value || 0) > minCardValue)) setPrecisionHits((v) => v + 1)
+        setPrecisionHits((v) => v + 1)
         comboRef.current = nextCombo
         setCombo(nextCombo)
         setBreakFx(null)
