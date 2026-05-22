@@ -718,7 +718,8 @@ button {
 .score-scroll { overflow-y: auto; max-height: 92dvh; align-items: start; justify-items: center; }
 .achievement-list { width: 100%; display: grid; gap: 6px; margin-top: 12px; }
 .achievement-list h4 { margin: 0; }
-.achievement-list > div { display: grid; gap: 2px; padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,.06); }
+.achievement-list > div { display: grid; gap: 2px; padding: 6px 8px; border-radius: 8px; background: rgba(255,255,255,.06); color: #fff7d6; }
+.achievement-list small { color: rgba(255, 244, 210, 0.92); }
 
 .joker-choice-overlay {
   position: fixed;
@@ -744,13 +745,14 @@ button {
   position: relative;
   box-shadow: 0 0 32px rgba(255, 171, 54, 0.45);
 }
-.joker-choice-plus {
-  position: absolute;
-  right: 8px;
-  top: 8px;
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 999px;
-  padding: 2px 8px;
-  font-size: 12px;
+.joker-choice-add-btn {
+  pointer-events: auto;
+  min-width: min(84vw, 420px);
+  border-radius: 14px;
+  border: 1px solid rgba(189, 245, 255, 0.95);
+  background: linear-gradient(135deg, rgba(36, 70, 108, 0.95), rgba(18, 39, 78, 0.95));
+  color: #dff8ff;
+  padding: 12px 14px;
+  font-weight: 800;
+  box-shadow: 0 0 28px rgba(87, 191, 255, 0.45);
 }
