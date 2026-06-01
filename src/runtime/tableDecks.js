@@ -12,11 +12,12 @@ export function drawCard(deck, reshuffleSource) {
   return { drawnCard: nextDeck.pop(), nextDeck }
 }
 
-export function countCardsByLabel(cards) {
-  return cards.reduce((counts, card) => {
-    counts[card.label] = (counts[card.label] || 0) + 1
-    return counts
-  }, {})
+export function countCardsByLabel(cards, labels = []) {
+  const counts = Object.fromEntries(labels.map((label) => [label, 0]))
+  return cards.reduce((groupedCounts, card) => {
+    groupedCounts[card.label] = (groupedCounts[card.label] || 0) + 1
+    return groupedCounts
+  }, counts)
 }
 
 export function makeTables(mainCards, count, previousTables = [], mainId = 'main') {

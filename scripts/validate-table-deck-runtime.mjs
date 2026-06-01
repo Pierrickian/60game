@@ -19,9 +19,9 @@ if (reshuffled.drawnCard?.id !== 'c' || reshuffled.nextDeck.length !== 0) {
   throw new Error('Expected an exhausted deck to reshuffle and draw from its fallback cards.')
 }
 
-const counts = countCardsByLabel([{ label: '2' }, { label: '2' }, { label: '3' }])
-if (counts['2'] !== 2 || counts['3'] !== 1) {
-  throw new Error('Expected cards to be counted in a single grouped pass.')
+const counts = countCardsByLabel([{ label: '2' }, { label: '2' }, { label: '3' }], ['2', '3', 'JOKER'])
+if (counts['2'] !== 2 || counts['3'] !== 1 || counts.JOKER !== 0) {
+  throw new Error('Expected cards to be counted in a single grouped pass, including exhausted labels.')
 }
 
 console.log('Validated table deck runtime optimizations.')
