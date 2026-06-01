@@ -288,8 +288,7 @@
     0 0 36px rgba(255, 151, 71, .42);
 }
 
-.front-combo::after,
-.combo-break-overlay::after {
+.front-combo::after {
   content: '';
   position: absolute;
   inset: -42% 12%;
@@ -299,15 +298,25 @@
   filter: blur(14px);
 }
 
+.combo-break-overlay::after {
+  content: '';
+  position: absolute;
+  inset: -42% 12%;
+  z-index: -1;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 72, 124, .3), rgba(129, 28, 88, .16) 50%, transparent 72%);
+  filter: blur(14px);
+}
+
 .combo-break-overlay strong {
   font-size: clamp(1.55rem, 8vw, 3.25rem);
   line-height: .96;
   font-weight: 1000;
   letter-spacing: -.03em;
-  color: #ffe1c0;
+  color: #ff8fba;
   text-shadow:
-    0 2px 0 rgba(95, 18, 0, .9),
-    0 0 18px rgba(255, 93, 52, .65);
+    0 2px 0 rgba(74, 0, 37, .95),
+    0 0 18px rgba(255, 48, 120, .78);
 }
 
 .combo-break-overlay span {
@@ -315,7 +324,8 @@
   font-size: clamp(1rem, 5.3vw, 2.2rem);
   font-weight: 1000;
   letter-spacing: -.02em;
-  text-shadow: 0 0 18px rgba(255, 120, 40, .75);
+  color: #ff5f9e;
+  text-shadow: 0 0 18px rgba(255, 42, 126, .82);
 }
 
 .session-panel {
