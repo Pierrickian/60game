@@ -19,7 +19,7 @@ const STAR_POPUP_ACCELERATION_FACTOR = 3
 const GAME_OVER_BANNER_LEAD_MS = 1000
 const WIN_OVERLAY_DURATION_MS = 1500
 const MULTI_DECK_COMBO_BREAK_HOLD_MS = 1000
-const PREDICTION_REACTION_DURATION_MS = 900
+const GAMEPLAY_LOG_DURATION_MS = 2200
 const PREDICTION_MISS_LABELS = ['no', 'retry', 'again']
 
 const THEME_BY_INDEX = ['green', 'blue', 'purple', 'orange', 'red', 'cyan', 'gold']
@@ -278,14 +278,8 @@ function ComboBreakOverlay({ breakFx }) {
   return <div className="combo-break-overlay"><motion.div initial={{ opacity: 0, y: -26, scale: .68 }} animate={{ opacity: 1, y: 0, scale: [1, 1.06, 1] }} exit={{ opacity: 0, y: 34, scale: .88 }} transition={{ duration: .34 }}><strong>COMBO BREAK</strong><ComboBreakCountdown from={breakFx.from} /></motion.div></div>
 }
 
-function PredictionReactionPopup({ popup }) {
-  const isSuccess = popup.type === 'success'
-  return <motion.div className={`prediction-reaction-popup ${isSuccess ? 'prediction-reaction-success' : 'prediction-reaction-loss'}`} initial={{ opacity: 0, x: isSuccess ? -28 : 28, y: 16, rotate: isSuccess ? -8 : 8, scale: .5 }} animate={{ opacity: [0, 1, 1, 0], x: 0, y: [16, 0, -4, -18], rotate: [isSuccess ? -8 : 8, isSuccess ? 3 : -3, 0], scale: [.5, 1.16, 1, .92] }} exit={{ opacity: 0, y: -24, scale: .82 }} transition={{ duration: PREDICTION_REACTION_DURATION_MS / 1000, times: [0, .18, .72, 1], ease: 'easeOut' }}><strong>{popup.text}</strong></motion.div>
-}
-
-function FrontComboOverlay({ combo }) {
-  if (!combo) return null
-  return <div className={`front-combo ${combo.boom ? 'big-bang-combo' : ''}`}><motion.div initial={{ opacity: 0, y: 28, scale: .65 }} animate={{ opacity: 1, y: 0, scale: [1, 1.08, 1] }} exit={{ opacity: 0, y: -36, scale: .9 }} transition={{ duration: .32 }}><span className="front-combo-title">{combo.title}</span><span className="front-combo-multiplier">x{combo.multiplier}</span>{combo.boom ? <span className="front-combo-boom">BOOM</span> : null}</motion.div></div>
+function GameplayLogStack({ logs }) {
+  return <div className="gameplay-log-stack"><AnimatePresence initial={false}>{logs.map((log) => <motion.div layout key={log.id} className={`gameplay-log gameplay-log-${log.category}`} initial={{ opacity: 0, y: -28, scale: .94 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30, scale: .96 }} transition={{ duration: .3, ease: 'easeOut', layout: { duration: .24 } }}><span className="gameplay-log-marker">›</span><small>{log.category}</small><strong>{log.text}</strong></motion.div>)}</AnimatePresence></div>
 }
 
 function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNext, onHome, stars }) {
@@ -320,7 +314,6 @@ function App() {
   const [scoreBump, setScoreBump] = useState(0)
   const [best, setBest] = useState(() => Number(localStorage.getItem('60game-best') || 0))
   const [bets, setBets] = useState([])
-  const [frontCombo, setFrontCombo] = useState(null)
   const [breakFx, setBreakFx] = useState(null)
   const [showEnd, setShowEnd] = useState(false)
   const [showLevelIntro, setShowLevelIntro] = useState(false)
@@ -329,8 +322,8 @@ function App() {
   const [achievementPopups, setAchievementPopups] = useState([])
   const [starPopups, setStarPopups] = useState([])
   const [jokerPowerPopups, setJokerPowerPopups] = useState([])
-  const [predictionReactionPopups, setPredictionReactionPopups] = useState([])
-  const predictionReactionTokenRef = useRef(0)
+  const [gameplayLogs, setGameplayLogs] = useState([])
+  const gameplayLogTokenRef = useRef(0)
   const predictionMissRef = useRef(0)
   const [cardCountBumps, setCardCountBumps] = useState({})
   const starPopupTimersRef = useRef(new Map())
@@ -351,16 +344,19 @@ function App() {
     window.setTimeout(() => {
       if (fxTokenRef.current !== token) return
       setTables((currentTables) => currentTables.map((table) => ({ ...table, showCombo: false })))
-      setFrontCombo(null)
       setBreakFx(null)
     }, delay)
   }
 
+  function showGameplayLog(category, text) {
+    const id = `gameplay-log-${++gameplayLogTokenRef.current}`
+    setGameplayLogs((items) => [{ id, category, text }, ...items].slice(0, 5))
+    window.setTimeout(() => setGameplayLogs((items) => items.filter((log) => log.id !== id)), GAMEPLAY_LOG_DURATION_MS)
+  }
+
   function showPredictionReaction(type) {
-    const id = `prediction-reaction-${++predictionReactionTokenRef.current}`
     const text = type === 'success' ? 'YES!' : PREDICTION_MISS_LABELS[predictionMissRef.current++ % PREDICTION_MISS_LABELS.length]
-    setPredictionReactionPopups((items) => [...items, { id, type, text }].slice(-3))
-    window.setTimeout(() => setPredictionReactionPopups((items) => items.filter((popup) => popup.id !== id)), PREDICTION_REACTION_DURATION_MS)
+    showGameplayLog(type === 'success' ? 'success' : 'other', text)
   }
 
   function newGame(levelId = selectedLevelId) {
@@ -370,7 +366,7 @@ function App() {
     comboBreakHoldRef.current = false
     predictionMissRef.current = 0
     previousUnlockedStarsRef.current = new Set()
-    setTables(makeTables(buildDeckForLevel(activeLevel), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setFrontCombo(null); setBreakFx(null); setShowEnd(false); setShowGameOverBanner(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setShowLevelIntro(true); setStarted(true); setAchievementRuntime(createAchievementRuntime(activeLevel)); setAchievementPopups([]); setStarPopups([]); setJokerPowerPopups([]); setPredictionReactionPopups([]); setCardCountBumps({}); setTotalDrawn(0); setPrecisionHits(0); starPopupTimersRef.current.forEach((timerMeta) => window.clearTimeout(timerMeta.timerId)); starPopupTimersRef.current.clear()
+    setTables(makeTables(buildDeckForLevel(activeLevel), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setBreakFx(null); setShowEnd(false); setShowGameOverBanner(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setShowLevelIntro(true); setStarted(true); setAchievementRuntime(createAchievementRuntime(activeLevel)); setAchievementPopups([]); setStarPopups([]); setJokerPowerPopups([]); setGameplayLogs([]); setCardCountBumps({}); setTotalDrawn(0); setPrecisionHits(0); starPopupTimersRef.current.forEach((timerMeta) => window.clearTimeout(timerMeta.timerId)); starPopupTimersRef.current.clear()
   }
 
 
@@ -476,10 +472,10 @@ function App() {
         setScoreBump((value) => value + 1)
         if (nextCombo >= 2) {
           const title = comboText(nextCombo) || 'COMBO'
-          setFrontCombo({ title, multiplier: nextCombo, boom: title === 'BIG BANG' })
+          showGameplayLog('combo', `${title}  x${nextCombo}`)
         }
-        if (jokerTriggered) setFrontCombo({ title: 'JOKER', multiplier: 1, boom: false })
-        scheduleFxClear(fxToken, frontCombo?.boom ? 2000 : 430)
+        if (jokerTriggered) showGameplayLog('other', 'JOKER  x1')
+        scheduleFxClear(fxToken, 430)
         if (fxTokenRef.current === fxToken && referenceDeck.length === 0) triggerEndSequence(fxToken)
         return makeTables(referenceDeck, nextCount, orderedPrevious, referenceTable.id)
       }
@@ -487,7 +483,6 @@ function App() {
       evaluateAchievements(achievementRuntime, { isWin: false, card: referenceTable.lastCard, combo: 0, levelConfig: currentLevel })
       comboRef.current = 0
       setCombo(0)
-      setFrontCombo(null)
       setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo } : null)
       scheduleFxClear(fxToken, previousCombo >= 2 ? 2400 : 220)
       if (fxTokenRef.current === fxToken && referenceDeck.length === 0) triggerEndSequence(fxToken)
@@ -516,9 +511,8 @@ function App() {
     comboBreakHoldRef.current = false
     setStarted(false)
     setShowEnd(false)
-    setFrontCombo(null)
     setBreakFx(null)
-    setPredictionReactionPopups([])
+    setGameplayLogs([])
     setBets([])
     setShowLevelIntro(false)
     previousUnlockedStarsRef.current = new Set()
@@ -593,7 +587,7 @@ function App() {
   }, [starPopups])
 
   const gameOver = started && showEnd
-  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'}`}><div className="cinematic-bg" />{!started ? <section className="start-screen level-select"><span>60game</span><strong>60 Game</strong><em>Select a level</em><div className="level-select-grid">{orderedLevelIds.map((id) => { const level = levelConfigs[id]; if (!level) return null; const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker'); const deckSize = Object.values(level.startingDeck).reduce((sum, amount) => sum + amount, 0); const jokerCount = level.startingDeck.joker || 0; const active = selectedLevelId === id; const saved = progression[id] || {}; return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{level.name}</b><small>{level.difficulty || 'Hard'} • {deckSize} cards • {jokerCount} jokers</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button> })}</div></section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} /> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon={<CardIcon />} label="Left" value={mainDeck.length} /></header><ComboStatus combo={combo} /><section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section><section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <TableSlot key={table.id} table={table} totalCards={totalCards} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section><AnimatePresence>{frontCombo ? <FrontComboOverlay key={`${frontCombo.title}-${frontCombo.multiplier}`} combo={frontCombo} /> : null}</AnimatePresence><AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} /> : null}</AnimatePresence><AnimatePresence>{predictionReactionPopups.map((popup) => <PredictionReactionPopup key={popup.id} popup={popup} />)}</AnimatePresence><section className="prediction-grid">{cardTypes.map((card, index) => remainingByType[card.label] > 0 ? <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} bumpKey={cardCountBumps[card.label]} /> : null)}</section><AnimatePresence>{achievementPopups.filter(Boolean).map((popup) => <motion.div key={popup.id} className='achievement-popup' initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35 }}>★ {popup.name} +{popup.points}</motion.div>)}</AnimatePresence><AnimatePresence>{starPopups.map((popup) => <StarPopup key={popup.id} popup={popup} />)}</AnimatePresence><AnimatePresence>{jokerPowerPopups.map((popup) => <motion.div key={popup.id} className='joker-power-popup' initial={{ opacity: 0, y: 26, scale: 0.4 }} animate={{ opacity: [0, 1, 1, 0], y: [26, -4, -12, -30], scale: [0.4, 1.2, 1, 0.85] }} exit={{ opacity: 0, y: -40, scale: 0.8 }} transition={{ duration: 1.7, ease: 'easeOut' }}>{popup.text}</motion.div>)}</AnimatePresence><AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>GAME OVER</motion.div> : null}</AnimatePresence>{showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} onPlay={() => setShowLevelIntro(false)} /> : null}</>}</main>
+  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'}`}><div className="cinematic-bg" />{!started ? <section className="start-screen level-select"><span>60game</span><strong>60 Game</strong><em>Select a level</em><div className="level-select-grid">{orderedLevelIds.map((id) => { const level = levelConfigs[id]; if (!level) return null; const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker'); const deckSize = Object.values(level.startingDeck).reduce((sum, amount) => sum + amount, 0); const jokerCount = level.startingDeck.joker || 0; const active = selectedLevelId === id; const saved = progression[id] || {}; return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{level.name}</b><small>{level.difficulty || 'Hard'} • {deckSize} cards • {jokerCount} jokers</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button> })}</div></section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} /> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon={<CardIcon />} label="Left" value={mainDeck.length} /></header><ComboStatus combo={combo} /><section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section><section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <TableSlot key={table.id} table={table} totalCards={totalCards} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section><GameplayLogStack logs={gameplayLogs} /><AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} /> : null}</AnimatePresence><section className="prediction-grid">{cardTypes.map((card, index) => remainingByType[card.label] > 0 ? <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} bumpKey={cardCountBumps[card.label]} /> : null)}</section><AnimatePresence>{achievementPopups.filter(Boolean).map((popup) => <motion.div key={popup.id} className='achievement-popup' initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35 }}>★ {popup.name} +{popup.points}</motion.div>)}</AnimatePresence><AnimatePresence>{starPopups.map((popup) => <StarPopup key={popup.id} popup={popup} />)}</AnimatePresence><AnimatePresence>{jokerPowerPopups.map((popup) => <motion.div key={popup.id} className='joker-power-popup' initial={{ opacity: 0, y: 26, scale: 0.4 }} animate={{ opacity: [0, 1, 1, 0], y: [26, -4, -12, -30], scale: [0.4, 1.2, 1, 0.85] }} exit={{ opacity: 0, y: -40, scale: 0.8 }} transition={{ duration: 1.7, ease: 'easeOut' }}>{popup.text}</motion.div>)}</AnimatePresence><AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>GAME OVER</motion.div> : null}</AnimatePresence>{showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} onPlay={() => setShowLevelIntro(false)} /> : null}</>}</main>
 }
 
 ReactDOM.createRoot(document.getElementById('app')).render(<App />)

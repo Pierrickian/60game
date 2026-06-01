@@ -260,47 +260,19 @@
   pointer-events: none;
 }
 
-.front-combo,
 .combo-break-overlay {
   position: fixed;
-  z-index: 1200;
+  z-index: 1400;
   left: 50vw;
-  top: clamp(116px, 20dvh, 158px);
+  top: 45dvh;
   transform: translateX(-50%);
-  width: min(92vw, 620px);
+  width: min(96vw, 760px);
   pointer-events: none;
   text-align: center;
   display: grid;
   justify-items: center;
   place-content: center;
   font-family: Inter, ui-rounded, system-ui, sans-serif;
-}
-
-.front-combo {
-  font-size: clamp(1.9rem, 9.5vw, 4rem);
-  line-height: .92;
-  font-weight: 1000;
-  letter-spacing: -.035em;
-  color: #fff7c9;
-  text-shadow:
-    0 2px 0 rgba(117, 58, 0, .95),
-    0 0 16px rgba(255, 221, 92, .85),
-    0 0 36px rgba(255, 151, 71, .42);
-}
-
-.front-combo::after {
-  content: '';
-  position: absolute;
-  inset: -42% 12%;
-  z-index: -1;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 221, 91, .2), rgba(255, 94, 94, .08) 48%, transparent 72%);
-  filter: blur(14px);
-}
-
-.combo-break-overlay {
-  top: 45dvh;
-  width: min(96vw, 760px);
 }
 
 .combo-break-overlay::after {
@@ -413,58 +385,71 @@
     width: min(8.6vw, 43px);
   }
 
-  .front-combo {
-    top: clamp(102px, 18dvh, 138px);
-    width: 94vw;
-  }
-
   .combo-break-overlay {
     top: 44dvh;
     width: 96vw;
   }
 }
 
-.prediction-reaction-popup {
+.gameplay-log-stack {
   position: fixed;
   z-index: 1300;
-  top: 48dvh;
+  top: clamp(116px, 16dvh, 150px);
+  left: 50%;
+  width: min(88vw, 470px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   pointer-events: none;
-  font-family: Impact, Haettenschweiler, 'Arial Black', ui-rounded, system-ui, sans-serif;
-  filter: drop-shadow(0 12px 14px rgba(0, 0, 0, .34));
+  mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
 }
 
-.prediction-reaction-popup strong {
-  position: relative;
-  display: block;
-  min-width: clamp(88px, 24vw, 146px);
-  padding: clamp(11px, 3vw, 18px) clamp(13px, 4vw, 22px);
-  border: clamp(3px, .8vw, 5px) solid #261537;
-  border-radius: 52% 48% 48% 52% / 58% 48% 52% 42%;
-  background: #fff8d9;
-  color: #261537;
-  font-size: clamp(2rem, 9vw, 4.5rem);
-  font-style: italic;
-  line-height: .82;
-  letter-spacing: -.045em;
-  text-align: center;
-  text-shadow: 2px 2px 0 rgba(255, 255, 255, .8);
-  box-shadow: inset 0 -7px 0 rgba(250, 185, 66, .34), 0 0 0 3px rgba(255, 255, 255, .38);
+.gameplay-log {
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px 8px 10px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-left: 4px solid currentColor;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(8, 11, 25, .94), rgba(16, 20, 39, .8));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .26), inset 0 1px 0 rgba(255, 255, 255, .08);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  backdrop-filter: blur(4px);
 }
 
-.prediction-reaction-popup strong::after {
-  content: '';
-  position: absolute;
-  bottom: -17px;
-  width: 24px;
-  height: 24px;
-  border-bottom: 4px solid #261537;
-  background: #fff0b7;
-  transform: rotate(45deg);
+.gameplay-log-marker {
+  font-size: 1.15rem;
+  font-weight: 1000;
+  line-height: 1;
 }
 
-.prediction-reaction-success { left: clamp(12px, 5vw, 72px); }
-.prediction-reaction-loss { right: clamp(12px, 5vw, 72px); }
-.prediction-reaction-success strong { color: #13764a; background: #eaffc4; box-shadow: inset 0 -7px 0 rgba(87, 201, 89, .3), 0 0 0 3px rgba(255, 255, 255, .38); }
-.prediction-reaction-success strong::after { left: 20px; background: #d6f8ad; }
-.prediction-reaction-loss strong { color: #bd315a; }
-.prediction-reaction-loss strong::after { right: 20px; }
+.gameplay-log small {
+  min-width: 54px;
+  color: currentColor;
+  font-size: .56rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .76;
+}
+
+.gameplay-log strong {
+  color: currentColor;
+  font-size: clamp(.96rem, 4vw, 1.28rem);
+  letter-spacing: .025em;
+  line-height: 1;
+  text-align: right;
+}
+
+.gameplay-log-combo { color: #ff9f43; }
+.gameplay-log-success { color: #ffe36e; }
+.gameplay-log-other { color: #f7f8ff; }
+.gameplay-log-combo strong,
+.gameplay-log-success strong { font-weight: 1000; }
+.gameplay-log-other strong { font-weight: 700; }
+.gameplay-log:nth-child(4) { opacity: .68 !important; }
+.gameplay-log:nth-child(5) { opacity: .35 !important; }
