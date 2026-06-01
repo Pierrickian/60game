@@ -6,7 +6,7 @@ import './bet.css'
 import './combo.css'
 import { levelConfigs, levelsRegistry } from './engine/contentLoaders'
 import { createAchievementRuntime, evaluateAchievements } from './engine/progression/achievements'
-import { getStarModel } from './engine/progression/stars'
+import { getPrecisionHitIncrement, getStarModel } from './engine/progression/stars'
 import { AnimatedMetric, StarDisplay, StarPopup } from './components/rewards'
 import { chooseWeightedJokerPower, resolveJokerPowerHandler } from './engine/jokerPowers'
 
@@ -396,8 +396,9 @@ function App() {
         return { ...table, deck: nextDeck, lastCard: drawnCard, lastHit: hit, lastMiss: !hit, revealId: (table.revealId || 0) + 1, showCombo: false }
       })
       const hits = revealedTables.filter((table) => table.lastHit && table.lastCard)
+      const precisionHitIncrement = getPrecisionHitIncrement(hits.length)
       setTotalDrawn((v) => v + 1)
-      const isWin = hits.length > 0
+      const isWin = precisionHitIncrement > 0
       const nextCombo = isWin ? previousCombo + 1 : 0
       const referenceTable = hits[0] || revealedTables.find((table) => table.isMain) || revealedTables[0]
       let referenceDeck = referenceTable.deck
@@ -412,7 +413,7 @@ function App() {
       window.setTimeout(() => setBets((items) => items.filter((bet) => bet.id !== betId)), 420)
       if (navigator.vibrate) navigator.vibrate(isWin ? 18 : 8)
       if (isWin) {
-        setPrecisionHits((v) => v + 1)
+        setPrecisionHits((v) => v + precisionHitIncrement)
         comboRef.current = nextCombo
         setCombo(nextCombo)
         setBreakFx(null)
