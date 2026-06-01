@@ -17,6 +17,8 @@ const SCORE_SCREEN_DELAY_MS = 2000
 const GAME_OVER_BANNER_LEAD_MS = 1000
 const WIN_OVERLAY_DURATION_MS = 1500
 const MULTI_DECK_COMBO_BREAK_HOLD_MS = 1000
+const COMBO_BREAK_COUNTDOWN_DURATION_MS = 2000
+const COMBO_BREAK_COUNTDOWN_REFRESH_MS = 100
 const GAMEPLAY_LOG_DURATION_MS = 2200
 const PREDICTION_MISS_LABELS = ['no', 'retry', 'again']
 
@@ -260,15 +262,17 @@ function LevelIntroCard({ level, levelNumber, totalCards, onPlay }) {
 function ComboBreakCountdown({ from }) {
   const [value, setValue] = useState(from)
   useEffect(() => {
+    const startedAt = performance.now()
     setValue(from)
-    const timers = []
-    const stepDurationMs = Math.max(16, 2000 / Math.max(1, from))
-    for (let next = from - 1, step = 1; next >= 0; next -= 1, step += 1) {
-      timers.push(window.setTimeout(() => setValue(next), Math.round(step * stepDurationMs)))
-    }
-    return () => timers.forEach(window.clearTimeout)
+    const timer = window.setInterval(() => {
+      const elapsed = performance.now() - startedAt
+      const nextValue = Math.max(0, Math.ceil(from * (1 - elapsed / COMBO_BREAK_COUNTDOWN_DURATION_MS)))
+      setValue((currentValue) => currentValue === nextValue ? currentValue : nextValue)
+      if (nextValue === 0) window.clearInterval(timer)
+    }, COMBO_BREAK_COUNTDOWN_REFRESH_MS)
+    return () => window.clearInterval(timer)
   }, [from])
-  return <motion.span key={value} className={value === 0 ? 'break-countdown zero' : 'break-countdown'} initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ duration: .12 }}>x{value}</motion.span>
+  return <span className={value === 0 ? 'break-countdown zero' : 'break-countdown'}>x{value}</span>
 }
 
 function ComboBreakOverlay({ breakFx }) {
@@ -415,7 +419,7 @@ function App() {
       const previousCombo = comboRef.current
       const betId = `bet-${Date.now()}-${buttonIndex}-${Math.random().toString(36).slice(2)}`
       const revealedTables = currentTables.map((table) => {
-        const { drawnCard, nextDeck } = drawCard(table.deck, currentMain.deck)
+        const { drawnCard, nextDeck } = drawCard(table.deck)
         const hit = drawnCard?.label === label
         return { ...table, deck: nextDeck, lastCard: drawnCard, lastHit: hit, lastMiss: !hit, revealId: (table.revealId || 0) + 1, showCombo: false }
       })

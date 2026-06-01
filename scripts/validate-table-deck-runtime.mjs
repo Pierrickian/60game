@@ -14,9 +14,11 @@ if (updatedTables[1].deck !== secondaryDeck) {
   throw new Error('Expected existing combo decks to be retained between draws.')
 }
 
-const reshuffled = drawCard([], [{ label: '2', id: 'c' }])
-if (reshuffled.drawnCard?.id !== 'c' || reshuffled.nextDeck.length !== 0) {
-  throw new Error('Expected an exhausted deck to reshuffle and draw from its fallback cards.')
+const exhaustedDeck = []
+const fallbackCards = [{ label: '2', id: 'c' }]
+const exhaustedDraw = drawCard(exhaustedDeck, fallbackCards)
+if (exhaustedDraw.drawnCard !== undefined || exhaustedDraw.nextDeck !== exhaustedDeck || fallbackCards.length !== 1) {
+  throw new Error('Expected an exhausted deck to remain empty without regenerating fallback cards.')
 }
 
 const counts = countCardsByLabel([{ label: '2' }, { label: '2' }, { label: '3' }], ['2', '3', 'JOKER'])

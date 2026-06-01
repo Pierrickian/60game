@@ -7,9 +7,8 @@ export function shuffle(cards) {
   return copy
 }
 
-export function drawCard(deck, reshuffleSource) {
-  const nextDeck = deck.length > 0 ? deck : shuffle(reshuffleSource)
-  return { drawnCard: nextDeck.pop(), nextDeck }
+export function drawCard(deck) {
+  return { drawnCard: deck.pop(), nextDeck: deck }
 }
 
 export function countCardsByLabel(cards, labels = []) {
