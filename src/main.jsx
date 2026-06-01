@@ -70,11 +70,21 @@ function makeTables(mainCards, count, previousTables = [], mainId = 'main') {
   })
 }
 
-function scoreShareText(score, best, stats) {
-  return `60game\nScore ${score}\nBest ${best}\nHits ${stats.hits}\nBest combo x${Math.max(1, stats.bestCombo)}\nMax decks ${stats.maxDecks}\nJokers ${stats.jokers}`
+function levelShareDetails(levelNumber, levelConfig) {
+  const deckSize = Object.values(levelConfig.startingDeck).reduce((sum, amount) => sum + amount, 0)
+  const jokerCount = levelConfig.startingDeck.joker || 0
+  return {
+    title: `LEVEL ${levelNumber} · ${levelConfig.name}`,
+    summary: `${levelConfig.difficulty || 'Hard'} · ${deckSize} cards · ${jokerCount} jokers`
+  }
 }
 
-function makeScoreImage(score, best, stats) {
+function scoreShareText(score, best, stats, levelNumber, levelConfig) {
+  const level = levelShareDetails(levelNumber, levelConfig)
+  return `60game\n${level.title}\n${level.summary}\nScore ${score}\nBest ${best}\nHits ${stats.hits}\nBest combo x${Math.max(1, stats.bestCombo)}\nMax decks ${stats.maxDecks}\nJokers ${stats.jokers}`
+}
+
+function makeScoreImage(score, best, stats, levelNumber, levelConfig) {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas')
     const width = 900
@@ -122,6 +132,14 @@ function makeScoreImage(score, best, stats) {
     context.font = '900 54px system-ui, sans-serif'
     context.fillText(`BEST ${best}`, width / 2, 480)
 
+    const level = levelShareDetails(levelNumber, levelConfig)
+    context.fillStyle = '#ffffff'
+    context.font = '900 32px system-ui, sans-serif'
+    context.fillText(level.title, width / 2, 545)
+    context.fillStyle = 'rgba(255, 255, 255, 0.66)'
+    context.font = '700 26px system-ui, sans-serif'
+    context.fillText(level.summary.toUpperCase(), width / 2, 585)
+
     const rows = [
       ['Hits', stats.hits],
       ['Best combo', `x${Math.max(1, stats.bestCombo)}`],
@@ -160,8 +178,8 @@ function makeScoreImage(score, best, stats) {
   })
 }
 
-async function shareScore(score, best, stats) {
-  const file = await makeScoreImage(score, best, stats)
+async function shareScore(score, best, stats, levelNumber, levelConfig) {
+  const file = await makeScoreImage(score, best, stats, levelNumber, levelConfig)
   if (file && navigator.canShare?.({ files: [file] }) && navigator.share) {
     try {
       await navigator.share({ files: [file] })
@@ -171,7 +189,7 @@ async function shareScore(score, best, stats) {
     }
   }
 
-  const text = scoreShareText(score, best, stats)
+  const text = scoreShareText(score, best, stats, levelNumber, levelConfig)
   if (navigator.share) {
     try {
       await navigator.share({ title: '60game score', text })
@@ -269,7 +287,7 @@ function FrontComboOverlay({ combo }) {
   return <div className={`front-combo ${combo.boom ? 'big-bang-combo' : ''}`}><motion.div initial={{ opacity: 0, y: 28, scale: .65 }} animate={{ opacity: 1, y: 0, scale: [1, 1.08, 1] }} exit={{ opacity: 0, y: -36, scale: .9 }} transition={{ duration: .32 }}><span className="front-combo-title">{combo.title}</span><span className="front-combo-multiplier">x{combo.multiplier}</span>{combo.boom ? <span className="front-combo-boom">BOOM</span> : null}</motion.div></div>
 }
 
-function EndPanel({ score, best, stats, levelNumber, onReplay, onNext, onHome, stars }) {
+function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNext, onHome, stars }) {
   const unlockedStarsCount = stars.filter((star) => star.unlocked).length
   const [showWinOverlay, setShowWinOverlay] = useState(unlockedStarsCount > 0)
 
@@ -283,7 +301,7 @@ function EndPanel({ score, best, stats, levelNumber, onReplay, onNext, onHome, s
     return () => window.clearTimeout(timer)
   }, [unlockedStarsCount])
 
-  return <section className="end-screen session-panel"><AnimatePresence>{showWinOverlay ? <motion.div className="win-overlay" initial={{ opacity: 0, scale: 0.66, y: 26 }} animate={{ opacity: 1, scale: [1.12, 0.96, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -28 }} transition={{ duration: 0.58, ease: 'easeOut' }}>WIN</motion.div> : null}</AnimatePresence><span>Level {levelNumber}</span><strong>{score}</strong><em>Best {best}</em><div className="star-panel">{stars.map((star, index) => <motion.div key={star.id} className={`star-row ${star.unlocked ? 'on' : ''}`} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.25 + 0.1, duration: 0.25 }}><AnimatedMetric value={star.id === 'precision' ? Math.round(Number(star.value || 0) * 100) : star.value} suffix={star.id === 'precision' ? '%' : ''} className={`metric-${star.id} ${star.id === 'score' && Number(star.value || 0) >= 1000 ? 'metric-score-fit' : ''}`} bumpKey={`${star.id}-${star.unlocked ? 'on' : 'off'}`} /><StarDisplay unlocked={star.unlocked} size="lg" /><small>{star.targetText}</small><small className="star-current">Current: {star.id === 'precision' ? (star.valueText || '0%') : star.value}</small></motion.div>)}</div><div className="session-stats"><div><small>Hits</small><b>{stats.hits}</b></div><div><small>Best combo</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>Max decks</small><b>{stats.maxDecks}</b></div><div><small>Jokers</small><b>{stats.jokers}</b></div></div><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}><button onClick={onReplay}>Replay</button><button onClick={onNext}>Next</button><button onClick={onHome}>Home</button><button onClick={() => shareScore(score, best, stats)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#25D366', color: 'white' }}><WhatsAppIcon />Share</button></div></section>
+  return <section className="end-screen session-panel"><AnimatePresence>{showWinOverlay ? <motion.div className="win-overlay" initial={{ opacity: 0, scale: 0.66, y: 26 }} animate={{ opacity: 1, scale: [1.12, 0.96, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -28 }} transition={{ duration: 0.58, ease: 'easeOut' }}>WIN</motion.div> : null}</AnimatePresence><span>Level {levelNumber}</span><strong>{score}</strong><em>Best {best}</em><div className="star-panel">{stars.map((star, index) => <motion.div key={star.id} className={`star-row ${star.unlocked ? 'on' : ''}`} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.25 + 0.1, duration: 0.25 }}><AnimatedMetric value={star.id === 'precision' ? Math.round(Number(star.value || 0) * 100) : star.value} suffix={star.id === 'precision' ? '%' : ''} className={`metric-${star.id} ${star.id === 'score' && Number(star.value || 0) >= 1000 ? 'metric-score-fit' : ''}`} bumpKey={`${star.id}-${star.unlocked ? 'on' : 'off'}`} /><StarDisplay unlocked={star.unlocked} size="lg" /><small>{star.targetText}</small><small className="star-current">Current: {star.id === 'precision' ? (star.valueText || '0%') : star.value}</small></motion.div>)}</div><div className="session-stats"><div><small>Hits</small><b>{stats.hits}</b></div><div><small>Best combo</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>Max decks</small><b>{stats.maxDecks}</b></div><div><small>Jokers</small><b>{stats.jokers}</b></div></div><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}><button onClick={onReplay}>Replay</button><button onClick={onNext}>Next</button><button onClick={onHome}>Home</button><button onClick={() => shareScore(score, best, stats, levelNumber, levelConfig)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#25D366', color: 'white' }}><WhatsAppIcon />Share</button></div></section>
 }
 
 function App() {
@@ -546,7 +564,7 @@ function App() {
   }, [starPopups])
 
   const gameOver = started && showEnd
-  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'}`}><div className="cinematic-bg" />{!started ? <section className="start-screen level-select"><span>60game</span><strong>60 Game</strong><em>Select a level</em><div className="level-select-grid">{orderedLevelIds.map((id) => { const level = levelConfigs[id]; if (!level) return null; const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker'); const deckSize = Object.values(level.startingDeck).reduce((sum, amount) => sum + amount, 0); const jokerCount = level.startingDeck.joker || 0; const active = selectedLevelId === id; const saved = progression[id] || {}; return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{level.name}</b><small>{level.difficulty || 'Hard'} • {deckSize} cards • {jokerCount} jokers</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button> })}</div></section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} /> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="★" label="Left" value={mainDeck.length} /></header><ComboStatus combo={combo} /><section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{mainDeck.length}</strong></div></section><section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <TableSlot key={table.id} table={table} totalCards={totalCards} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence><AnimatePresence>{frontCombo ? <FrontComboOverlay key={`${frontCombo.title}-${frontCombo.multiplier}`} combo={frontCombo} /> : null}</AnimatePresence><AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} /> : null}</AnimatePresence></section><section className="prediction-grid">{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} bumpKey={cardCountBumps[card.label]} />)}</section><AnimatePresence>{achievementPopups.filter(Boolean).map((popup) => <motion.div key={popup.id} className='achievement-popup' initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35 }}>★ {popup.name} +{popup.points}</motion.div>)}</AnimatePresence><AnimatePresence>{starPopups.map((popup) => <StarPopup key={popup.id} popup={popup} />)}</AnimatePresence><AnimatePresence>{jokerPowerPopups.map((popup) => <motion.div key={popup.id} className='joker-power-popup' initial={{ opacity: 0, y: 26, scale: 0.4 }} animate={{ opacity: [0, 1, 1, 0], y: [26, -4, -12, -30], scale: [0.4, 1.2, 1, 0.85] }} exit={{ opacity: 0, y: -40, scale: 0.8 }} transition={{ duration: 1.7, ease: 'easeOut' }}>{popup.text}</motion.div>)}</AnimatePresence><AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>GAME OVER</motion.div> : null}</AnimatePresence>{showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} onPlay={() => setShowLevelIntro(false)} /> : null}</>}</main>
+  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'}`}><div className="cinematic-bg" />{!started ? <section className="start-screen level-select"><span>60game</span><strong>60 Game</strong><em>Select a level</em><div className="level-select-grid">{orderedLevelIds.map((id) => { const level = levelConfigs[id]; if (!level) return null; const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker'); const deckSize = Object.values(level.startingDeck).reduce((sum, amount) => sum + amount, 0); const jokerCount = level.startingDeck.joker || 0; const active = selectedLevelId === id; const saved = progression[id] || {}; return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{level.name}</b><small>{level.difficulty || 'Hard'} • {deckSize} cards • {jokerCount} jokers</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button> })}</div></section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} /> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="★" label="Left" value={mainDeck.length} /></header><ComboStatus combo={combo} /><section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{mainDeck.length}</strong></div></section><section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <TableSlot key={table.id} table={table} totalCards={totalCards} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence><AnimatePresence>{frontCombo ? <FrontComboOverlay key={`${frontCombo.title}-${frontCombo.multiplier}`} combo={frontCombo} /> : null}</AnimatePresence><AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} /> : null}</AnimatePresence></section><section className="prediction-grid">{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label]} onGuess={guess} bumpKey={cardCountBumps[card.label]} />)}</section><AnimatePresence>{achievementPopups.filter(Boolean).map((popup) => <motion.div key={popup.id} className='achievement-popup' initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.35 }}>★ {popup.name} +{popup.points}</motion.div>)}</AnimatePresence><AnimatePresence>{starPopups.map((popup) => <StarPopup key={popup.id} popup={popup} />)}</AnimatePresence><AnimatePresence>{jokerPowerPopups.map((popup) => <motion.div key={popup.id} className='joker-power-popup' initial={{ opacity: 0, y: 26, scale: 0.4 }} animate={{ opacity: [0, 1, 1, 0], y: [26, -4, -12, -30], scale: [0.4, 1.2, 1, 0.85] }} exit={{ opacity: 0, y: -40, scale: 0.8 }} transition={{ duration: 1.7, ease: 'easeOut' }}>{popup.text}</motion.div>)}</AnimatePresence><AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>GAME OVER</motion.div> : null}</AnimatePresence>{showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} onPlay={() => setShowLevelIntro(false)} /> : null}</>}</main>
 }
 
 ReactDOM.createRoot(document.getElementById('app')).render(<App />)
