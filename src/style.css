@@ -909,3 +909,62 @@ button {
   .session-actions { gap: 4px; }
   .session-actions-row button { padding-block: 8px; }
 }
+
+.achievement-criterion { font-size: .7rem; line-height: 1.3; }
+
+@media (max-width: 560px) {
+  .achievements-table thead tr,
+  .achievements-table tbody tr {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 48px;
+  }
+
+  .achievements-table th:first-child { width: auto; }
+  .achievements-table th:nth-child(2) { width: auto; }
+  .achievements-table th:nth-child(3) { display: none; }
+  .achievements-table th:last-child { width: auto; }
+
+  .achievements-table tbody tr {
+    overflow: hidden;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .045);
+  }
+
+  .achievements-table tr.is-earned { background: rgba(255, 200, 83, .1); }
+  .achievements-table td,
+  .achievements-table tr.is-earned td { background: transparent; }
+
+  .achievement-earned-marker {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    height: auto;
+    display: grid;
+    place-items: center;
+    padding: 7px 3px !important;
+  }
+
+  .achievement-name {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 8px 4px 1px !important;
+    font-size: .66rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .achievement-criterion {
+    grid-column: 2 / 4;
+    grid-row: 2;
+    padding: 2px 6px 8px 4px !important;
+    color: rgba(255, 255, 255, .62) !important;
+    font-size: .56rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .achievement-points {
+    grid-column: 3;
+    grid-row: 1;
+    padding: 8px 6px 1px 2px !important;
+    font-size: .64rem !important;
+    line-height: 1.1 !important;
+  }
+}

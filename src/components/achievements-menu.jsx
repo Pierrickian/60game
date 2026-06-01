@@ -35,9 +35,9 @@ export function AchievementsMenu({ achievements, levelConfig, onClose }) {
             const isAchievementStarWinner = achievementStarWinner?.config.id === achievement.config.id
             return <tr key={achievement.config.id} className={achievement.unlocked ? 'is-earned' : ''}>
               <td className="achievement-earned-marker">{achievement.unlocked ? <StarDisplay unlocked size={isAchievementStarWinner ? 'lg' : 'md'} /> : null}</td>
-              <td><strong>{achievement.config.name}</strong></td>
-              <td>{achievementCriterion(achievement.config, levelConfig)}</td>
-              <td><b>+{achievement.config.pointsReward}</b></td>
+              <td className="achievement-name"><strong>{achievement.config.name}</strong></td>
+              <td className="achievement-criterion">{achievementCriterion(achievement.config, levelConfig)}</td>
+              <td className="achievement-points"><b>+{achievement.config.pointsReward}</b></td>
             </tr>
           })}</tbody>
         </table>
