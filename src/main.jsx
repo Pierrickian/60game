@@ -9,7 +9,7 @@ import { createAchievementRuntime, evaluateAchievements } from './engine/progres
 import { getPrecisionHitIncrement, getStarModel } from './engine/progression/stars'
 import { AnimatedMetric, StarDisplay } from './components/rewards'
 import { chooseWeightedJokerPower, resolveJokerPowerHandler } from './engine/jokerPowers'
-import { countCardsByLabel, drawCard, makeTables, shuffle } from './runtime/tableDecks'
+import { DeckReconciliationError, applyDeckMutationToTables, countCardsByLabel, drawCard, makeTables, reconcileDeckAfterWinningDraw, resyncDeckFromPromoted } from './runtime/tableDecks'
 
 const COMBO_LABELS = { 2: 'GREAT', 3: 'AMAZING', 4: 'IMPRESSIVE', 5: 'AWESOME', 6: 'GOD IS PLAYING' }
 const POST_GOD_LABELS = ['HAPPY BIRTHDAY', 'MY LORD', 'CHIRURGICAL', 'FIN LIMIER', 'OISEAU RARE', 'RENARD', 'LOUP', 'TIGRE', 'LION', 'DINOSAURE', 'METEORITE', 'SOLEIL', 'GALAXIE', 'COSMOS', 'UNIVERS', 'MULTIVERS', 'TROU NOIR', 'BIG BANG', 'QUANTIC AWERENESS', 'SOURCE VIBRATION', 'LOVE', 'PEACE', 'VOID', 'PURE ENERGY', 'PURE BODY', 'PURE MIND', 'PURE HEART', 'PURE SOUL', 'ANGEL', 'ARCHANGEL', 'DIVINE', 'DIVINE 2', 'DIVINE 3', 'DIVINE 4', 'DIVINE 5', 'DIVINE 6', 'DIVINE 7', 'DIVINE 8', 'DIVINE 9', 'DIVINE 10', 'DIVINE 1000', 'DIVINE 1M', 'DIVINE 1B', 'DIVINE 999T']
@@ -434,13 +434,23 @@ function App() {
       const jokerHits = hits.filter((table) => table.lastCard?.label === 'JOKER').length
       const jokerTriggered = jokerHits > 0
       const nextCount = activeTableCount(nextCombo)
-      const orderedPrevious = revealedTables.map((table) => ({ ...table, showCombo: nextCombo >= 2 && table.lastHit }))
+      let orderedPrevious = revealedTables.map((table) => ({ ...table, showCombo: nextCombo >= 2 && table.lastHit }))
       let jokerScoreMultiplier = 1
       setBets((items) => [...items, { id: betId, card: predictedCard || getCardType(cardTypes, label), buttonIndex, result: 'pending' }])
       window.setTimeout(() => setBets((items) => items.map((bet) => bet.id === betId ? { ...bet, result: isWin ? 'win' : 'loss' } : bet)), 80)
       window.setTimeout(() => setBets((items) => items.filter((bet) => bet.id !== betId)), 420)
       if (navigator.vibrate) navigator.vibrate(isWin ? 18 : 8)
       if (isWin) {
+        orderedPrevious = orderedPrevious.map((table) => {
+          if (table.id === referenceTable.id) return table
+          try {
+            return { ...table, deck: reconcileDeckAfterWinningDraw(table.deck, table.lastCard, label) }
+          } catch (error) {
+            if (!(error instanceof DeckReconciliationError)) throw error
+            console.warn(error.message, { tableId: table.id })
+            return { ...table, deck: resyncDeckFromPromoted(referenceDeck) }
+          }
+        })
         showPredictionReaction('success')
         setPrecisionHits((v) => v + precisionHitIncrement)
         comboRef.current = nextCombo
@@ -457,23 +467,18 @@ function App() {
             if (handler) {
               const cardId = Date.now()
               const beforeCounts = countCardsByLabel(referenceDeck)
-              referenceDeck = handler.apply({
-                deck: referenceDeck,
-                levelConfig: currentLevel,
-                makeCardFromLabel: (rawLabel) => {
-                  if (rawLabel === 'JOKER') return { label: 'JOKER', value: 0, theme: 'joker', icon: '♛', id: `joker-${cardId}-${Math.random().toString(36).slice(2, 8)}` }
-                  const value = Number(rawLabel)
-                  const existingType = cardTypes.find((type) => type.label === String(rawLabel))
-                  return { label: String(rawLabel), value, theme: existingType?.theme || 'green', icon: existingType?.icon || '◆', id: `num-${rawLabel}-${cardId}-${Math.random().toString(36).slice(2, 8)}` }
-                }
-              }, selectedPower.params)
+              const makeCardFromLabel = (rawLabel) => {
+                if (rawLabel === 'JOKER') return { label: 'JOKER', value: 0, theme: 'joker', icon: '♛', id: `joker-${cardId}-${Math.random().toString(36).slice(2, 8)}` }
+                const value = Number(rawLabel)
+                const existingType = cardTypes.find((type) => type.label === String(rawLabel))
+                return { label: String(rawLabel), value, theme: existingType?.theme || 'green', icon: existingType?.icon || '◆', id: `num-${rawLabel}-${cardId}-${Math.random().toString(36).slice(2, 8)}` }
+              }
+              orderedPrevious = applyDeckMutationToTables(orderedPrevious, referenceTable.id, (deck) => handler.apply({ deck, levelConfig: currentLevel, makeCardFromLabel }, selectedPower.params))
+              referenceDeck = orderedPrevious.find((table) => table.id === referenceTable.id)?.deck || referenceDeck
               if (selectedPower.handler === 'multiplyScore') jokerScoreMultiplier = Number(selectedPower?.params?.factor || 2)
               const afterCounts = countCardsByLabel(referenceDeck)
               const changed = cardTypes.map((type) => type.label).filter((label) => (afterCounts[label] || 0) !== (beforeCounts[label] || 0))
-              if (changed.length > 0) {
-                referenceDeck = shuffle(referenceDeck)
-                setCardCountBumps((current) => changed.reduce((acc, label) => ({ ...acc, [label]: (acc[label] || 0) + 1 }), { ...current }))
-              }
+              if (changed.length > 0) setCardCountBumps((current) => changed.reduce((acc, label) => ({ ...acc, [label]: (acc[label] || 0) + 1 }), { ...current }))
               showGameplayLog('hit', selectedPower.popupText || 'JOKER  x1')
             }
           }
