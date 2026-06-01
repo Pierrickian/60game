@@ -79,12 +79,19 @@ function levelShareDetails(levelNumber, levelConfig) {
   }
 }
 
-function scoreShareText(score, best, stats, levelNumber, levelConfig) {
-  const level = levelShareDetails(levelNumber, levelConfig)
-  return `60game\n${level.title}\n${level.summary}\nScore ${score}\nBest ${best}\nHits ${stats.hits}\nBest combo x${Math.max(1, stats.bestCombo)}\nMax decks ${stats.maxDecks}\nJokers ${stats.jokers}`
+function scoreShareMetrics(stars) {
+  return {
+    achievements: stars.find((star) => star.id === 'success')?.value || 0,
+    precision: stars.find((star) => star.id === 'precision')?.valueText || '0%'
+  }
 }
 
-function makeScoreImage(score, best, stats, levelNumber, levelConfig) {
+function scoreShareText(score, best, stats, levelNumber, levelConfig, metrics) {
+  const level = levelShareDetails(levelNumber, levelConfig)
+  return `60game\n${level.title}\n${level.summary}\nScore ${score}\nBest ${best}\nHits ${stats.hits}\nBest combo x${Math.max(1, stats.bestCombo)}\nAchievements ${metrics.achievements}\nPrecision ${metrics.precision}`
+}
+
+function makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics) {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas')
     const width = 900
@@ -143,8 +150,8 @@ function makeScoreImage(score, best, stats, levelNumber, levelConfig) {
     const rows = [
       ['Hits', stats.hits],
       ['Best combo', `x${Math.max(1, stats.bestCombo)}`],
-      ['Max decks', stats.maxDecks],
-      ['Jokers', stats.jokers]
+      ['Achievements', metrics.achievements],
+      ['Precision', metrics.precision]
     ]
     context.textAlign = 'left'
     rows.forEach(([label, value], index) => {
@@ -178,8 +185,8 @@ function makeScoreImage(score, best, stats, levelNumber, levelConfig) {
   })
 }
 
-async function shareScore(score, best, stats, levelNumber, levelConfig) {
-  const file = await makeScoreImage(score, best, stats, levelNumber, levelConfig)
+async function shareScore(score, best, stats, levelNumber, levelConfig, metrics) {
+  const file = await makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics)
   if (file && navigator.canShare?.({ files: [file] }) && navigator.share) {
     try {
       await navigator.share({ files: [file] })
@@ -189,7 +196,7 @@ async function shareScore(score, best, stats, levelNumber, levelConfig) {
     }
   }
 
-  const text = scoreShareText(score, best, stats, levelNumber, levelConfig)
+  const text = scoreShareText(score, best, stats, levelNumber, levelConfig, metrics)
   if (navigator.share) {
     try {
       await navigator.share({ title: '60game score', text })
@@ -289,6 +296,7 @@ function FrontComboOverlay({ combo }) {
 
 function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNext, onHome, stars }) {
   const unlockedStarsCount = stars.filter((star) => star.unlocked).length
+  const shareMetrics = scoreShareMetrics(stars)
   const [showWinOverlay, setShowWinOverlay] = useState(unlockedStarsCount > 0)
 
   useEffect(() => {
@@ -301,7 +309,7 @@ function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNe
     return () => window.clearTimeout(timer)
   }, [unlockedStarsCount])
 
-  return <section className="end-screen session-panel"><AnimatePresence>{showWinOverlay ? <motion.div className="win-overlay" initial={{ opacity: 0, scale: 0.66, y: 26 }} animate={{ opacity: 1, scale: [1.12, 0.96, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -28 }} transition={{ duration: 0.58, ease: 'easeOut' }}>WIN</motion.div> : null}</AnimatePresence><span>Level {levelNumber}</span><strong>{score}</strong><em>Best {best}</em><div className="star-panel">{stars.map((star, index) => <motion.div key={star.id} className={`star-row ${star.unlocked ? 'on' : ''}`} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.25 + 0.1, duration: 0.25 }}><AnimatedMetric value={star.id === 'precision' ? Math.round(Number(star.value || 0) * 100) : star.value} suffix={star.id === 'precision' ? '%' : ''} className={`metric-${star.id} ${star.id === 'score' && Number(star.value || 0) >= 1000 ? 'metric-score-fit' : ''}`} bumpKey={`${star.id}-${star.unlocked ? 'on' : 'off'}`} /><StarDisplay unlocked={star.unlocked} size="lg" /><small>{star.targetText}</small><small className="star-current">Current: {star.id === 'precision' ? (star.valueText || '0%') : star.value}</small></motion.div>)}</div><div className="session-stats"><div><small>Hits</small><b>{stats.hits}</b></div><div><small>Best combo</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>Max decks</small><b>{stats.maxDecks}</b></div><div><small>Jokers</small><b>{stats.jokers}</b></div></div><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}><button onClick={onReplay}>Replay</button><button onClick={onNext}>Next</button><button onClick={onHome}>Home</button><button onClick={() => shareScore(score, best, stats, levelNumber, levelConfig)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#25D366', color: 'white' }}><WhatsAppIcon />Share</button></div></section>
+  return <section className="end-screen session-panel"><AnimatePresence>{showWinOverlay ? <motion.div className="win-overlay" initial={{ opacity: 0, scale: 0.66, y: 26 }} animate={{ opacity: 1, scale: [1.12, 0.96, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -28 }} transition={{ duration: 0.58, ease: 'easeOut' }}>WIN</motion.div> : null}</AnimatePresence><span>Level {levelNumber}</span><strong>{score}</strong><em>Best {best}</em><div className="star-panel">{stars.map((star, index) => <motion.div key={star.id} className={`star-row ${star.unlocked ? 'on' : ''}`} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.25 + 0.1, duration: 0.25 }}><AnimatedMetric value={star.id === 'precision' ? Math.round(Number(star.value || 0) * 100) : star.value} suffix={star.id === 'precision' ? '%' : ''} className={`metric-${star.id} ${star.id === 'score' && Number(star.value || 0) >= 1000 ? 'metric-score-fit' : ''}`} bumpKey={`${star.id}-${star.unlocked ? 'on' : 'off'}`} /><StarDisplay unlocked={star.unlocked} size="lg" /><small>{star.targetText}</small><small className="star-current">Current: {star.id === 'precision' ? (star.valueText || '0%') : star.value}</small></motion.div>)}</div><div className="session-stats"><div><small>Hits</small><b>{stats.hits}</b></div><div><small>Best combo</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>Achievements</small><b>{shareMetrics.achievements}</b></div><div><small>Precision</small><b>{shareMetrics.precision}</b></div></div><div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}><button onClick={onReplay}>Replay</button><button onClick={onNext}>Next</button><button onClick={onHome}>Home</button><button onClick={() => shareScore(score, best, stats, levelNumber, levelConfig, shareMetrics)} style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#25D366', color: 'white' }}><WhatsAppIcon />Share</button></div></section>
 }
 
 function App() {
