@@ -1,7 +1,7 @@
 {
   "id": "source_of_life",
   "name": "Source of Life",
-  "description": "Source of Life",
+  "description": "Match the source-of-life rank twice in a row",
   "pointsReward": 130,
   "handler": "rankStreak",
   "params": {

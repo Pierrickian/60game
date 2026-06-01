@@ -1,7 +1,7 @@
 {
   "id": "deus",
   "name": "Deus",
-  "description": "Deus",
+  "description": "Match the Deus rank twice in a row",
   "pointsReward": 100,
   "handler": "rankStreak",
   "params": {

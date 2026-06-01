@@ -740,3 +740,231 @@ button {
   margin: 0;
   color: rgba(255,255,255,.78);
 }
+
+.achievements-open {
+  background: linear-gradient(135deg, #8d69ff, #4b64ff) !important;
+  color: #fff !important;
+}
+
+.achievements-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 3200;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(3, 5, 15, .88);
+}
+
+.achievements-menu-card {
+  position: relative;
+  width: min(94vw, 880px);
+  height: min(88dvh, 760px);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid rgba(255, 227, 124, .38);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 207, 88, .17), transparent 36%),
+    radial-gradient(circle at 90% 12%, rgba(115, 89, 255, .2), transparent 35%),
+    linear-gradient(145deg, #171c3a, #080b1b 70%);
+  box-shadow: 0 26px 90px rgba(0, 0, 0, .68), inset 0 1px 0 rgba(255, 255, 255, .16);
+  text-align: left;
+}
+
+.achievements-menu-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  width: 46px;
+  height: 46px;
+  padding: 0 !important;
+  border: 1px solid rgba(255, 255, 255, .24) !important;
+  border-radius: 50% !important;
+  background: rgba(7, 9, 24, .94) !important;
+  color: #fff !important;
+  font-size: 2rem;
+  font-weight: 400 !important;
+  line-height: .8;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .36);
+}
+
+.achievements-menu-header { padding: 22px 74px 16px 22px; }
+.achievements-menu-header span { color: #ffd76b; font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; }
+.achievements-menu-header h2 { margin: 4px 0; color: #fff7ca; font-size: clamp(1.6rem, 7vw, 2.8rem); line-height: 1; }
+.achievements-menu-header p { margin: 8px 0 0; color: rgba(255, 255, 255, .68); font-size: .78rem; }
+.achievement-star-big { color: #ffd95e; font-size: 1.5rem; line-height: .6; text-shadow: 0 0 14px rgba(255, 204, 79, .95); }
+
+.achievements-table-wrap { overflow-y: auto; overscroll-behavior: contain; padding: 0 12px 18px; scrollbar-color: #8d69ff rgba(255, 255, 255, .08); }
+.achievements-table { width: 100%; border-collapse: separate; border-spacing: 0 7px; table-layout: fixed; }
+.achievements-table th { position: sticky; top: 0; z-index: 1; padding: 10px 8px; color: rgba(255, 255, 255, .58); background: #11162d; font-size: .62rem; letter-spacing: .12em; text-align: left; text-transform: uppercase; }
+.achievements-table th:first-child { width: 62px; border-radius: 10px 0 0 10px; }
+.achievements-table th:nth-child(2) { width: 25%; }
+.achievements-table th:last-child { width: 68px; border-radius: 0 10px 10px 0; text-align: right; }
+.achievements-table td { padding: 11px 8px; color: rgba(255, 255, 255, .58); background: rgba(255, 255, 255, .045); font-size: .76rem; line-height: 1.35; }
+.achievements-table td:first-child { border-radius: 13px 0 0 13px; }
+.achievements-table td:last-child { border-radius: 0 13px 13px 0; color: #ffce66; text-align: right; }
+.achievements-table strong { color: rgba(255, 255, 255, .86); }
+.achievements-table tr.is-earned td { background: rgba(255, 200, 83, .1); color: rgba(255, 255, 255, .84); }
+.achievement-earned-marker { height: 62px; text-align: center; }
+.achievement-earned-marker .size-lg { font-size: 42px; }
+
+@media (max-width: 560px) {
+  .achievements-menu { padding: 10px; }
+  .achievements-menu-card { width: 100%; height: min(92dvh, 760px); border-radius: 22px; }
+  .achievements-menu-header { padding: 18px 66px 12px 16px; }
+  .achievements-table-wrap { padding: 0 7px 12px; }
+  .achievements-table { border-spacing: 0 5px; }
+  .achievements-table th { padding: 8px 5px; font-size: .52rem; letter-spacing: .08em; }
+  .achievements-table th:first-child { width: 46px; }
+  .achievements-table th:nth-child(2) { width: 27%; }
+  .achievements-table th:last-child { width: 52px; }
+  .achievements-table td { padding: 9px 5px; font-size: .68rem; }
+  .achievement-earned-marker { height: 54px; }
+  .achievement-earned-marker .size-lg { font-size: 36px; }
+}
+
+.session-actions,
+.session-actions-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.session-actions { flex-direction: column; }
+.session-actions-home { justify-content: center; }
+.share-score { display: inline-flex; align-items: center; gap: 8px; background: #25D366 !important; color: #fff !important; }
+
+@media (max-width: 560px) {
+  .end-screen.session-panel {
+    position: fixed;
+    inset: calc(env(safe-area-inset-top) + 18px) 12px calc(env(safe-area-inset-bottom) + 14px);
+    width: auto;
+    min-height: 0;
+    padding: 24px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    overflow: hidden;
+  }
+
+  .session-panel > span { font-size: .68rem; }
+  .session-panel > strong { font-size: clamp(2.9rem, 15vw, 4rem); line-height: .92; }
+  .session-panel > em { font-size: .86rem; }
+
+  .session-panel .star-panel {
+    gap: 6px;
+    margin: 7px 0;
+  }
+
+  .session-panel .star-row {
+    min-height: 102px;
+    gap: 2px;
+    padding: 6px 4px;
+    border-radius: 11px;
+  }
+
+  .session-panel .star-row .animated-metric { font-size: clamp(22px, 7vw, 29px); }
+  .session-panel .star-row .reward-star.size-lg { font-size: 31px; }
+  .session-panel .star-row small { font-size: .62rem; line-height: 1.15; }
+
+  .session-stats {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    margin: 1px 0 5px;
+  }
+
+  .session-stats div {
+    min-height: 39px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 1px;
+    border-radius: 11px;
+    background: rgba(255, 255, 255, .055);
+  }
+
+  .session-stats small { color: rgba(255, 255, 255, .62); font-size: .61rem; letter-spacing: .06em; text-transform: uppercase; }
+  .session-stats b { color: #fff; font-size: .9rem; line-height: 1; }
+
+  .session-actions { width: 100%; gap: 5px; }
+  .session-actions-row { width: 100%; gap: 7px; flex-wrap: nowrap; }
+  .session-actions-row button { min-width: 0; flex: 1 1 0; padding: 9px 11px; font-size: .78rem; line-height: 1.1; }
+  .session-actions-home button { flex: 0 1 48%; }
+  .share-score { justify-content: center; gap: 5px; }
+  .share-score svg { width: 16px; height: 16px; }
+}
+
+@media (max-width: 560px) and (max-height: 700px) {
+  .end-screen.session-panel { padding-top: 18px; padding-bottom: 14px; gap: 3px; }
+  .session-panel .star-row { min-height: 88px; }
+  .session-panel .star-row .reward-star.size-lg { font-size: 27px; }
+  .session-stats div { min-height: 34px; }
+  .session-actions { gap: 4px; }
+  .session-actions-row button { padding-block: 8px; }
+}
+
+.achievement-criterion { font-size: .7rem; line-height: 1.3; }
+
+@media (max-width: 560px) {
+  .achievements-table thead tr,
+  .achievements-table tbody tr {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 48px;
+  }
+
+  .achievements-table th:first-child { width: auto; }
+  .achievements-table th:nth-child(2) { width: auto; }
+  .achievements-table th:nth-child(3) { display: none; }
+  .achievements-table th:last-child { width: auto; }
+
+  .achievements-table tbody tr {
+    overflow: hidden;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, .045);
+  }
+
+  .achievements-table tr.is-earned { background: rgba(255, 200, 83, .1); }
+  .achievements-table td,
+  .achievements-table tr.is-earned td { background: transparent; }
+
+  .achievement-earned-marker {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    height: auto;
+    display: grid;
+    place-items: center;
+    padding: 7px 3px !important;
+  }
+
+  .achievement-name {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 8px 4px 1px !important;
+    font-size: .66rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .achievement-criterion {
+    grid-column: 2 / 4;
+    grid-row: 2;
+    padding: 2px 6px 8px 4px !important;
+    color: rgba(255, 255, 255, .62) !important;
+    font-size: .56rem !important;
+    line-height: 1.25 !important;
+  }
+
+  .achievement-points {
+    grid-column: 3;
+    grid-row: 1;
+    padding: 8px 6px 1px 2px !important;
+    font-size: .64rem !important;
+    line-height: 1.1 !important;
+  }
+}

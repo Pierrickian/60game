@@ -1,7 +1,7 @@
 {
   "id": "straight",
   "name": "Straight",
-  "description": "Straight",
+  "description": "Match 3 consecutive ranks in ascending order",
   "pointsReward": 75,
   "handler": "straightThree",
   "params": {

@@ -1,7 +1,7 @@
 {
   "id": "hacker",
   "name": "Hacker",
-  "description": "Hacker",
+  "description": "Match the lowest rank 8 times in a row",
   "pointsReward": 200,
   "handler": "rankStreak",
   "params": {

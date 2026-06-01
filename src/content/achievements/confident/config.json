@@ -1,7 +1,7 @@
 {
   "id": "confident",
   "name": "Confident",
-  "description": "Confident",
+  "description": "Match the confident rank twice in a row",
   "pointsReward": 80,
   "handler": "rankStreak",
   "params": {

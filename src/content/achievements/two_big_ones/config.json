@@ -1,7 +1,7 @@
 {
   "id": "two_big_ones",
   "name": "2 Big Ones",
-  "description": "2 Big Ones",
+  "description": "Match the highest rank twice in a row",
   "pointsReward": 120,
   "handler": "topValuePair",
   "params": {
