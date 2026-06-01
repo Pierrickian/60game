@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run validate:levels && vite build",
+    "build": "npm run validate:levels && npm run validate:runtime-decks && vite build",
     "preview": "vite preview",
-    "validate:levels": "node scripts/validate-level-card-counts.mjs"
+    "validate:levels": "node scripts/validate-level-card-counts.mjs",
+    "validate:runtime-decks": "node scripts/validate-table-deck-runtime.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",

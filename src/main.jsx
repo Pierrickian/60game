@@ -9,6 +9,7 @@ import { createAchievementRuntime, evaluateAchievements } from './engine/progres
 import { getPrecisionHitIncrement, getStarModel } from './engine/progression/stars'
 import { AnimatedMetric, StarDisplay, StarPopup } from './components/rewards'
 import { chooseWeightedJokerPower, resolveJokerPowerHandler } from './engine/jokerPowers'
+import { countCardsByLabel, drawCard, makeTables, shuffle } from './runtime/tableDecks'
 
 const COMBO_LABELS = { 2: 'GREAT', 3: 'AMAZING', 4: 'IMPRESSIVE', 5: 'AWESOME', 6: 'GOD IS PLAYING' }
 const POST_GOD_LABELS = ['HAPPY BIRTHDAY', 'MY LORD', 'CHIRURGICAL', 'FIN LIMIER', 'OISEAU RARE', 'RENARD', 'LOUP', 'TIGRE', 'LION', 'DINOSAURE', 'METEORITE', 'SOLEIL', 'GALAXIE', 'COSMOS', 'UNIVERS', 'MULTIVERS', 'TROU NOIR', 'BIG BANG']
@@ -33,20 +34,10 @@ function buildDeckForLevel(levelConfig) {
   const types = cardTypesFromLevel(levelConfig)
   return shuffle(types.flatMap((type) => Array.from({ length: type.count }, (_, index) => ({ ...type, id: `${type.label}-${index}` }))))
 }
-const countRemaining = (deck, label) => deck.filter((card) => card.label === label).length
 const getCardType = (cardTypes, label) => cardTypes.find((card) => card.label === label)
 function comboText(combo) {
   if (combo <= 6) return COMBO_LABELS[combo]
   return POST_GOD_LABELS[(combo - 7) % POST_GOD_LABELS.length]
-}
-
-function shuffle(cards) {
-  const copy = [...cards]
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[copy[i], copy[j]] = [copy[j], copy[i]]
-  }
-  return copy
 }
 
 function activeTableCount(combo) {
@@ -60,15 +51,6 @@ function tableLayoutClass(count) {
   if (count <= 4) return 'tables-4'
   if (count <= 6) return 'tables-6'
   return 'tables-8'
-}
-
-function makeTables(mainCards, count, previousTables = [], mainId = 'main') {
-  return Array.from({ length: count }, (_, index) => {
-    const previous = previousTables[index]
-    const id = previous?.id || (index === 0 ? 'main' : `combo-${index}`)
-    const isMain = id === mainId || (!previousTables.some((table) => table.id === mainId) && index === 0)
-    return { id, isMain, deck: isMain ? mainCards : shuffle(mainCards), lastCard: previous?.lastCard || null, lastHit: previous?.lastHit || false, lastMiss: previous?.lastMiss || false, revealId: previous?.revealId || 0, showCombo: false }
-  })
 }
 
 function levelShareDetails(levelNumber, levelConfig) {
@@ -353,7 +335,7 @@ function App() {
   const mainTable = tables.find((table) => table.isMain) || tables[0]
   const mainDeck = mainTable.deck
   const lastCard = mainTable.lastCard
-  const remainingByType = useMemo(() => Object.fromEntries(cardTypes.map((type) => [type.label, countRemaining(mainDeck, type.label)])), [mainDeck, cardTypes])
+  const remainingByType = countCardsByLabel(mainDeck)
 
   function scheduleFxClear(token, delay = 430) {
     window.setTimeout(() => {
@@ -397,8 +379,7 @@ function App() {
       const previousCombo = comboRef.current
       const betId = `bet-${Date.now()}-${buttonIndex}-${Math.random().toString(36).slice(2)}`
       const revealedTables = currentTables.map((table) => {
-        const sourceDeck = table.deck.length > 0 ? table.deck : shuffle(currentMain.deck)
-        const [drawnCard, ...nextDeck] = sourceDeck
+        const { drawnCard, nextDeck } = drawCard(table.deck, currentMain.deck)
         const hit = drawnCard?.label === label
         return { ...table, deck: nextDeck, lastCard: drawnCard, lastHit: hit, lastMiss: !hit, revealId: (table.revealId || 0) + 1, showCombo: false }
       })
@@ -441,7 +422,7 @@ function App() {
             const handler = resolveJokerPowerHandler(selectedPower.handler)
             if (handler) {
               const cardId = Date.now()
-              const beforeCounts = Object.fromEntries(cardTypes.map((type) => [type.label, referenceDeck.filter((card) => card.label === type.label).length]))
+              const beforeCounts = countCardsByLabel(referenceDeck)
               referenceDeck = handler.apply({
                 deck: referenceDeck,
                 levelConfig: currentLevel,
@@ -453,8 +434,8 @@ function App() {
                 }
               }, selectedPower.params)
               if (selectedPower.handler === 'multiplyScore') jokerScoreMultiplier = Number(selectedPower?.params?.factor || 2)
-              const afterCounts = Object.fromEntries(cardTypes.map((type) => [type.label, referenceDeck.filter((card) => card.label === type.label).length]))
-              const changed = Object.keys(afterCounts).filter((label) => afterCounts[label] !== beforeCounts[label])
+              const afterCounts = countCardsByLabel(referenceDeck)
+              const changed = cardTypes.map((type) => type.label).filter((label) => (afterCounts[label] || 0) !== (beforeCounts[label] || 0))
               if (changed.length > 0) {
                 referenceDeck = shuffle(referenceDeck)
                 setCardCountBumps((current) => changed.reduce((acc, label) => ({ ...acc, [label]: (acc[label] || 0) + 1 }), { ...current }))
