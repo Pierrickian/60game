@@ -384,13 +384,15 @@ button {
 
 .gain-pop {
   position: absolute;
-  z-index: 14;
-  top: -6px;
-  right: -12px;
-  font-size: 1.7rem;
+  z-index: 18;
+  top: -14%;
+  right: -24%;
+  font-size: clamp(1.15rem, 5vw, 1.9rem);
+  line-height: 1;
   font-weight: 1000;
   color: #ffe86a;
-  text-shadow: 0 0 18px rgba(255,232,106,.88);
+  text-shadow: 0 0 18px rgba(255,232,106,.88), 0 2px 0 rgba(88, 49, 0, .8);
+  pointer-events: none;
 }
 
 .impact-lite {
@@ -644,16 +646,14 @@ button {
 
 .game-over-banner {
   position: fixed;
-  left: 0;
-  right: 0;
-  top: 25dvh;
+  inset: 0;
   text-align: center;
-  z-index: 40;
+  z-index: 3000;
   display: grid;
   place-items: center;
   pointer-events: none;
   font-family: 'Press Start 2P', 'ArcadeClassic', 'Courier New', monospace;
-  font-size: clamp(42px, 10vw, 120px);
+  font-size: clamp(34px, 8.4vw, 108px);
   letter-spacing: 0.14em;
   color: #ffefac;
   font-weight: 900;
@@ -663,16 +663,61 @@ button {
 .win-overlay {
   position: fixed;
   inset: 0;
+  z-index: 2800;
   display: grid;
   place-items: center;
-  z-index: 50;
-  font-family: 'Press Start 2P', 'ArcadeClassic', 'Courier New', monospace;
-  font-size: clamp(64px, 16vw, 200px);
-  color: #fff3ae;
-  letter-spacing: 0.15em;
-  font-weight: 900;
-  text-shadow: 0 0 24px rgba(255, 213, 95, 0.98), 0 0 60px rgba(255, 133, 31, 0.85), 0 0 120px rgba(25, 10, 45, 0.75);
   pointer-events: none;
+  background: radial-gradient(circle, rgba(116, 71, 5, .32), rgba(7, 10, 22, .18) 48%, transparent 72%);
+}
+
+.win-overlay-card {
+  position: relative;
+  min-width: min(88vw, 580px);
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  padding: clamp(22px, 5vw, 42px) clamp(24px, 8vw, 78px);
+  overflow: hidden;
+  border: 3px solid rgba(255, 224, 115, .9);
+  border-radius: 28px 8px 28px 8px;
+  color: #fff4b0;
+  background: linear-gradient(145deg, rgba(87, 44, 2, .96), rgba(23, 15, 36, .96) 58%, rgba(7, 10, 23, .98));
+  box-shadow: 0 0 0 5px rgba(255, 171, 47, .2), 0 18px 50px rgba(0, 0, 0, .52), 0 0 72px rgba(255, 177, 50, .48), inset 0 0 44px rgba(255, 190, 62, .17);
+  font-family: 'Press Start 2P', 'ArcadeClassic', 'Courier New', monospace;
+  text-align: center;
+}
+
+.win-overlay-card::before,
+.win-overlay-card::after {
+  content: '✦';
+  position: absolute;
+  top: 50%;
+  color: #ffe787;
+  font-size: clamp(1.5rem, 5vw, 3.5rem);
+  text-shadow: 0 0 20px rgba(255, 211, 89, .94);
+  transform: translateY(-50%);
+}
+
+.win-overlay-card::before { left: 5%; }
+.win-overlay-card::after { right: 5%; }
+
+.win-kicker,
+.win-subtitle {
+  color: #ffd66b;
+  font-size: clamp(.64rem, 2.4vw, 1rem);
+  font-weight: 1000;
+  letter-spacing: .16em;
+  text-shadow: 0 0 12px rgba(255, 192, 69, .66);
+}
+
+.win-title {
+  color: #fff6bb;
+  font-size: clamp(70px, 20vw, 190px);
+  line-height: .9;
+  font-weight: 1000;
+  letter-spacing: .02em;
+  -webkit-text-stroke: clamp(2px, .6vw, 5px) #bd5f0b;
+  text-shadow: 0 5px 0 #723006, 0 10px 0 rgba(40, 12, 2, .58), 0 0 28px rgba(255, 220, 104, .98), 0 0 72px rgba(255, 132, 27, .7);
 }
 
 .startup-error {

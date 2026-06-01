@@ -457,3 +457,58 @@
 .gameplay-log-combo-break strong { font-weight: 700; }
 .gameplay-log:nth-child(4) { opacity: .68 !important; }
 .gameplay-log:nth-child(5) { opacity: .35 !important; }
+
+.point-reward-stack {
+  position: fixed;
+  z-index: 1750;
+  top: clamp(148px, 23dvh, 230px);
+  right: clamp(8px, 2.5vw, 24px);
+  width: min(45vw, 220px);
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.point-reward-popup {
+  width: fit-content;
+  max-width: 100%;
+  display: grid;
+  justify-items: end;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 226, 112, .72);
+  border-right: 4px solid #ffe36e;
+  border-radius: 14px 4px 4px 14px;
+  color: #fff2a1;
+  background: linear-gradient(105deg, rgba(60, 35, 4, .78), rgba(15, 17, 34, .94));
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .34), 0 0 22px rgba(255, 186, 51, .28);
+  text-align: right;
+}
+
+.point-reward-popup small,
+.point-reward-popup span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.point-reward-popup small {
+  color: #ffd66b;
+  font-size: .52rem;
+  font-weight: 1000;
+  letter-spacing: .16em;
+}
+
+.point-reward-popup strong {
+  color: #fff5a8;
+  font-size: clamp(1.65rem, 7vw, 2.7rem);
+  line-height: .94;
+  text-shadow: 0 0 16px rgba(255, 219, 95, .82);
+}
+
+.point-reward-popup span {
+  font-size: .62rem;
+  font-weight: 800;
+  color: rgba(255,255,255,.82);
+}
