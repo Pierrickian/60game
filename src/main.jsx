@@ -17,6 +17,7 @@ const STAR_POPUP_DURATION_MS = 2500
 const STAR_POPUP_ACCELERATION_FACTOR = 3
 const GAME_OVER_BANNER_LEAD_MS = 1000
 const WIN_OVERLAY_DURATION_MS = 1500
+const MULTI_DECK_COMBO_BREAK_HOLD_MS = 1000
 
 const THEME_BY_INDEX = ['green', 'blue', 'purple', 'orange', 'red', 'cyan', 'gold']
 
@@ -341,6 +342,7 @@ function App() {
   const [jokerPowerPopups, setJokerPowerPopups] = useState([])
   const [cardCountBumps, setCardCountBumps] = useState({})
   const starPopupTimersRef = useRef(new Map())
+  const comboBreakHoldRef = useRef(false)
   const [showGameOverBanner, setShowGameOverBanner] = useState(false)
   const [totalDrawn, setTotalDrawn] = useState(0)
   const [precisionHits, setPrecisionHits] = useState(0)
@@ -366,6 +368,7 @@ function App() {
     const activeLevel = levelConfigs[levelId] ?? levelConfigs[levelsRegistry.startingLevel]
     comboRef.current = 0
     fxTokenRef.current += 1
+    comboBreakHoldRef.current = false
     previousUnlockedStarsRef.current = new Set()
     setTables(makeTables(buildDeckForLevel(activeLevel), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setFrontCombo(null); setBreakFx(null); setShowEnd(false); setShowGameOverBanner(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setShowLevelIntro(true); setStarted(true); setAchievementRuntime(createAchievementRuntime(activeLevel)); setAchievementPopups([]); setStarPopups([]); setJokerPowerPopups([]); setCardCountBumps({}); setTotalDrawn(0); setPrecisionHits(0); starPopupTimersRef.current.forEach((timerMeta) => window.clearTimeout(timerMeta.timerId)); starPopupTimersRef.current.clear()
   }
@@ -385,7 +388,7 @@ function App() {
 
   function guess(predictedCard, buttonIndex) {
     const label = predictedCard?.label
-    if (showEnd) return
+    if (showEnd || comboBreakHoldRef.current) return
     fxTokenRef.current += 1
     const fxToken = fxTokenRef.current
     setTables((currentTables) => {
@@ -487,6 +490,15 @@ function App() {
       setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo } : null)
       scheduleFxClear(fxToken, previousCombo >= 2 ? 2400 : 220)
       if (fxTokenRef.current === fxToken && referenceDeck.length === 0) triggerEndSequence(fxToken)
+      if (currentTables.length > 1) {
+        comboBreakHoldRef.current = true
+        window.setTimeout(() => {
+          if (fxTokenRef.current !== fxToken) return
+          comboBreakHoldRef.current = false
+          setTables(makeTables(referenceDeck, 1, [referenceTable], referenceTable.id))
+        }, MULTI_DECK_COMBO_BREAK_HOLD_MS)
+        return revealedTables
+      }
       return makeTables(referenceDeck, 1, [referenceTable], referenceTable.id)
     })
   }
@@ -499,6 +511,8 @@ function App() {
   }
 
   function goHome() {
+    fxTokenRef.current += 1
+    comboBreakHoldRef.current = false
     setStarted(false)
     setShowEnd(false)
     setFrontCombo(null)

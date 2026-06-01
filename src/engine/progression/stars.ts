@@ -7,7 +7,7 @@ export function getPrecisionHitIncrement(hitCount) {
 
 export function getStarModel(level, runtime) {
   const difficulty = level?.difficulty || 'Hard'
-  const scoreTarget = SCORE_THRESHOLDS[difficulty] ?? 400
+  const scoreTarget = level?.scoreTarget ?? SCORE_THRESHOLDS[difficulty] ?? 400
   const precisionTarget = PRECISION_THRESHOLDS[difficulty] ?? 0.4
   const minCardValue = Math.min(...Object.keys(level.startingDeck).filter((v) => v !== 'joker').map(Number))
   const precision = runtime.totalDrawn > 0 ? runtime.precisionHits / runtime.totalDrawn : 0

@@ -2,6 +2,7 @@
   "id": "hard_30",
   "name": "Hard 30",
   "difficulty": "Hard",
+  "scoreTarget": 250,
   "startingDeck": {
     "3": 10,
     "5": 6,
