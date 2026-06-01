@@ -397,6 +397,8 @@
   top: clamp(116px, 16dvh, 150px);
   left: 50%;
   width: min(88vw, 470px);
+  max-height: calc(50dvh - clamp(116px, 16dvh, 150px));
+  overflow: hidden;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
