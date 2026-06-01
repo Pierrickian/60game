@@ -447,9 +447,11 @@
 
 .gameplay-log-combo { color: #ff9f43; }
 .gameplay-log-success { color: #ffe36e; }
-.gameplay-log-other { color: #f7f8ff; }
+.gameplay-log-hit { color: #f7f8ff; }
+.gameplay-log-combo-break { color: #aeb4c2; }
 .gameplay-log-combo strong,
 .gameplay-log-success strong { font-weight: 1000; }
-.gameplay-log-other strong { font-weight: 700; }
+.gameplay-log-hit strong,
+.gameplay-log-combo-break strong { font-weight: 700; }
 .gameplay-log:nth-child(4) { opacity: .68 !important; }
 .gameplay-log:nth-child(5) { opacity: .35 !important; }
