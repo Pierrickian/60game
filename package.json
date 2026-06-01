@@ -5,11 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run validate:levels && npm run validate:runtime-decks && npm run validate:browser-storage && vite build",
+    "build": "npm run validate:levels && npm run validate:runtime-decks && npm run validate:browser-storage && npm run validate:app-startup && vite build",
     "preview": "vite preview",
     "validate:levels": "node scripts/validate-level-card-counts.mjs",
     "validate:runtime-decks": "node scripts/validate-table-deck-runtime.mjs",
-    "validate:browser-storage": "node scripts/validate-browser-storage.mjs"
+    "validate:browser-storage": "node scripts/validate-browser-storage.mjs",
+    "validate:app-startup": "node scripts/validate-app-startup.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.0",
