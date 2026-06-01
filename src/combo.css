@@ -260,42 +260,19 @@
   pointer-events: none;
 }
 
-.front-combo,
 .combo-break-overlay {
   position: fixed;
-  z-index: 120;
+  z-index: 1400;
   left: 50vw;
-  top: clamp(116px, 20dvh, 158px);
+  top: 45dvh;
   transform: translateX(-50%);
-  width: min(92vw, 620px);
+  width: min(96vw, 760px);
   pointer-events: none;
   text-align: center;
   display: grid;
   justify-items: center;
   place-content: center;
   font-family: Inter, ui-rounded, system-ui, sans-serif;
-}
-
-.front-combo {
-  font-size: clamp(1.9rem, 9.5vw, 4rem);
-  line-height: .92;
-  font-weight: 1000;
-  letter-spacing: -.035em;
-  color: #fff7c9;
-  text-shadow:
-    0 2px 0 rgba(117, 58, 0, .95),
-    0 0 16px rgba(255, 221, 92, .85),
-    0 0 36px rgba(255, 151, 71, .42);
-}
-
-.front-combo::after {
-  content: '';
-  position: absolute;
-  inset: -42% 12%;
-  z-index: -1;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(255, 221, 91, .2), rgba(255, 94, 94, .08) 48%, transparent 72%);
-  filter: blur(14px);
 }
 
 .combo-break-overlay::after {
@@ -309,7 +286,7 @@
 }
 
 .combo-break-overlay strong {
-  font-size: clamp(1.55rem, 8vw, 3.25rem);
+  font-size: clamp(2.35rem, 12vw, 5.8rem);
   line-height: .96;
   font-weight: 1000;
   letter-spacing: -.03em;
@@ -321,7 +298,7 @@
 
 .combo-break-overlay span {
   margin-top: 2px;
-  font-size: clamp(1rem, 5.3vw, 2.2rem);
+  font-size: clamp(1.6rem, 8vw, 3.8rem);
   font-weight: 1000;
   letter-spacing: -.02em;
   color: #ff5f9e;
@@ -408,9 +385,75 @@
     width: min(8.6vw, 43px);
   }
 
-  .front-combo,
   .combo-break-overlay {
-    top: clamp(102px, 18dvh, 138px);
-    width: 94vw;
+    top: 44dvh;
+    width: 96vw;
   }
 }
+
+.gameplay-log-stack {
+  position: fixed;
+  z-index: 1300;
+  top: clamp(116px, 16dvh, 150px);
+  left: 50%;
+  width: min(88vw, 470px);
+  max-height: calc(50dvh - clamp(116px, 16dvh, 150px));
+  overflow: hidden;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, #000 0%, #000 72%, transparent 100%);
+}
+
+.gameplay-log {
+  min-height: 42px;
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px 8px 10px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-left: 4px solid currentColor;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(8, 11, 25, .94), rgba(16, 20, 39, .8));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .26), inset 0 1px 0 rgba(255, 255, 255, .08);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  backdrop-filter: blur(4px);
+}
+
+.gameplay-log-marker {
+  font-size: 1.15rem;
+  font-weight: 1000;
+  line-height: 1;
+}
+
+.gameplay-log small {
+  min-width: 54px;
+  color: currentColor;
+  font-size: .56rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  opacity: .76;
+}
+
+.gameplay-log strong {
+  color: currentColor;
+  font-size: clamp(.96rem, 4vw, 1.28rem);
+  letter-spacing: .025em;
+  line-height: 1;
+  text-align: right;
+}
+
+.gameplay-log-combo { color: #ff9f43; }
+.gameplay-log-success { color: #ffe36e; }
+.gameplay-log-hit { color: #f7f8ff; }
+.gameplay-log-combo-break { color: #aeb4c2; }
+.gameplay-log-combo strong,
+.gameplay-log-success strong { font-weight: 1000; }
+.gameplay-log-hit strong,
+.gameplay-log-combo-break strong { font-weight: 700; }
+.gameplay-log:nth-child(4) { opacity: .68 !important; }
+.gameplay-log:nth-child(5) { opacity: .35 !important; }

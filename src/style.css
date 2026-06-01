@@ -610,7 +610,6 @@ button {
   filter: brightness(.96);
 }
 .mini-stars { display:flex; gap:4px; margin-top:6px; color:#ffd76b; font-size:12px; }
-.achievement-popup { position: fixed; right: 12px; top: 90px; z-index: 30; background: rgba(20,20,40,.86); border: 1px solid rgba(255,215,107,.55); color:#fff; padding:10px 12px; border-radius: 12px; box-shadow: 0 0 24px rgba(255,215,107,.35); }
 .star-panel { display:grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap:10px; width:100%; margin:12px 0; }
 .star-row { background: rgba(255,255,255,.07); border-radius: 12px; padding: 8px; display:flex; flex-direction:column; align-items:center; gap:4px; }
 .star-row.on { box-shadow: 0 0 16px rgba(255,215,107,.35); }
@@ -622,10 +621,6 @@ button {
 .reward-star.size-lg { font-size:44px; }
 .reward-star.size-md { font-size:20px; }
 
-.reward-popup { position: fixed; left: 50%; top: 20dvh; transform: translateX(-50%); z-index: 35; display:flex; gap:12px; align-items:center; padding: 12px 18px; border-radius: 16px; background: radial-gradient(circle at 20% 10%, rgba(255,255,255,.25), rgba(32,20,56,.9) 60%); border:1px solid rgba(255,216,103,.7); box-shadow: 0 10px 40px rgba(255,169,39,.4); pointer-events:none; }
-.reward-popup b { font-size:18px; color:#fff2be; }
-.reward-popup small { color:#f5d89e; opacity:.92; }
-
 .star-row { min-height: 180px; justify-content: center; }
 .star-row.on { box-shadow: 0 0 22px rgba(255,215,107,.42), inset 0 0 24px rgba(255,197,68,.12); }
 .star-row .animated-metric { font-size: clamp(28px, 7vw, 44px); color:#fff; }
@@ -634,10 +629,6 @@ button {
 .mini-stars i { font-style: normal; font-size:16px; }
 
 .mini-star { font-size: 16px; }
-
-.reward-popup.is-unlocked { border-color: rgba(255,216,103,.7); box-shadow: 0 10px 40px rgba(255,169,39,.4); }
-.reward-popup.is-lost { border-color: rgba(112,182,255,.9); box-shadow: 0 10px 40px rgba(71,143,255,.45); background: radial-gradient(circle at 20% 10%, rgba(210,232,255,.3), rgba(18,30,62,.92) 60%); }
-.reward-popup.is-lost b, .reward-popup.is-lost small { color: #cfe5ff; }
 
 .animated-metric.metric-score-fit {
   display: block;
@@ -682,23 +673,4 @@ button {
   font-weight: 900;
   text-shadow: 0 0 24px rgba(255, 213, 95, 0.98), 0 0 60px rgba(255, 133, 31, 0.85), 0 0 120px rgba(25, 10, 45, 0.75);
   pointer-events: none;
-}
-
-.joker-power-popup {
-  position: fixed;
-  left: 50%;
-  top: 34dvh;
-  transform: translateX(-50%);
-  z-index: 42;
-  pointer-events: none;
-  font-weight: 900;
-  font-size: clamp(30px, 8vw, 56px);
-  letter-spacing: 0.06em;
-  color: #fff7cb;
-  text-shadow: 0 0 10px rgba(255, 213, 91, 0.95), 0 0 28px rgba(255, 140, 37, 0.82), 0 0 48px rgba(112, 64, 255, 0.6);
-  padding: 10px 18px;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 220, 130, 0.85);
-  background: radial-gradient(circle at 50% 10%, rgba(255, 250, 232, 0.22), rgba(57, 24, 94, 0.92) 62%, rgba(10, 7, 22, 0.95));
-  box-shadow: 0 0 36px rgba(255, 158, 50, 0.55), inset 0 0 24px rgba(255, 248, 176, 0.25);
 }
