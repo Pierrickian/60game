@@ -155,7 +155,7 @@ function makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics) {
     ]
     context.textAlign = 'left'
     rows.forEach(([label, value], index) => {
-      const y = 620 + index * 106
+      const y = 690 + index * 106
       context.fillStyle = 'rgba(255, 255, 255, 0.1)'
       context.beginPath()
       context.roundRect(150, y - 58, 600, 78, 28)
