@@ -1,7 +1,7 @@
 {
   "id": "combos_time",
   "name": "Combos Time",
-  "description": "Combos Time",
+  "description": "Reach a x5 combo",
   "pointsReward": 40,
   "handler": "comboThreshold",
   "params": {

@@ -1,7 +1,7 @@
 {
   "id": "flow_of_the_multiverse",
   "name": "Flow of the Multiverse",
-  "description": "Flow of the Multiverse",
+  "description": "Match the multiverse rank twice in a row",
   "pointsReward": 140,
   "handler": "rankStreak",
   "params": {

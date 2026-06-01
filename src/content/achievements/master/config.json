@@ -1,7 +1,7 @@
 {
   "id": "master",
   "name": "Master",
-  "description": "Master",
+  "description": "Match the master rank twice in a row",
   "pointsReward": 90,
   "handler": "rankStreak",
   "params": {

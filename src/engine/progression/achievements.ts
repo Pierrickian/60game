@@ -30,6 +30,7 @@ export function evaluateAchievements(runtimeItems, draw) {
     try {
       if (handler(item, item.config.params || {}, draw)) {
         item.unlocked = true
+        item.unlockedOrder = runtimeItems.filter((runtimeItem) => runtimeItem.unlockedOrder).length + 1
         unlocked.push(item.config)
       }
     } catch (error) {

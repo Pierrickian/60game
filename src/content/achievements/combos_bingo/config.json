@@ -1,7 +1,7 @@
 {
   "id": "combos_bingo",
   "name": "Combos Bingo",
-  "description": "Combos Bingo",
+  "description": "Reach a x10 combo",
   "pointsReward": 70,
   "handler": "comboThreshold",
   "params": {

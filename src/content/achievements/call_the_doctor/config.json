@@ -1,7 +1,7 @@
 {
   "id": "call_the_doctor",
   "name": "Call the Doctor",
-  "description": "Call the Doctor",
+  "description": "Reach a x20 combo",
   "pointsReward": 130,
   "handler": "comboThreshold",
   "params": {
