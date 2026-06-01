@@ -629,7 +629,6 @@ button {
 .star-row { min-height: 180px; justify-content: center; }
 .star-row.on { box-shadow: 0 0 22px rgba(255,215,107,.42), inset 0 0 24px rgba(255,197,68,.12); }
 .star-row .animated-metric { font-size: clamp(28px, 7vw, 44px); color:#fff; }
-.star-current { opacity:.85; }
 
 .mini-stars { display:flex; gap:6px; margin-top:8px; }
 .mini-stars i { font-style: normal; font-size:16px; }
