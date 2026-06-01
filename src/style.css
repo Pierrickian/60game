@@ -674,3 +674,24 @@ button {
   text-shadow: 0 0 24px rgba(255, 213, 95, 0.98), 0 0 60px rgba(255, 133, 31, 0.85), 0 0 120px rgba(25, 10, 45, 0.75);
   pointer-events: none;
 }
+
+.startup-error {
+  min-height: 100dvh;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  color: #fff;
+  background: #070a16;
+}
+
+.startup-error strong {
+  font-size: 2rem;
+  color: #ffe86a;
+}
+
+.startup-error p {
+  margin: 0;
+  color: rgba(255,255,255,.78);
+}

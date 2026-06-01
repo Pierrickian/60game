@@ -4,11 +4,21 @@ import { join } from 'node:path'
 const levelsDirectory = new URL('../src/content/levels/', import.meta.url)
 const levelDirectories = (await readdir(levelsDirectory, { withFileTypes: true }))
   .filter((entry) => entry.isDirectory())
+const registry = JSON.parse(await readFile(new URL('../src/content/registry/levels.json', import.meta.url), 'utf8'))
+const configuredLevelIds = new Set(levelDirectories.map((directory) => directory.name))
+const registryLevelIds = registry.levels.map(({ id }) => id)
 const errors = []
+
+if (!configuredLevelIds.has(registry.startingLevel)) errors.push(`registry: missing starting level config ${registry.startingLevel}`)
+if (new Set(registryLevelIds).size !== registryLevelIds.length) errors.push('registry: level ids must be unique')
+for (const id of registryLevelIds) {
+  if (!configuredLevelIds.has(id)) errors.push(`registry: missing level config ${id}`)
+}
 
 for (const directory of levelDirectories) {
   const configPath = join(levelsDirectory.pathname, directory.name, 'config.json')
   const config = JSON.parse(await readFile(configPath, 'utf8'))
+  if (config.id !== directory.name) errors.push(`${directory.name}: config id must match its directory name`)
   const numericCards = Object.entries(config.startingDeck)
     .filter(([label]) => label !== 'joker')
     .map(([label, count]) => ({ value: Number(label), count }))
