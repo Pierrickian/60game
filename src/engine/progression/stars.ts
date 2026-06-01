@@ -1,6 +1,10 @@
 const SCORE_THRESHOLDS = { 'Super Easy': 100, Easy: 200, Medium: 300, Hard: 400 }
 const PRECISION_THRESHOLDS = { 'Super Easy': 0.1, Easy: 0.2, Medium: 0.3, Hard: 0.4 }
 
+export function getPrecisionHitIncrement(hitCount) {
+  return hitCount > 0 ? 1 : 0
+}
+
 export function getStarModel(level, runtime) {
   const difficulty = level?.difficulty || 'Hard'
   const scoreTarget = SCORE_THRESHOLDS[difficulty] ?? 400
