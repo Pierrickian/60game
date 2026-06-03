@@ -663,7 +663,7 @@ button {
   position: fixed;
   left: 50%;
   top: 30dvh;
-  z-index: 28;
+  z-index: 1320;
   min-width: 150px;
   transform: translateX(-50%);
   border: 1px solid rgba(255,255,255,.25);
