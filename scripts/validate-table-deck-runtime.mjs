@@ -5,6 +5,7 @@ import {
   drawCard,
   haveSameDeckComposition,
   makeTables,
+  peekNextDrawCard,
   reconcileDeckAfterWinningDraw,
   resyncDeckFromPromoted
 } from '../src/runtime/tableDecks.js'
@@ -26,6 +27,8 @@ const initialTables = makeTables(cards, 2)
 const secondaryDeck = initialTables[1].deck
 const { drawnCard, nextDeck } = drawCard(initialTables[0].deck)
 expect(drawnCard && nextDeck !== cards && nextDeck.length === 1 && cards.length === 2, 'Expected draws to return a trimmed deck without mutating the source deck.')
+expect(peekNextDrawCard([card('18', 'bottom'), card('36', 'top')]).label === '36', 'Expected next-card peeks to use the same logical top as draws.')
+expect(peekNextDrawCard([card('18', 'same-bottom'), card('18', 'same-top')]).label === '18', 'Expected same-value next-card peeks to preserve the value needed to suppress more/less hints.')
 
 const updatedTables = makeTables(nextDeck, 2, initialTables, initialTables[0].id)
 expect(updatedTables[1].deck === secondaryDeck, 'Expected existing combo decks to be retained between draws.')

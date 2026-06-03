@@ -7,8 +7,12 @@ export function shuffle(cards) {
   return copy
 }
 
+export function peekNextDrawCard(deck) {
+  return deck[deck.length - 1]
+}
+
 export function drawCard(deck) {
-  const drawnCard = deck[deck.length - 1]
+  const drawnCard = peekNextDrawCard(deck)
   const nextDeck = drawnCard === undefined ? deck : deck.slice(0, -1)
   return { drawnCard, nextDeck }
 }
