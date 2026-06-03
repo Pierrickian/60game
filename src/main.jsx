@@ -229,14 +229,22 @@ function FaceCard({ card, empty = false }) {
 
 const MemoFaceCard = React.memo(FaceCard)
 
-function DeckGainPopup({ points, revealId }) {
-  if (!points) return null
-  return <motion.div key={`gain-${revealId}`} className="gain-pop" initial={{ opacity: 0, x: -8, y: 10, scale: .72 }} animate={{ opacity: [0, 1, 1, 0], x: [-8, 0, 5, 10], y: [10, -4, -14, -24], scale: [.72, 1.16, 1, .92] }} transition={{ duration: 1.05, times: [0, .18, .62, 1], ease: 'easeOut' }}>+{points}</motion.div>
+function DeckGainPopup({ label, revealId, tone = 'points' }) {
+  if (!label) return null
+  return <motion.div key={`gain-${revealId}-${label}`} className={`gain-pop gain-pop-${tone}`} initial={{ opacity: 0, x: -8, y: 10, scale: .72 }} animate={{ opacity: [0, 1, 1, 0], x: [-8, 0, 5, 10], y: [10, -4, -14, -24], scale: [.72, 1.16, 1, .92] }} transition={{ duration: 1.05, times: [0, .18, .62, 1], ease: 'easeOut' }}>{label}</motion.div>
 }
 
-function DiscardPile({ card, won, miss, points, revealId, showCombo }) {
+function getDeckGainPopup(card, won) {
+  if (!won || !card) return null
+  if (card.label === 'JOKER') return { label: 'J', tone: 'joker' }
+  if (!card.value) return null
+  return { label: `+${card.value}`, tone: 'points' }
+}
+
+function DiscardPile({ card, won, miss, revealId, showCombo }) {
   const stateClass = won ? 'impact-lite' : miss ? 'miss-shake' : ''
-  return <div className="discard-zone"><div className="plate plate-purple" /><div className={`discard-card-wrap ${stateClass}`}><div key={revealId} className="discard-drop"><MemoFaceCard card={card} empty={!card} /></div><AnimatePresence>{showCombo ? <motion.div className="local-combo-label" initial={{ opacity: 0, y: 14, scale: .7 }} animate={{ opacity: 1, y: -18, scale: 1 }} exit={{ opacity: 0, y: -32, scale: .8 }} transition={{ duration: .25 }}>COMBO</motion.div> : null}<DeckGainPopup points={points} revealId={revealId} /></AnimatePresence></div></div>
+  const gainPopup = getDeckGainPopup(card, won)
+  return <div className="discard-zone"><div className="plate plate-purple" /><div className={`discard-card-wrap ${stateClass}`}><div key={revealId} className="discard-drop"><MemoFaceCard card={card} empty={!card} /></div><AnimatePresence>{showCombo ? <motion.div className="local-combo-label" initial={{ opacity: 0, y: 14, scale: .7 }} animate={{ opacity: 1, y: -18, scale: 1 }} exit={{ opacity: 0, y: -32, scale: .8 }} transition={{ duration: .25 }}>COMBO</motion.div> : null}<DeckGainPopup label={gainPopup?.label} tone={gainPopup?.tone} revealId={revealId} /></AnimatePresence></div></div>
 }
 
 const MemoDiscardPile = React.memo(DiscardPile)
@@ -265,8 +273,7 @@ function BetClone({ bet }) {
 }
 
 function TableSlot({ table, totalCards }) {
-  const points = table.lastHit && table.lastCard ? table.lastCard.value : null
-  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><MemoDeckStack remaining={table.deck.length} isMain={table.isMain} totalCards={totalCards} /><div className="arc-ribbon mini-ribbon" /><MemoDiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} points={points} revealId={table.revealId} showCombo={table.showCombo} /></motion.div>
+  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><MemoDeckStack remaining={table.deck.length} isMain={table.isMain} totalCards={totalCards} /><div className="arc-ribbon mini-ribbon" /><MemoDiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} revealId={table.revealId} showCombo={table.showCombo} /></motion.div>
 }
 
 const MemoTableSlot = React.memo(TableSlot)
