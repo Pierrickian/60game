@@ -5,9 +5,11 @@ import {
   drawCard,
   haveSameDeckComposition,
   makeTables,
+  peekNextDrawCard,
   reconcileDeckAfterWinningDraw,
   resyncDeckFromPromoted
 } from '../src/runtime/tableDecks.js'
+import { getMoreLessHintDirection } from '../src/runtime/moreLessHints.js'
 
 function card(label, id) {
   return { label, id }
@@ -26,6 +28,13 @@ const initialTables = makeTables(cards, 2)
 const secondaryDeck = initialTables[1].deck
 const { drawnCard, nextDeck } = drawCard(initialTables[0].deck)
 expect(drawnCard && nextDeck !== cards && nextDeck.length === 1 && cards.length === 2, 'Expected draws to return a trimmed deck without mutating the source deck.')
+expect(peekNextDrawCard([card('18', 'bottom'), card('36', 'top')]).label === '36', 'Expected next-card peeks to use the same logical top as draws.')
+expect(peekNextDrawCard([card('18', 'same-bottom'), card('18', 'same-top')]).label === '18', 'Expected same-value next-card peeks to preserve the value needed to suppress more/less hints.')
+expect(getMoreLessHintDirection({ label: '18', value: 18 }, { label: '36', value: 36 }) === 'MORE', 'Expected a higher numeric next card to produce a MORE hint.')
+expect(getMoreLessHintDirection({ label: '36', value: 36 }, { label: '18', value: 18 }) === 'LESS', 'Expected a lower numeric next card to produce a LESS hint.')
+expect(getMoreLessHintDirection({ label: '18', value: 18 }, { label: '18', value: 18 }) === null, 'Expected equal numeric cards to suppress more/less hints.')
+expect(getMoreLessHintDirection({ label: 'JOKER', value: 0 }, { label: '36', value: 36 }) === null, 'Expected a drawn Joker to suppress more/less hints.')
+expect(getMoreLessHintDirection({ label: '18', value: 18 }, { label: 'JOKER', value: 0 }) === null, 'Expected a next Joker to suppress more/less hints.')
 
 const updatedTables = makeTables(nextDeck, 2, initialTables, initialTables[0].id)
 expect(updatedTables[1].deck === secondaryDeck, 'Expected existing combo decks to be retained between draws.')
