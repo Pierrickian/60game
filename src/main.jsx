@@ -12,6 +12,7 @@ import { AchievementsMenu } from './components/achievements-menu'
 import { chooseWeightedJokerPower, resolveJokerPowerHandler } from './engine/jokerPowers'
 import { readStoredNumber, readStoredObject, writeStoredValue } from './runtime/browserStorage'
 import { DeckReconciliationError, applyDeckMutationToTables, countCardsByLabel, drawCard, makeTables, peekNextDrawCard, reconcileDeckAfterWinningDraw, resyncDeckFromPromoted, shuffle } from './runtime/tableDecks'
+import { getMoreLessHintDirection } from './runtime/moreLessHints'
 
 const COMBO_LABELS = { 2: 'GREAT', 3: 'AMAZING', 4: 'IMPRESSIVE', 5: 'AWESOME', 6: 'GOD IS PLAYING' }
 const POST_GOD_LABELS = ['HAPPY BIRTHDAY', 'MY LORD', 'CHIRURGICAL', 'FIN LIMIER', 'OISEAU RARE', 'RENARD', 'LOUP', 'TIGRE', 'LION', 'DINOSAURE', 'METEORITE', 'SOLEIL', 'GALAXIE', 'COSMOS', 'UNIVERS', 'MULTIVERS', 'TROU NOIR', 'BIG BANG', 'QUANTIC AWERENESS', 'SOURCE VIBRATION', 'LOVE', 'PEACE', 'VOID', 'PURE ENERGY', 'PURE BODY', 'PURE MIND', 'PURE HEART', 'PURE SOUL', 'ANGEL', 'ARCHANGEL', 'DIVINE', 'DIVINE 2', 'DIVINE 3', 'DIVINE 4', 'DIVINE 5', 'DIVINE 6', 'DIVINE 7', 'DIVINE 8', 'DIVINE 9', 'DIVINE 10', 'DIVINE 1000', 'DIVINE 1M', 'DIVINE 1B', 'DIVINE 999T']
@@ -431,13 +432,14 @@ function App() {
   function showMoreLessHint(drawnCard, nextDeck, nextTableCount, currentTableCount) {
     if (!moreLessMode || currentTableCount !== 1 || nextTableCount !== 1 || !drawnCard || !nextDeck?.length) return
     const nextCard = peekNextDrawCard(nextDeck)
-    if (!nextCard || nextCard.value === drawnCard.value) {
+    const direction = getMoreLessHintDirection(drawnCard, nextCard)
+    if (!direction) {
       clearMoreLessHint()
       return
     }
     const token = ++moreLessHintTokenRef.current
     const id = `more-less-${token}`
-    setMoreLessHint({ id, direction: nextCard.value > drawnCard.value ? 'MORE' : 'LESS' })
+    setMoreLessHint({ id, direction })
     window.setTimeout(() => {
       if (moreLessHintTokenRef.current !== token) return
       setMoreLessHint(null)
