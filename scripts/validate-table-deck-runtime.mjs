@@ -25,7 +25,7 @@ const cards = [card('2', 'a'), card('3', 'b')]
 const initialTables = makeTables(cards, 2)
 const secondaryDeck = initialTables[1].deck
 const { drawnCard, nextDeck } = drawCard(initialTables[0].deck)
-expect(drawnCard && nextDeck === cards && nextDeck.length === 1, 'Expected draws to reuse the existing deck and remove one card in place.')
+expect(drawnCard && nextDeck !== cards && nextDeck.length === 1 && cards.length === 2, 'Expected draws to return a trimmed deck without mutating the source deck.')
 
 const updatedTables = makeTables(nextDeck, 2, initialTables, initialTables[0].id)
 expect(updatedTables[1].deck === secondaryDeck, 'Expected existing combo decks to be retained between draws.')
@@ -77,7 +77,10 @@ const losingTables = [
   { id: 'main', deck: [card('2', 'l2'), card('5', 'l5')] },
   { id: 'combo-1', deck: [card('2', 'q2'), card('7', 'q7')] }
 ]
-const revealedLosingTables = losingTables.map((table) => ({ ...table, lastCard: drawCard(table.deck).drawnCard }))
+const revealedLosingTables = losingTables.map((table) => {
+  const { drawnCard: losingDraw, nextDeck: losingDeck } = drawCard(table.deck)
+  return { ...table, deck: losingDeck, lastCard: losingDraw }
+})
 expect(labels(revealedLosingTables[0].deck) === '2' && labels(revealedLosingTables[1].deck) === '2', 'Expected a loss to preserve the existing draw-only behavior without reconciliation.')
 
 const promotedDeck = [card('3', 'p3'), card('5', 'p5')]
@@ -94,10 +97,18 @@ const resyncedDeck = resyncDeckFromPromoted(promotedDeck)
 expect(labels(resyncedDeck) === labels(promotedDeck) && resyncedDeck !== promotedDeck, 'Expected exceptional recovery to resynchronize only the incoherent deck from the promoted deck.')
 expect(labels(coherentDeck) === '5,3', 'Expected exceptional recovery not to touch coherent sibling decks.')
 
-const jokerMutatedDecks = applyDeckMutationToTables(reconciledWinningTables, firstWinningTable.id, (deck, table) => [...deck, card('2', `joker-add-${table.id}`)])
+let jokerMutationCalls = 0
+const jokerMutatedDecks = applyDeckMutationToTables(reconciledWinningTables, firstWinningTable.id, (deck, table) => {
+  jokerMutationCalls += 1
+  return [...deck, card('2', `joker-add-${table.id}`)]
+})
+expect(jokerMutationCalls === 1, 'Expected an explicit Joker mutation to be applied only to the promoted deck.')
 expect(jokerMutatedDecks.every((table) => haveSameDeckComposition(table.deck, jokerMutatedDecks[0].deck)), 'Expected an explicit Joker mutation to keep every active deck synchronized by composition.')
+expect(new Set(jokerMutatedDecks.map((table) => labels(table.deck))).size === 1, 'Expected Joker mutations to propagate from the promoted deck without recomputing sibling decks.')
 const jokerCounts = countCardsByLabel(jokerMutatedDecks[0].deck, ['2', '3', '5', '7'])
 expect(jokerCounts['2'] === 1, 'Expected an explicit Joker mutation to make an exhausted prediction label legitimately reappear.')
+const unchangedTables = applyDeckMutationToTables(reconciledWinningTables, firstWinningTable.id, (deck) => deck)
+expect(unchangedTables === reconciledWinningTables, 'Expected no-op Joker powers to preserve table references.')
 expect(randomCalls === shuffledSource.length - 1, 'Expected reconciliation and explicit Joker additions not to trigger extra shuffles.')
 Math.random = originalRandom
 
