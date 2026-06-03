@@ -8,7 +8,9 @@ export function shuffle(cards) {
 }
 
 export function drawCard(deck) {
-  return { drawnCard: deck.pop(), nextDeck: deck }
+  const drawnCard = deck[deck.length - 1]
+  const nextDeck = drawnCard === undefined ? deck : deck.slice(0, -1)
+  return { drawnCard, nextDeck }
 }
 
 export class DeckReconciliationError extends Error {
@@ -18,15 +20,13 @@ export class DeckReconciliationError extends Error {
   }
 }
 
-// drawCard pops from the top at the end of the array, so index 0 is the logical bottom.
+// drawCard reads the top at the end of the array, so index 0 is the logical bottom.
 export function reconcileDeckAfterWinningDraw(deck, drawnCard, predictedLabel) {
   if (!drawnCard) throw new DeckReconciliationError(predictedLabel)
   if (drawnCard.label === predictedLabel) return deck
-  const reconciledDeck = [drawnCard, ...deck]
-  const predictedIndex = reconciledDeck.findIndex((card) => card.label === predictedLabel)
+  const predictedIndex = deck.findIndex((card) => card.label === predictedLabel)
   if (predictedIndex < 0) throw new DeckReconciliationError(predictedLabel)
-  reconciledDeck.splice(predictedIndex, 1)
-  return reconciledDeck
+  return [drawnCard, ...deck.slice(0, predictedIndex), ...deck.slice(predictedIndex + 1)]
 }
 
 export function resyncDeckFromPromoted(promotedDeck) {
@@ -42,12 +42,16 @@ export function haveSameDeckComposition(leftDeck, rightDeck) {
 }
 
 export function applyDeckMutationToTables(tables, promotedId, mutateDeck) {
-  const mutatedTables = tables.map((table) => ({ ...table, deck: mutateDeck(table.deck, table) }))
-  const promotedDeck = mutatedTables.find((table) => table.id === promotedId)?.deck
-  if (!promotedDeck) return mutatedTables
-  return mutatedTables.map((table) => table.id !== promotedId && !haveSameDeckComposition(table.deck, promotedDeck)
-    ? { ...table, deck: resyncDeckFromPromoted(promotedDeck) }
-    : table)
+  const promotedTable = tables.find((table) => table.id === promotedId)
+  if (!promotedTable) return tables
+
+  const promotedDeck = mutateDeck(promotedTable.deck, promotedTable)
+  if (promotedDeck === promotedTable.deck) return tables
+
+  return tables.map((table) => ({
+    ...table,
+    deck: table.id === promotedId ? promotedDeck : resyncDeckFromPromoted(promotedDeck)
+  }))
 }
 
 export function countCardsByLabel(cards, labels = []) {
