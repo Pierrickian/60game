@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run validate:levels && npm run validate:runtime-decks && npm run validate:browser-storage && npm run validate:app-startup && vite build",
+    "build": "npm run validate:probabilities && npm run validate:levels && npm run validate:runtime-decks && npm run validate:browser-storage && npm run validate:app-startup && vite build",
     "preview": "vite preview",
+    "validate:probabilities": "node scripts/validate-card-probabilities.mjs",
     "validate:levels": "node scripts/validate-level-card-counts.mjs",
     "validate:runtime-decks": "node scripts/validate-table-deck-runtime.mjs",
     "validate:browser-storage": "node scripts/validate-browser-storage.mjs",

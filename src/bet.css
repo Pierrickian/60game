@@ -56,7 +56,8 @@
 
 .prediction-card[aria-disabled='true'] .prediction-value,
 .prediction-card[aria-disabled='true'] .prediction-icon,
-.prediction-card[aria-disabled='true'] .prediction-left {
+.prediction-card[aria-disabled='true'] .prediction-left,
+.prediction-card[aria-disabled='true'] .prediction-probability {
   color: rgba(255,255,255,.36) !important;
   text-shadow: none !important;
 }
@@ -102,4 +103,41 @@
     width: min(18vw, 72px);
     border-radius: 15px;
   }
+}
+
+.prediction-card.most-likely:not([aria-disabled='true']) {
+  border-color: rgba(255, 245, 157, .96);
+  animation: probabilityBestGlow 1.15s ease-in-out infinite alternate;
+}
+
+.prediction-probability {
+  position: absolute;
+  z-index: 2;
+  left: 7px;
+  top: 7px;
+  min-width: 33px;
+  padding: 3px 5px;
+  border: 1px solid rgba(255, 255, 255, .24);
+  border-radius: 999px;
+  color: #fff9b8;
+  background: rgba(5, 8, 20, .62);
+  font-size: .55rem;
+  font-weight: 1000;
+  line-height: 1;
+  letter-spacing: .02em;
+  text-align: center;
+  box-shadow: 0 0 12px rgba(255, 225, 91, .18);
+}
+
+@keyframes probabilityBestGlow {
+  from {
+    box-shadow: 0 12px 26px rgba(0,0,0,.32), 0 0 10px rgba(255,231,115,.5), inset 0 1px 0 rgba(255,255,255,.28);
+  }
+  to {
+    box-shadow: 0 12px 26px rgba(0,0,0,.32), 0 0 24px rgba(255,240,151,.96), inset 0 0 14px rgba(255,239,134,.28);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prediction-card.most-likely:not([aria-disabled='true']) { animation: none; }
 }

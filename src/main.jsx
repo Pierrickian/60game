@@ -13,6 +13,7 @@ import { chooseWeightedJokerPower, resolveJokerPowerHandler } from './engine/jok
 import { readStoredNumber, readStoredObject, writeStoredValue } from './runtime/browserStorage'
 import { DeckReconciliationError, applyDeckMutationToTables, countCardsByLabel, drawCard, makeTables, peekNextDrawCard, reconcileDeckAfterWinningDraw, resyncDeckFromPromoted, shuffle } from './runtime/tableDecks'
 import { getMoreLessHintDirection } from './runtime/moreLessHints'
+import { formatCardProbability, getCardProbabilityModel, getMostLikelyCardLabels } from './runtime/cardProbabilities'
 
 const COMBO_LABELS = { 2: 'GREAT', 3: 'AMAZING', 4: 'IMPRESSIVE', 5: 'AWESOME', 6: 'GOD IS PLAYING' }
 const POST_GOD_LABELS = ['HAPPY BIRTHDAY', 'MY LORD', 'CHIRURGICAL', 'FIN LIMIER', 'OISEAU RARE', 'RENARD', 'LOUP', 'TIGRE', 'LION', 'DINOSAURE', 'METEORITE', 'SOLEIL', 'GALAXIE', 'COSMOS', 'UNIVERS', 'MULTIVERS', 'TROU NOIR', 'BIG BANG', 'QUANTIC AWERENESS', 'SOURCE VIBRATION', 'LOVE', 'PEACE', 'VOID', 'PURE ENERGY', 'PURE BODY', 'PURE MIND', 'PURE HEART', 'PURE SOUL', 'ANGEL', 'ARCHANGEL', 'DIVINE', 'DIVINE 2', 'DIVINE 3', 'DIVINE 4', 'DIVINE 5', 'DIVINE 6', 'DIVINE 7', 'DIVINE 8', 'DIVINE 9', 'DIVINE 10', 'DIVINE 1000', 'DIVINE 1M', 'DIVINE 1B', 'DIVINE 999T']
@@ -58,6 +59,14 @@ function tableLayoutClass(count) {
   if (count <= 4) return 'tables-4'
   if (count <= 6) return 'tables-6'
   return 'tables-8'
+}
+
+function isCardInMoreLessRange(card, range) {
+  if (!range) return true
+  if (!Number.isFinite(card?.value) || card.value <= 0 || !Number.isFinite(range.referenceValue)) return false
+  if (range.direction === 'MORE') return card.value > range.referenceValue
+  if (range.direction === 'LESS') return card.value < range.referenceValue
+  return false
 }
 
 function levelShareDetails(levelNumber, levelConfig) {
@@ -204,10 +213,6 @@ function WhatsAppIcon() {
   return <svg width="22" height="22" viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16.03 4C9.4 4 4 9.35 4 15.93c0 2.1.55 4.13 1.6 5.92L4 28l6.32-1.56a12.1 12.1 0 0 0 5.71 1.44C22.66 27.88 28 22.53 28 15.93S22.66 4 16.03 4Zm0 21.84c-1.82 0-3.6-.5-5.16-1.45l-.37-.22-3.75.93.96-3.64-.24-.38a9.83 9.83 0 0 1-1.47-5.15c0-5.45 4.5-9.89 10.03-9.89 5.51 0 9.99 4.44 9.99 9.89 0 5.47-4.48 9.91-9.99 9.91Zm5.5-7.4c-.3-.15-1.78-.87-2.06-.97-.28-.1-.48-.15-.68.15-.2.3-.78.97-.96 1.17-.18.2-.35.23-.65.08-.3-.15-1.27-.46-2.42-1.48a9.06 9.06 0 0 1-1.67-2.06c-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.53.15-.18.2-.3.3-.5.1-.2.05-.38-.03-.53-.08-.15-.68-1.63-.93-2.23-.25-.58-.5-.5-.68-.51l-.58-.01c-.2 0-.53.08-.8.38-.28.3-1.05 1.02-1.05 2.48s1.08 2.88 1.23 3.08c.15.2 2.13 3.23 5.16 4.53.72.31 1.29.5 1.73.64.73.23 1.39.2 1.91.12.58-.09 1.78-.72 2.03-1.42.25-.7.25-1.3.18-1.42-.08-.13-.28-.2-.58-.35Z" /></svg>
 }
 
-function CardIcon() {
-  return <svg width="16" height="18" viewBox="0 0 16 18" fill="none" aria-hidden="true"><rect x="2.5" y="1.5" width="11" height="15" rx="2" stroke="currentColor" strokeWidth="1.5" /><path d="M5 5h6M5 8h6M5 11h4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" /></svg>
-}
-
 function Stat({ tone, icon, label, value, bumpKey }) {
   return <motion.div key={`${label}-${bumpKey || 0}`} className={`stat-card ${tone}`} initial={{ scale: 1 }} animate={{ scale: bumpKey ? [1, 1.1, 1] : 1 }} transition={{ duration: .24 }}><span className="stat-icon">{icon}</span><span className="stat-label">{label}</span><strong>{value}</strong></motion.div>
 }
@@ -249,7 +254,7 @@ function DiscardPile({ card, won, miss, revealId, showCombo }) {
 
 const MemoDiscardPile = React.memo(DiscardPile)
 
-function PredictionCard({ card, index, remaining, onGuess, bumpKey }) {
+function PredictionCard({ card, index, remaining, onGuess, bumpKey, probability, isMostLikely }) {
   const unavailable = remaining <= 0
   function handlePress(event) {
     if (unavailable) {
@@ -259,7 +264,7 @@ function PredictionCard({ card, index, remaining, onGuess, bumpKey }) {
     }
     onGuess(card, index)
   }
-  return <motion.button key={`${card.label}-${bumpKey || 0}`} className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''}`} aria-disabled={unavailable} onClick={handlePress} whileTap={{ scale: unavailable ? 1 : 0.96 }} initial={{ scale: 1 }} animate={{ scale: bumpKey ? [1, 1.12, 0.96, 1] : 1 }} transition={{ duration: 0.34 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span><span className="prediction-left">{remaining} LEFT</span></motion.button>
+  return <motion.button key={`${card.label}-${bumpKey || 0}`} className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''} ${isMostLikely ? 'most-likely' : ''}`} aria-disabled={unavailable} onClick={handlePress} whileTap={{ scale: unavailable ? 1 : 0.96 }} initial={{ scale: 1 }} animate={{ scale: bumpKey ? [1, 1.12, 0.96, 1] : 1 }} transition={{ duration: 0.34 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span>{probability !== undefined ? <span className="prediction-probability">{formatCardProbability(probability)}</span> : null}<span className="prediction-left">{remaining} LEFT</span></motion.button>
 }
 
 function BetClone({ bet }) {
@@ -278,10 +283,10 @@ function TableSlot({ table, totalCards }) {
 
 const MemoTableSlot = React.memo(TableSlot)
 
-function LevelIntroCard({ level, levelNumber, totalCards, onClassic, onMoreLess }) {
+function LevelIntroCard({ level, levelNumber, totalCards, probabilitiesEnabled, onProbabilitiesChange, onClassic, onMoreLess }) {
   const jokerCount = level.startingDeck.joker || 0
   const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker')
-  return <section className="level-intro-overlay"><article className="level-intro-card"><span>Level {levelNumber}</span><em>{level.difficulty || 'Hard'} • {totalCards} cards • {jokerCount} jokers</em><p>{nonJoker.join(' / ')}</p><div className="level-intro-actions"><button className="level-intro-play level-intro-classic" onClick={onClassic}>Classic</button><button className="level-intro-play level-intro-more-less" onClick={onMoreLess}>More or less</button></div></article></section>
+  return <section className="level-intro-overlay"><article className="level-intro-card"><span>Level {levelNumber}</span><em>{level.difficulty || 'Hard'} • {totalCards} cards • {jokerCount} jokers</em><p>{nonJoker.join(' / ')}</p><label className={`probability-option ${probabilitiesEnabled ? 'enabled' : ''}`}><input type="checkbox" checked={probabilitiesEnabled} onChange={(event) => onProbabilitiesChange(event.target.checked)} /><span className="probability-check" aria-hidden="true">✓</span><span className="probability-option-copy"><strong>Show draw probabilities</strong><small>Display each card's odds and highlight the best bet.</small></span></label><div className="level-intro-actions"><button className="level-intro-play level-intro-classic" onClick={onClassic}>Classic</button><button className="level-intro-play level-intro-more-less" onClick={onMoreLess}>More or less</button></div></article></section>
 }
 
 
@@ -386,7 +391,9 @@ function App() {
   const [showRecentLogs, setShowRecentLogs] = useState(false)
   const [pointRewards, setPointRewards] = useState([])
   const [moreLessMode, setMoreLessMode] = useState(false)
+  const [probabilitiesEnabled, setProbabilitiesEnabled] = useState(false)
   const [moreLessHint, setMoreLessHint] = useState(null)
+  const [moreLessRange, setMoreLessRange] = useState(null)
   const [moreLessHintPresenceKey, setMoreLessHintPresenceKey] = useState(0)
   const gameplayLogTokenRef = useRef(0)
   const predictionMissRef = useRef(0)
@@ -405,6 +412,12 @@ function App() {
   const lastCard = mainTable.lastCard
   const cardTypeLabels = useMemo(() => cardTypes.map((type) => type.label), [cardTypes])
   const remainingByType = useMemo(() => countCardsByLabel(mainDeck, cardTypeLabels), [mainDeck, cardTypeLabels])
+  const probabilityModel = useMemo(() => getCardProbabilityModel(remainingByType, mainDeck.length, probabilitiesEnabled), [remainingByType, mainDeck.length, probabilitiesEnabled])
+  const highlightedProbabilityLabels = useMemo(() => {
+    if (!probabilitiesEnabled) return new Set()
+    const eligibleLabels = moreLessMode && moreLessRange ? cardTypes.filter((card) => isCardInMoreLessRange(card, moreLessRange)).map((card) => card.label) : cardTypeLabels
+    return getMostLikelyCardLabels(remainingByType, eligibleLabels)
+  }, [probabilitiesEnabled, moreLessMode, moreLessRange, cardTypes, cardTypeLabels, remainingByType])
 
   function scheduleFxClear(token, delay = 430) {
     window.setTimeout(() => {
@@ -444,10 +457,14 @@ function App() {
     moreLessHintTokenRef.current += 1
     if (immediate) setMoreLessHintPresenceKey((key) => key + 1)
     setMoreLessHint(null)
+    setMoreLessRange(null)
   }
 
   function showMoreLessHint(drawnCard, nextDeck, nextTableCount, currentTableCount) {
-    if (!moreLessMode || currentTableCount !== 1 || nextTableCount !== 1 || !drawnCard || !nextDeck?.length) return
+    if (!moreLessMode || currentTableCount !== 1 || nextTableCount !== 1 || !drawnCard || !nextDeck?.length) {
+      clearMoreLessHint({ immediate: true })
+      return
+    }
     const nextCard = peekNextDrawCard(nextDeck)
     const direction = getMoreLessHintDirection(drawnCard, nextCard)
     if (!direction) {
@@ -456,6 +473,7 @@ function App() {
     }
     const token = ++moreLessHintTokenRef.current
     const id = `more-less-${token}`
+    setMoreLessRange({ direction, referenceValue: drawnCard.value })
     setMoreLessHint({ id, direction })
     window.setTimeout(() => {
       if (moreLessHintTokenRef.current !== token) return
@@ -477,6 +495,7 @@ function App() {
     predictionMissRef.current = 0
     previousUnlockedStarsRef.current = new Set()
     setMoreLessMode(false)
+    setProbabilitiesEnabled(false)
     clearMoreLessHint()
     setTables(makeTables(buildDeckForLevel(activeLevel), 1)); setCombo(0); setScore(0); setScoreBump(0); setBets([]); setBreakFx(null); setShowEnd(false); setShowGameOverBanner(false); setStats({ hits: 0, bestCombo: 0, maxDecks: 1, jokers: 0 }); setShowLevelIntro(true); setStarted(true); setAchievementRuntime(createAchievementRuntime(activeLevel)); setGameplayLogs([]); setGameplayLogHistory([]); setShowRecentLogs(false); setPointRewards([]); setCardCountBumps({}); setTotalDrawn(0); setPrecisionHits(0)
   }
@@ -634,6 +653,7 @@ function App() {
   }
 
   const runtimeStars = getStarModel(currentLevel, { achievementCount: achievementRuntime.filter((a) => a.unlocked).length, score, totalDrawn, precisionHits })
+  const precisionPercentage = runtimeStars.find((star) => star.id === 'precision')?.valueText || '0%'
   const unlockedStarIds = runtimeStars.filter((s) => s.unlocked).map((s) => s.id).join(',')
 
   const previousUnlockedStarsRef = useRef(new Set())
@@ -669,7 +689,7 @@ function App() {
   const visibleGameplayLogs = showRecentLogs ? gameplayLogHistory : gameplayLogs
   const gameplayIsVisible = !showLevelIntro
   const gameOver = started && showEnd
-  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'}`}><div className="cinematic-bg" />{!started ? <section className="start-screen level-select"><span>60game</span><strong>60 Game</strong><em>Select a level</em><div className="level-select-grid">{orderedLevelIds.map((id) => { const level = levelConfigs[id]; if (!level) return null; const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker'); const deckSize = Object.values(level.startingDeck).reduce((sum, amount) => sum + amount, 0); const jokerCount = level.startingDeck.joker || 0; const active = selectedLevelId === id; const saved = progression[id] || {}; return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{level.name}</b><small>{level.difficulty || 'Hard'} • {deckSize} cards • {jokerCount} jokers</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button> })}</div></section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} achievements={achievementRuntime} /> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon={<CardIcon />} label="Left" value={mainDeck.length} /></header><ComboStatus combo={combo} /><section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section>{gameplayIsVisible ? <><section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section><GameInfoButton isPressed={showRecentLogs} onPressChange={setShowRecentLogs} /><GameplayLogStack logs={visibleGameplayLogs} onDismissOverflow={dismissOverflowGameplayLogs} /><PointRewardStack rewards={pointRewards} /><AnimatePresence key={moreLessHintPresenceKey}>{moreLessHint ? <MoreLessHintPopup hint={moreLessHint} /> : null}</AnimatePresence><AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} /> : null}</AnimatePresence><section className="prediction-grid">{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label] ?? 0} onGuess={guess} bumpKey={cardCountBumps[card.label]} />)}</section></> : null}<AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>END OF DECK</motion.div> : null}</AnimatePresence>{showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} onClassic={() => startLevelIntro('classic')} onMoreLess={() => startLevelIntro('more-less')} /> : null}</>}</main>
+  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'}`}><div className="cinematic-bg" />{!started ? <section className="start-screen level-select"><span>60game</span><strong>60 Game</strong><em>Select a level</em><div className="level-select-grid">{orderedLevelIds.map((id) => { const level = levelConfigs[id]; if (!level) return null; const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker'); const deckSize = Object.values(level.startingDeck).reduce((sum, amount) => sum + amount, 0); const jokerCount = level.startingDeck.joker || 0; const active = selectedLevelId === id; const saved = progression[id] || {}; return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{level.name}</b><small>{level.difficulty || 'Hard'} • {deckSize} cards • {jokerCount} jokers</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button> })}</div></section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} achievements={achievementRuntime} /> : <><header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="◎" label="Precision" value={precisionPercentage} /></header><ComboStatus combo={combo} /><section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section>{gameplayIsVisible ? <><section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section><GameInfoButton isPressed={showRecentLogs} onPressChange={setShowRecentLogs} /><GameplayLogStack logs={visibleGameplayLogs} onDismissOverflow={dismissOverflowGameplayLogs} /><PointRewardStack rewards={pointRewards} /><AnimatePresence key={moreLessHintPresenceKey}>{moreLessHint ? <MoreLessHintPopup hint={moreLessHint} /> : null}</AnimatePresence><AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} /> : null}</AnimatePresence><section className="prediction-grid">{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label] ?? 0} probability={probabilitiesEnabled ? probabilityModel.percentages[card.label] : undefined} isMostLikely={highlightedProbabilityLabels.has(card.label)} onGuess={guess} bumpKey={cardCountBumps[card.label]} />)}</section></> : null}<AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>END OF DECK</motion.div> : null}</AnimatePresence>{showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} probabilitiesEnabled={probabilitiesEnabled} onProbabilitiesChange={setProbabilitiesEnabled} onClassic={() => startLevelIntro('classic')} onMoreLess={() => startLevelIntro('more-less')} /> : null}</>}</main>
 }
 
 class AppErrorBoundary extends React.Component {
