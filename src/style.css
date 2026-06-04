@@ -1058,3 +1058,67 @@ button {
     line-height: 1.1 !important;
   }
 }
+
+.probability-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 16px;
+  text-align: left;
+  background: rgba(4,8,22,.4);
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+
+.probability-option.enabled {
+  border-color: rgba(255,231,115,.72);
+  background: rgba(255,218,87,.1);
+  box-shadow: 0 0 22px rgba(255,213,69,.14);
+}
+
+.probability-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.probability-check {
+  width: 26px;
+  height: 26px;
+  display: grid !important;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.34);
+  border-radius: 8px;
+  color: transparent !important;
+  background: rgba(255,255,255,.07);
+  font-size: .9rem !important;
+  letter-spacing: 0 !important;
+}
+
+.probability-option.enabled .probability-check {
+  color: #24140a !important;
+  border-color: #ffe777;
+  background: linear-gradient(135deg, #fff39a, #ffb849);
+}
+
+.level-intro-card .probability-option-copy {
+  display: grid;
+  gap: 3px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: #fff;
+}
+
+.probability-option-copy strong { font-size: .82rem; }
+.probability-option-copy small { color: rgba(255,255,255,.64); font-size: .67rem; line-height: 1.35; }
+
+.prediction-card .prediction-left {
+  position: absolute;
+  right: 7px;
+  bottom: 7px;
+}
