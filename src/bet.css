@@ -114,7 +114,7 @@
   position: absolute;
   z-index: 2;
   left: 7px;
-  bottom: 7px;
+  top: 7px;
   min-width: 33px;
   padding: 3px 5px;
   border: 1px solid rgba(255, 255, 255, .24);
