@@ -1441,3 +1441,46 @@ button {
 .game-header .quick-info div {
   height: 38px;
 }
+
+.game-shell .gameplay-log-stack {
+  z-index: 1200;
+  top: clamp(104px, 14dvh, 132px);
+  gap: 5px;
+  max-height: calc(55dvh - clamp(104px, 14dvh, 132px));
+}
+
+.game-shell .gameplay-log {
+  min-height: 32px;
+  gap: 6px;
+  padding: 5px 10px 5px 8px;
+  border-radius: 7px;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+.game-shell .gameplay-log-marker {
+  font-size: .95rem;
+}
+
+.game-shell .gameplay-log small {
+  min-width: 46px;
+  font-size: .5rem;
+}
+
+.game-shell .gameplay-log strong {
+  font-size: clamp(.78rem, 3.2vw, 1rem);
+}
+
+.in-game .multideck-stage {
+  transform: translateY(clamp(50px, 8dvh, 76px));
+}
+
+.tutorial-focus-table .multideck-stage,
+.tutorial-focus-discard .multideck-stage,
+.tutorial-focus-prediction-grid .multideck-stage {
+  transform: translateY(clamp(50px, 8dvh, 76px)) scale(.9);
+  transform-origin: center bottom;
+}
+
+.tutorial-running .gameplay-log-stack.tutorial-ui-highlight {
+  z-index: 1900;
+}
