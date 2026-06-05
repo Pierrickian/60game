@@ -27,25 +27,49 @@ export const TUTORIAL_STEPS = [
     action: 'next'
   },
   {
-    id: 'guess_one',
-    title: 'Predict a card',
-    body: 'Use the card buttons below. Pick one card you think will come next.',
+    id: 'guess_win',
+    title: 'Make a winning prediction',
+    body: 'Tap the highlighted card. This one is set up to succeed so you can see the reward feedback.',
     target: 'prediction-grid',
-    action: 'guess'
+    action: 'guess',
+    outcome: 'win'
   },
   {
-    id: 'result_one',
-    title: 'Read the reveal',
-    body: 'The card appears in the purple slot. A correct prediction adds points and keeps momentum.',
+    id: 'result_win',
+    title: 'Points pop on the reveal',
+    body: 'The reveal shows the drawn card, and the point popup shows what was added to your score.',
     target: 'discard',
     action: 'next'
   },
   {
-    id: 'guess_two',
-    title: 'Try another prediction',
-    body: 'Card counts changed after the draw. Use what remains to choose again.',
+    id: 'guess_combo',
+    title: 'Chain another success',
+    body: 'Tap the highlighted card again. A second success creates a combo.',
     target: 'prediction-grid',
-    action: 'guess'
+    action: 'guess',
+    outcome: 'win'
+  },
+  {
+    id: 'combo_multideck',
+    title: 'Combo opens multidecks',
+    body: 'The combo duplicates the active table. More decks mean a prediction can be checked in several places at once.',
+    target: 'table',
+    action: 'next'
+  },
+  {
+    id: 'guess_loss',
+    title: 'See a miss too',
+    body: 'Tap the highlighted card. This one is set up to miss so you can see how a combo breaks.',
+    target: 'prediction-grid',
+    action: 'guess',
+    outcome: 'loss'
+  },
+  {
+    id: 'loss_result',
+    title: 'Miss and combo break',
+    body: 'A wrong prediction marks the reveal as a miss and collapses the combo back toward one deck.',
+    target: 'discard',
+    action: 'next'
   },
   {
     id: 'info_button',
@@ -62,16 +86,9 @@ export const TUTORIAL_STEPS = [
     action: 'next'
   },
   {
-    id: 'guess_three',
-    title: 'Play one more turn',
-    body: 'Make another prediction. Combos can add more active decks after repeated hits.',
-    target: 'prediction-grid',
-    action: 'guess'
-  },
-  {
     id: 'status',
-    title: 'Watch your run',
-    body: 'Score, best score, precision, level and cards update as the deck goes down.',
+    title: 'Star targets',
+    body: 'The three cards show your Success, Score and Precision progress: the same three criteria used for stars.',
     target: 'hud',
     action: 'next'
   },

@@ -1337,3 +1337,15 @@ button {
   overflow: visible;
   mask-image: none;
 }
+
+.game-header {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+}
+
+.prediction-card.tutorial-card-locked {
+  opacity: .28;
+  filter: saturate(.55);
+}
