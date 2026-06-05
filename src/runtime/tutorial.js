@@ -1,61 +1,78 @@
 export const TUTORIAL_STORAGE_KEY = '60game-tutorial-settings'
 
 export const TUTORIAL_TEXT = {
-  homeTitle: 'Interactive tutorial',
+  homeTitle: 'Tutorial',
   homeStart: 'Start tutorial',
-  homeDisabled: 'Tutorial disabled',
-  homeDisable: 'Disable tutorial',
-  homeEnable: 'Enable tutorial',
-  homeHint: 'Launch a guided run with pauses, then turn it off forever if you want.',
-  homeEnableHint: 'Turn it back on to launch the guided run.',
-  pause: 'Tutorial pause',
-  waiting: 'Waiting for your action…',
+  homeHint: 'Launch a guided run before playing freely.',
+  pause: 'Tutorial',
+  waiting: 'Your turn…',
   next: 'Next',
-  finish: 'Finish',
-  disableForever: 'Disable forever',
+  finish: 'Play',
+  stop: 'Forever',
   close: 'Close tutorial'
 }
 
 export const TUTORIAL_STEPS = [
   {
     id: 'mode',
-    title: '1 · Choose a mode',
-    body: 'Pick Classic or More or less. The game is paused until you choose how this run starts.',
+    title: 'Choose your run',
+    body: 'Pick Classic for the normal game, or More or less for hints after each draw.',
     target: 'level-intro',
     action: 'choose-mode'
   },
   {
     id: 'table',
-    title: '2 · Read the table',
-    body: 'The left stack is the deck. The right slot reveals the card you draw after each prediction.',
+    title: 'Deck and reveal',
+    body: 'The blue stack is your deck. The purple slot shows the card that was just drawn.',
     target: 'table',
     action: 'next'
   },
   {
-    id: 'prediction',
-    title: '3 · Make a prediction',
-    body: 'Tap one available card at the bottom. During this step, the tutorial waits for your prediction before continuing.',
+    id: 'guess_one',
+    title: 'Predict a card',
+    body: 'Use the card buttons below. Pick one card you think will come next.',
     target: 'prediction-grid',
     action: 'guess'
   },
   {
-    id: 'result',
-    title: '4 · Follow the result',
-    body: 'A hit scores the card value and grows your combo. A miss breaks the combo, but the run continues until the deck is empty.',
+    id: 'result_one',
+    title: 'Read the reveal',
+    body: 'The card appears in the purple slot. A correct prediction adds points and keeps momentum.',
     target: 'discard',
     action: 'next'
   },
   {
+    id: 'guess_two',
+    title: 'Try another prediction',
+    body: 'Card counts changed after the draw. Use what remains to choose again.',
+    target: 'prediction-grid',
+    action: 'guess'
+  },
+  {
+    id: 'logs_after_action',
+    title: 'Check the feedback',
+    body: 'The recent messages are held on screen now, so you can see what your last action triggered.',
+    target: 'logs',
+    action: 'next'
+  },
+  {
+    id: 'guess_three',
+    title: 'Play one more turn',
+    body: 'Make another prediction. Combos can add more active decks after repeated hits.',
+    target: 'prediction-grid',
+    action: 'guess'
+  },
+  {
     id: 'status',
-    title: '5 · Watch the helpers',
-    body: 'Score, best score, precision, card counts and logs update after every draw so you can adjust your next choice.',
+    title: 'Watch your run',
+    body: 'Score, best score, precision, level and cards update as the deck goes down.',
     target: 'hud',
     action: 'next'
   },
   {
     id: 'done',
-    title: 'Ready',
-    body: 'The tutorial is complete. You can replay it from Home or disable it completely there.',
+    title: 'You are ready',
+    body: 'Keep playing until the deck is empty. Replay the tutorial from Home whenever you want.',
     target: 'controls',
     action: 'finish'
   }

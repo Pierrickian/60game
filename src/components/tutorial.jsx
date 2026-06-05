@@ -4,25 +4,22 @@ import { TUTORIAL_TEXT } from '../runtime/tutorial'
 function TutorialProgress({ currentStepId, steps }) {
   const currentIndex = Math.max(0, steps.findIndex((step) => step.id === currentStepId))
 
-  return <div className="tutorial-progress" aria-label={`Tutorial step ${currentIndex + 1} of ${steps.length}`}>
+  return <div className="tutorial-progress" aria-label={`Tutorial progress ${currentIndex + 1} of ${steps.length}`}>
     {steps.map((step, index) => <span key={step.id} className={index <= currentIndex ? 'active' : ''} />)}
   </div>
 }
 
-export function TutorialHomePanel({ disabled, onStart, onToggleDisabled }) {
-  return <section className={`tutorial-home-panel ${disabled ? 'disabled' : ''}`} aria-label={TUTORIAL_TEXT.homeTitle}>
+export function TutorialHomePanel({ onStart }) {
+  return <section className="tutorial-home-panel" aria-label={TUTORIAL_TEXT.homeTitle}>
     <div>
       <strong>{TUTORIAL_TEXT.homeTitle}</strong>
-      <p>{disabled ? TUTORIAL_TEXT.homeEnableHint : TUTORIAL_TEXT.homeHint}</p>
+      <p>{TUTORIAL_TEXT.homeHint}</p>
     </div>
-    <div className="tutorial-home-actions">
-      <button type="button" className="tutorial-start-button" onClick={onStart} disabled={disabled}>{disabled ? TUTORIAL_TEXT.homeDisabled : TUTORIAL_TEXT.homeStart}</button>
-      <button type="button" className="tutorial-toggle-button" onClick={() => onToggleDisabled(!disabled)}>{disabled ? TUTORIAL_TEXT.homeEnable : TUTORIAL_TEXT.homeDisable}</button>
-    </div>
+    <button type="button" className="tutorial-start-button" onClick={onStart}>{TUTORIAL_TEXT.homeStart}</button>
   </section>
 }
 
-export function TutorialOverlay({ step, steps, active, onNext, onFinish, onDisable, onClose }) {
+export function TutorialOverlay({ step, steps, active, onNext, onFinish, onStop, onClose }) {
   if (!active || !step) return null
 
   const waitsForPlayer = step.action === 'guess' || step.action === 'choose-mode'
@@ -38,7 +35,7 @@ export function TutorialOverlay({ step, steps, active, onNext, onFinish, onDisab
       {waitsForPlayer ? <small className="tutorial-waiting">{TUTORIAL_TEXT.waiting}</small> : null}
       <div className="tutorial-actions">
         {isFinal ? <button type="button" className="tutorial-primary" onClick={onFinish}>{TUTORIAL_TEXT.finish}</button> : waitsForPlayer ? null : <button type="button" className="tutorial-primary" onClick={onNext}>{TUTORIAL_TEXT.next}</button>}
-        <button type="button" className="tutorial-secondary" onClick={onDisable}>{TUTORIAL_TEXT.disableForever}</button>
+        <button type="button" className="tutorial-secondary" onClick={onStop}>{TUTORIAL_TEXT.stop}</button>
       </div>
     </div>
   </motion.aside>

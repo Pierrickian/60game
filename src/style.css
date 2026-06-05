@@ -1138,11 +1138,6 @@ button {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 14px 34px rgba(0,0,0,.24);
 }
 
-.tutorial-home-panel.disabled {
-  border-color: rgba(255,255,255,.14);
-  background: rgba(7, 12, 30, .5);
-  opacity: .78;
-}
 
 .tutorial-home-panel strong {
   display: block;
@@ -1158,14 +1153,8 @@ button {
   line-height: 1.35;
 }
 
-.tutorial-home-actions {
-  display: grid;
-  gap: 8px;
-  min-width: 160px;
-}
 
 .tutorial-start-button,
-.tutorial-toggle-button,
 .tutorial-primary,
 .tutorial-secondary {
   border: 0;
@@ -1189,7 +1178,6 @@ button {
   box-shadow: none;
 }
 
-.tutorial-toggle-button,
 .tutorial-secondary {
   color: #fff;
   background: rgba(255,255,255,.1);
@@ -1208,18 +1196,25 @@ button {
 }
 
 .tutorial-target-level-intro,
-.tutorial-target-hud,
 .tutorial-target-controls {
   top: max(10px, env(safe-area-inset-top));
 }
 
+.tutorial-target-hud {
+  bottom: calc(76px + env(safe-area-inset-bottom));
+}
+
 .tutorial-target-table,
 .tutorial-target-discard {
-  top: 42dvh;
+  bottom: calc(108px + env(safe-area-inset-bottom));
 }
 
 .tutorial-target-prediction-grid {
-  top: 16dvh;
+  top: max(96px, 13dvh);
+}
+
+.tutorial-target-logs {
+  bottom: calc(64px + env(safe-area-inset-bottom));
 }
 
 .tutorial-card {
@@ -1314,13 +1309,31 @@ button {
     grid-template-columns: 1fr;
   }
 
-  .tutorial-home-actions {
-    grid-template-columns: 1fr 1fr;
-    min-width: 0;
-  }
-
   .tutorial-target-table,
   .tutorial-target-discard {
-    top: 36dvh;
+    bottom: calc(96px + env(safe-area-inset-bottom));
   }
+}
+
+.tutorial-ui-highlight {
+  outline: 2px solid rgba(255, 232, 106, .92);
+  outline-offset: 5px;
+  border-radius: 20px;
+  box-shadow: 0 0 0 7px rgba(255, 232, 106, .12), 0 0 34px rgba(124, 246, 255, .22) !important;
+}
+
+.tutorial-running .tutorial-ui-highlight:not(.game-info-button):not(.gameplay-log-stack) {
+  position: relative;
+  z-index: 1810;
+}
+
+.tutorial-running .game-info-button.tutorial-ui-highlight,
+.tutorial-running .gameplay-log-stack.tutorial-ui-highlight {
+  z-index: 1810;
+}
+
+.gameplay-log-stack.tutorial-ui-highlight {
+  max-height: 34dvh;
+  overflow: visible;
+  mask-image: none;
 }

@@ -223,8 +223,9 @@ function ComboStatus({ combo }) {
   return <div className="combo-status"><span>{combo >= 2 ? `${activeTableCount(combo)} DECKS` : '1 DECK'}</span></div>
 }
 
-function DeckStack({ remaining, isMain, totalCards }) {
-  return <div className="deck-zone"><div className="plate plate-blue" /><div className="deck-stack"><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className={`deck-back ${isMain ? 'primary-deck' : ''}`}><span className="deck-logo">{totalCards}</span><span className="deck-subtitle">GAME</span>{isMain ? <small>{remaining}</small> : null}</div></div></div>
+function DeckStack({ remaining, isMain, totalCards, tutorialTarget }) {
+  const highlighted = tutorialTarget === 'table'
+  return <div className={`deck-zone ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div className="plate plate-blue" /><div className="deck-stack"><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className={`deck-back ${isMain ? 'primary-deck' : ''}`}><span className="deck-logo">{totalCards}</span><span className="deck-subtitle">GAME</span>{isMain ? <small>{remaining}</small> : null}</div></div></div>
 }
 
 const MemoDeckStack = React.memo(DeckStack)
@@ -248,10 +249,11 @@ function getDeckGainPopup(card, won) {
   return { label: `+${card.value}`, tone: 'points' }
 }
 
-function DiscardPile({ card, won, miss, revealId, showCombo }) {
+function DiscardPile({ card, won, miss, revealId, showCombo, tutorialTarget }) {
   const stateClass = won ? 'impact-lite' : miss ? 'miss-shake' : ''
+  const highlighted = tutorialTarget === 'table' || tutorialTarget === 'discard'
   const gainPopup = getDeckGainPopup(card, won)
-  return <div className="discard-zone"><div className="plate plate-purple" /><div className={`discard-card-wrap ${stateClass}`}><div key={revealId} className="discard-drop"><MemoFaceCard card={card} empty={!card} /></div><AnimatePresence>{showCombo ? <motion.div className="local-combo-label" initial={{ opacity: 0, y: 14, scale: .7 }} animate={{ opacity: 1, y: -18, scale: 1 }} exit={{ opacity: 0, y: -32, scale: .8 }} transition={{ duration: .25 }}>COMBO</motion.div> : null}<DeckGainPopup label={gainPopup?.label} tone={gainPopup?.tone} revealId={revealId} /></AnimatePresence></div></div>
+  return <div className={`discard-zone ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div className="plate plate-purple" /><div className={`discard-card-wrap ${stateClass}`}><div key={revealId} className="discard-drop"><MemoFaceCard card={card} empty={!card} /></div><AnimatePresence>{showCombo ? <motion.div className="local-combo-label" initial={{ opacity: 0, y: 14, scale: .7 }} animate={{ opacity: 1, y: -18, scale: 1 }} exit={{ opacity: 0, y: -32, scale: .8 }} transition={{ duration: .25 }}>COMBO</motion.div> : null}<DeckGainPopup label={gainPopup?.label} tone={gainPopup?.tone} revealId={revealId} /></AnimatePresence></div></div>
 }
 
 const MemoDiscardPile = React.memo(DiscardPile)
@@ -279,16 +281,16 @@ function BetClone({ bet }) {
   return <motion.div className={`bet-clone theme-${bet.card.theme} bet-${bet.result}`} initial={{ x: startX, y: startY, scale: 0.66, opacity: 0.94 }} animate={animate} exit={{ opacity: 0, scale: 0.45 }} transition={{ duration: bet.result === 'pending' ? 0.18 : 0.32, ease: 'easeOut' }}><span>{bet.card.label}</span><small>{bet.card.icon}</small></motion.div>
 }
 
-function TableSlot({ table, totalCards }) {
-  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><MemoDeckStack remaining={table.deck.length} isMain={table.isMain} totalCards={totalCards} /><div className="arc-ribbon mini-ribbon" /><MemoDiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} revealId={table.revealId} showCombo={table.showCombo} /></motion.div>
+function TableSlot({ table, totalCards, tutorialTarget }) {
+  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><MemoDeckStack remaining={table.deck.length} isMain={table.isMain} totalCards={totalCards} tutorialTarget={tutorialTarget} /><div className="arc-ribbon mini-ribbon" /><MemoDiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} revealId={table.revealId} showCombo={table.showCombo} tutorialTarget={tutorialTarget} /></motion.div>
 }
 
 const MemoTableSlot = React.memo(TableSlot)
 
-function LevelIntroCard({ level, levelNumber, totalCards, probabilitiesEnabled, onProbabilitiesChange, onClassic, onMoreLess }) {
+function LevelIntroCard({ level, levelNumber, totalCards, probabilitiesEnabled, onProbabilitiesChange, onClassic, onMoreLess, highlighted }) {
   const jokerCount = level.startingDeck.joker || 0
   const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker')
-  return <section className="level-intro-overlay"><article className="level-intro-card"><span>Level {levelNumber}</span><em>{level.difficulty || 'Hard'} • {totalCards} cards • {jokerCount} jokers</em><p>{nonJoker.join(' / ')}</p><label className={`probability-option ${probabilitiesEnabled ? 'enabled' : ''}`}><input type="checkbox" checked={probabilitiesEnabled} onChange={(event) => onProbabilitiesChange(event.target.checked)} /><span className="probability-check" aria-hidden="true">✓</span><span className="probability-option-copy"><strong>Show draw probabilities</strong><small>Display each card's odds and highlight the best bet.</small></span></label><div className="level-intro-actions"><button className="level-intro-play level-intro-classic" onClick={onClassic}>Classic</button><button className="level-intro-play level-intro-more-less" onClick={onMoreLess}>More or less</button></div></article></section>
+  return <section className="level-intro-overlay"><article className={`level-intro-card ${highlighted ? 'tutorial-ui-highlight' : ''}`}><span>Level {levelNumber}</span><em>{level.difficulty || 'Hard'} • {totalCards} cards • {jokerCount} jokers</em><p>{nonJoker.join(' / ')}</p><label className={`probability-option ${probabilitiesEnabled ? 'enabled' : ''}`}><input type="checkbox" checked={probabilitiesEnabled} onChange={(event) => onProbabilitiesChange(event.target.checked)} /><span className="probability-check" aria-hidden="true">✓</span><span className="probability-option-copy"><strong>Show draw probabilities</strong><small>Display each card's odds and highlight the best bet.</small></span></label><div className="level-intro-actions"><button className="level-intro-play level-intro-classic" onClick={onClassic}>Classic</button><button className="level-intro-play level-intro-more-less" onClick={onMoreLess}>More or less</button></div></article></section>
 }
 
 
@@ -322,15 +324,16 @@ function PointRewardStack({ rewards }) {
   return <div className="point-reward-stack"><AnimatePresence initial={false}>{rewards.map((reward) => <motion.div key={reward.id} className="point-reward-popup" initial={{ opacity: 0, x: 34, scale: .8 }} animate={{ opacity: [0, 1, 1, 0], x: [34, 0, 0, 18], scale: [.8, 1.08, 1, .94] }} exit={{ opacity: 0, x: 24, scale: .9 }} transition={{ duration: 1.5, times: [0, .16, .7, 1], ease: 'easeOut' }}><small>SUCCESS</small><strong>+{reward.points}</strong><span>{reward.label}</span></motion.div>)}</AnimatePresence></div>
 }
 
-function GameInfoButton({ isPressed, onPressChange }) {
-  return <button className={`game-info-button ${isPressed ? 'pressed' : ''}`} type="button" aria-label="Show recent logs" aria-pressed={isPressed} onPointerDown={() => onPressChange(true)} onPointerUp={() => onPressChange(false)} onPointerLeave={() => onPressChange(false)} onPointerCancel={() => onPressChange(false)}>i</button>
+function GameInfoButton({ isPressed, onPressChange, highlighted }) {
+  return <button className={`game-info-button ${isPressed ? 'pressed' : ''} ${highlighted ? 'tutorial-ui-highlight' : ''}`} type="button" aria-label="Show recent logs" aria-pressed={isPressed} onPointerDown={() => onPressChange(true)} onPointerUp={() => onPressChange(false)} onPointerLeave={() => onPressChange(false)} onPointerCancel={() => onPressChange(false)}>i</button>
 }
 
-function GameplayLogStack({ logs, onDismissOverflow }) {
+function GameplayLogStack({ logs, onDismissOverflow, highlighted }) {
   const stackRef = useRef(null)
 
   useLayoutEffect(() => {
     function dismissOverflowLogs() {
+      if (highlighted) return
       const midpoint = window.innerHeight / 2
       const activeIds = new Set(logs.map((log) => log.id))
       const overflowingIds = Array.from(stackRef.current?.querySelectorAll('[data-gameplay-log-id]') || [])
@@ -345,9 +348,9 @@ function GameplayLogStack({ logs, onDismissOverflow }) {
       window.cancelAnimationFrame(frameId)
       window.removeEventListener('resize', dismissOverflowLogs)
     }
-  }, [logs, onDismissOverflow])
+  }, [logs, onDismissOverflow, highlighted])
 
-  return <div ref={stackRef} className="gameplay-log-stack"><AnimatePresence initial={false}>{logs.map((log) => <motion.div layout data-gameplay-log-id={log.id} key={log.id} className={`gameplay-log gameplay-log-${log.tone || log.category}`} initial={{ opacity: 0, y: -28, scale: .94 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30, scale: .96 }} transition={{ duration: .3, ease: 'easeOut', layout: { duration: .24 } }}><span className="gameplay-log-marker">›</span><small>{log.category}</small><strong>{log.text}</strong></motion.div>)}</AnimatePresence></div>
+  return <div ref={stackRef} className={`gameplay-log-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}><AnimatePresence initial={false}>{logs.map((log) => <motion.div layout data-gameplay-log-id={log.id} key={log.id} className={`gameplay-log gameplay-log-${log.tone || log.category}`} initial={{ opacity: 0, y: -28, scale: .94 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30, scale: .96 }} transition={{ duration: .3, ease: 'easeOut', layout: { duration: .24 } }}><span className="gameplay-log-marker">›</span><small>{log.category}</small><strong>{log.text}</strong></motion.div>)}</AnimatePresence></div>
 }
 
 function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNext, onHome, stars, achievements }) {
@@ -512,14 +515,17 @@ function App() {
 
   function finishTutorial() {
     setTutorialActive(false)
+    setShowRecentLogs(false)
   }
 
-  function disableTutorial() {
+  function stopTutorialForever() {
     setTutorialDisabled(true)
+    setShowRecentLogs(false)
   }
 
   function closeTutorial() {
     setTutorialActive(false)
+    setShowRecentLogs(false)
   }
 
   function startLevelIntro(mode) {
@@ -649,7 +655,7 @@ function App() {
         }
         scheduleFxClear(fxToken, 430)
         if (fxTokenRef.current === fxToken && referenceDeck.length === 0) triggerEndSequence(fxToken)
-        if (tutorialActive && tutorialStep?.action === 'guess') window.setTimeout(() => setTutorialStepId('result'), 460)
+        if (tutorialActive && tutorialStep?.action === 'guess') window.setTimeout(() => setTutorialStepId((stepId) => getNextTutorialStepId(stepId)), 460)
         return makeTables(referenceDeck, nextCount, orderedPrevious, referenceTable.id)
       }
       showPredictionReaction('loss')
@@ -661,7 +667,7 @@ function App() {
       setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo } : null)
       scheduleFxClear(fxToken, previousCombo >= 2 ? 2400 : 220)
       if (fxTokenRef.current === fxToken && referenceDeck.length === 0) triggerEndSequence(fxToken)
-      if (tutorialActive && tutorialStep?.action === 'guess') window.setTimeout(() => setTutorialStepId('result'), 460)
+      if (tutorialActive && tutorialStep?.action === 'guess') window.setTimeout(() => setTutorialStepId((stepId) => getNextTutorialStepId(stepId)), 460)
       if (currentTables.length > 1) {
         comboBreakHoldRef.current = true
         window.setTimeout(() => {
@@ -734,7 +740,15 @@ function App() {
     })
   }, [showEnd, selectedLevelId, score])
 
-  const visibleGameplayLogs = showRecentLogs ? gameplayLogHistory : gameplayLogs
+  useEffect(() => {
+    if (!tutorialActive) return
+    setShowRecentLogs(tutorialStep?.target === 'logs')
+  }, [tutorialActive, tutorialStep?.target])
+
+  const tutorialTarget = tutorialActive ? tutorialStep?.target : null
+  const tutorialHighlight = (target) => tutorialTarget === target ? 'tutorial-ui-highlight' : ''
+  const tutorialShowingLogs = tutorialTarget === 'logs'
+  const visibleGameplayLogs = tutorialShowingLogs || showRecentLogs ? gameplayLogHistory : gameplayLogs
   const gameplayIsVisible = !showLevelIntro
   const gameOver = started && showEnd
   return <main className={`game-shell ${started ? 'in-game' : 'home-mode'} ${tutorialActive ? 'tutorial-running' : ''}`}>
@@ -743,7 +757,7 @@ function App() {
       <span>60game</span>
       <strong>60 Game</strong>
       <em>Select a level</em>
-      <TutorialHomePanel disabled={tutorialDisabled} onStart={startTutorial} onToggleDisabled={setTutorialDisabled} />
+      {!tutorialDisabled ? <TutorialHomePanel onStart={startTutorial} /> : null}
       <div className="level-select-grid">{orderedLevelIds.map((id) => {
         const level = levelConfigs[id]
         if (!level) return null
@@ -755,22 +769,22 @@ function App() {
         return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{level.name}</b><small>{level.difficulty || 'Hard'} • {deckSize} cards • {jokerCount} jokers</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button>
       })}</div>
     </section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} achievements={achievementRuntime} /> : <>
-      <header className="top-stats"><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="◎" label="Precision" value={precisionPercentage} /></header>
+      <header className={`top-stats ${tutorialHighlight('hud')}`}><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="purple" icon="♛" label="Best" value={best} /><Stat tone="green" icon="◎" label="Precision" value={precisionPercentage} /></header>
       <ComboStatus combo={combo} />
-      <section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section>
+      <section className={`quick-info ${tutorialHighlight('hud')}`}><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section>
       {gameplayIsVisible ? <>
-        <section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section>
-        <GameInfoButton isPressed={showRecentLogs} onPressChange={setShowRecentLogs} />
-        <GameplayLogStack logs={visibleGameplayLogs} onDismissOverflow={dismissOverflowGameplayLogs} />
+        <section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} tutorialTarget={tutorialTarget} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section>
+        <GameInfoButton isPressed={showRecentLogs} onPressChange={setShowRecentLogs} highlighted={tutorialShowingLogs} />
+        <GameplayLogStack logs={visibleGameplayLogs} onDismissOverflow={dismissOverflowGameplayLogs} highlighted={tutorialShowingLogs} />
         <PointRewardStack rewards={pointRewards} />
         <AnimatePresence key={moreLessHintPresenceKey}>{moreLessHint ? <MoreLessHintPopup hint={moreLessHint} /> : null}</AnimatePresence>
         <AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} /> : null}</AnimatePresence>
-        <section className="prediction-grid">{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label] ?? 0} probability={probabilitiesEnabled ? probabilityModel.percentages[card.label] : undefined} isMostLikely={highlightedProbabilityLabels.has(card.label)} onGuess={guess} bumpKey={cardCountBumps[card.label]} />)}</section>
+        <section className={`prediction-grid ${tutorialHighlight('prediction-grid')}`}>{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label] ?? 0} probability={probabilitiesEnabled ? probabilityModel.percentages[card.label] : undefined} isMostLikely={highlightedProbabilityLabels.has(card.label)} onGuess={guess} bumpKey={cardCountBumps[card.label]} />)}</section>
       </> : null}
       <AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>END OF DECK</motion.div> : null}</AnimatePresence>
-      {showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} probabilitiesEnabled={probabilitiesEnabled} onProbabilitiesChange={setProbabilitiesEnabled} onClassic={() => startLevelIntro('classic')} onMoreLess={() => startLevelIntro('more-less')} /> : null}
+      {showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} probabilitiesEnabled={probabilitiesEnabled} onProbabilitiesChange={setProbabilitiesEnabled} onClassic={() => startLevelIntro('classic')} onMoreLess={() => startLevelIntro('more-less')} highlighted={tutorialTarget === 'level-intro'} /> : null}
     </>}
-    <AnimatePresence>{tutorialActive ? <TutorialOverlay key={tutorialStep?.id} step={tutorialStep} steps={TUTORIAL_STEPS} active={tutorialActive} onNext={advanceTutorial} onFinish={finishTutorial} onDisable={disableTutorial} onClose={closeTutorial} /> : null}</AnimatePresence>
+    <AnimatePresence>{tutorialActive ? <TutorialOverlay key={tutorialStep?.id} step={tutorialStep} steps={TUTORIAL_STEPS} active={tutorialActive} onNext={advanceTutorial} onFinish={finishTutorial} onStop={stopTutorialForever} onClose={closeTutorial} /> : null}</AnimatePresence>
   </main>
 }
 
