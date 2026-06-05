@@ -284,20 +284,19 @@ button {
 .deck-logo {
   position: relative;
   z-index: 1;
-  font-size: clamp(2.7rem, 11vw, 4.6rem);
+  font-size: clamp(1.9rem, 7.6vw, 3.2rem);
   font-weight: 1000;
-  line-height: .8;
+  line-height: .78;
   color: rgba(255,255,255,.9);
 }
 
 .deck-subtitle {
-  position: absolute;
+  position: relative;
   z-index: 1;
-  bottom: 28%;
-  font-size: .68rem;
-  letter-spacing: .24em;
-  font-weight: 900;
-  color: rgba(255,255,255,.86);
+  font-size: clamp(.72rem, 2.8vw, 1.15rem);
+  letter-spacing: .16em;
+  font-weight: 1000;
+  color: rgba(255,255,255,.88);
 }
 
 .deck-back small {
@@ -1483,4 +1482,34 @@ button {
 
 .tutorial-running .gameplay-log-stack.tutorial-ui-highlight {
   z-index: 1900;
+}
+
+.language-toggle {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: max(12px, env(safe-area-inset-right));
+  z-index: 2500;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(255,255,255,.26);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 12, 28, .82);
+  box-shadow: 0 14px 34px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.2);
+  color: #fff;
+}
+
+.language-toggle span {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.deck-brand {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  gap: .18em;
+  transform: translateY(-2%);
 }
