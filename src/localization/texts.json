@@ -1,0 +1,654 @@
+{
+  "brand.60game": {
+    "en": "60game",
+    "fr": "60game"
+  },
+  "brand.60Game": {
+    "en": "60 Game",
+    "fr": "60 Game"
+  },
+  "deck.game": {
+    "en": "GAME",
+    "fr": "GAME"
+  },
+  "home.selectLevel": {
+    "en": "Select a level",
+    "fr": "Choisis un niveau"
+  },
+  "home.tutorial.title": {
+    "en": "Tutorial",
+    "fr": "Tutoriel"
+  },
+  "home.tutorial.start": {
+    "en": "Start tutorial",
+    "fr": "Lancer le tutoriel"
+  },
+  "home.tutorial.hint": {
+    "en": "Launch a guided run before playing freely.",
+    "fr": "Lance une partie guidée avant de jouer librement."
+  },
+  "language.switchToEnglish": {
+    "en": "Switch to English",
+    "fr": "Passer en anglais"
+  },
+  "language.switchToFrench": {
+    "en": "Switch to French",
+    "fr": "Passer en français"
+  },
+  "common.level": {
+    "en": "Level",
+    "fr": "Niveau"
+  },
+  "common.cards": {
+    "en": "cards",
+    "fr": "cartes"
+  },
+  "common.cardsUpper": {
+    "en": "CARDS",
+    "fr": "CARTES"
+  },
+  "common.jokers": {
+    "en": "jokers",
+    "fr": "jokers"
+  },
+  "common.best": {
+    "en": "Best",
+    "fr": "Record"
+  },
+  "common.hits": {
+    "en": "Hits",
+    "fr": "Touches"
+  },
+  "common.bestCombo": {
+    "en": "Best combo",
+    "fr": "Meilleur combo"
+  },
+  "common.achievements": {
+    "en": "Achievements",
+    "fr": "Succès"
+  },
+  "common.precision": {
+    "en": "Precision",
+    "fr": "Précision"
+  },
+  "common.success": {
+    "en": "Success",
+    "fr": "Succès"
+  },
+  "common.score": {
+    "en": "Score",
+    "fr": "Score"
+  },
+  "common.replay": {
+    "en": "Replay",
+    "fr": "Rejouer"
+  },
+  "common.next": {
+    "en": "Next",
+    "fr": "Suivant"
+  },
+  "common.home": {
+    "en": "Home",
+    "fr": "Accueil"
+  },
+  "common.share": {
+    "en": "Share",
+    "fr": "Partager"
+  },
+  "common.close": {
+    "en": "Close",
+    "fr": "Fermer"
+  },
+  "common.left": {
+    "en": "LEFT",
+    "fr": "RESTE"
+  },
+  "difficulty.Super Easy": {
+    "en": "Super Easy",
+    "fr": "Très facile"
+  },
+  "difficulty.Easy": {
+    "en": "Easy",
+    "fr": "Facile"
+  },
+  "difficulty.Medium": {
+    "en": "Medium",
+    "fr": "Moyen"
+  },
+  "difficulty.Hard": {
+    "en": "Hard",
+    "fr": "Difficile"
+  },
+  "levelName.classic_60": {
+    "en": "Classic 60",
+    "fr": "Classique 60"
+  },
+  "levelName.level_1": {
+    "en": "Classic 60",
+    "fr": "Classique 60"
+  },
+  "levelName.easy_16": {
+    "en": "Easy 16",
+    "fr": "Facile 16"
+  },
+  "levelName.easy_20": {
+    "en": "Easy 20",
+    "fr": "Facile 20"
+  },
+  "levelName.easy_24": {
+    "en": "Easy 24",
+    "fr": "Facile 24"
+  },
+  "levelName.easy_24_alt": {
+    "en": "Easy 24 Alt",
+    "fr": "Facile 24 Alt"
+  },
+  "levelName.easy_36": {
+    "en": "Easy 36",
+    "fr": "Facile 36"
+  },
+  "levelName.easy_60": {
+    "en": "Easy 60",
+    "fr": "Facile 60"
+  },
+  "levelName.hard_30": {
+    "en": "Hard 30",
+    "fr": "Difficile 30"
+  },
+  "levelName.hard_72": {
+    "en": "Hard 72",
+    "fr": "Difficile 72"
+  },
+  "levelName.medium_30": {
+    "en": "Medium 30",
+    "fr": "Moyen 30"
+  },
+  "levelName.medium_44": {
+    "en": "Medium 44",
+    "fr": "Moyen 44"
+  },
+  "levelName.medium_48": {
+    "en": "Medium 48",
+    "fr": "Moyen 48"
+  },
+  "levelName.medium_50": {
+    "en": "Medium 50",
+    "fr": "Moyen 50"
+  },
+  "levelName.super_easy_12": {
+    "en": "Super Easy 12",
+    "fr": "Très facile 12"
+  },
+  "levelName.super_easy_12_alt": {
+    "en": "Super Easy 12 Alt",
+    "fr": "Très facile 12 Alt"
+  },
+  "mode.classic": {
+    "en": "Classic",
+    "fr": "Classique"
+  },
+  "mode.moreLess": {
+    "en": "More or less",
+    "fr": "Plus ou moins"
+  },
+  "probabilities.show": {
+    "en": "Show draw probabilities",
+    "fr": "Afficher les probabilités de pioche"
+  },
+  "probabilities.hint": {
+    "en": "Display each card's odds and highlight the best bet.",
+    "fr": "Affiche les chances de chaque carte et met en avant le meilleur pari."
+  },
+  "moreLess.nextCard": {
+    "en": "Next card",
+    "fr": "Carte suivante"
+  },
+  "moreLess.MORE": {
+    "en": "MORE",
+    "fr": "PLUS"
+  },
+  "moreLess.LESS": {
+    "en": "LESS",
+    "fr": "MOINS"
+  },
+  "gameInfo.showRecentLogs": {
+    "en": "Show recent logs",
+    "fr": "Afficher les messages récents"
+  },
+  "gameLog.hit": {
+    "en": "hit",
+    "fr": "touche"
+  },
+  "gameLog.combo": {
+    "en": "combo",
+    "fr": "combo"
+  },
+  "gameLog.success": {
+    "en": "success",
+    "fr": "succès"
+  },
+  "gameLog.combo-break": {
+    "en": "combo break",
+    "fr": "combo perdu"
+  },
+  "feedback.yes": {
+    "en": "YES!",
+    "fr": "OUI !"
+  },
+  "feedback.no": {
+    "en": "no",
+    "fr": "non"
+  },
+  "feedback.retry": {
+    "en": "retry",
+    "fr": "réessaie"
+  },
+  "feedback.again": {
+    "en": "again",
+    "fr": "encore"
+  },
+  "reward.success": {
+    "en": "SUCCESS",
+    "fr": "SUCCÈS"
+  },
+  "combo.break": {
+    "en": "COMBO BREAK",
+    "fr": "COMBO PERDU"
+  },
+  "game.endOfDeck": {
+    "en": "END OF DECK",
+    "fr": "FIN DU DECK"
+  },
+  "win.victory": {
+    "en": "★ VICTORY ★",
+    "fr": "★ VICTOIRE ★"
+  },
+  "win.win": {
+    "en": "WIN",
+    "fr": "GAGNÉ"
+  },
+  "win.deckCleared": {
+    "en": "DECK CLEARED",
+    "fr": "DECK TERMINÉ"
+  },
+  "tutorial.pause": {
+    "en": "Tutorial",
+    "fr": "Tutoriel"
+  },
+  "tutorial.waiting": {
+    "en": "Your turn…",
+    "fr": "À toi…"
+  },
+  "tutorial.next": {
+    "en": "Next",
+    "fr": "Suivant"
+  },
+  "tutorial.finish": {
+    "en": "Play",
+    "fr": "Jouer"
+  },
+  "tutorial.close": {
+    "en": "Close tutorial",
+    "fr": "Fermer le tutoriel"
+  },
+  "tutorial.progress": {
+    "en": "Tutorial progress {current} of {total}",
+    "fr": "Progression du tutoriel {current} sur {total}"
+  },
+  "tutorial.mode.title": {
+    "en": "Choose your run",
+    "fr": "Choisis ta partie"
+  },
+  "tutorial.mode.body": {
+    "en": "Pick Classic for the normal game, or More or less for hints after each draw.",
+    "fr": "Choisis Classique pour le jeu normal, ou Plus ou moins pour recevoir des indices après chaque pioche."
+  },
+  "tutorial.table.title": {
+    "en": "Deck and reveal",
+    "fr": "Deck et révélation"
+  },
+  "tutorial.table.body": {
+    "en": "The blue stack is your deck. The purple slot shows the card that was just drawn.",
+    "fr": "La pile bleue est ton deck. L'emplacement violet montre la carte qui vient d'être piochée."
+  },
+  "tutorial.guessWin.title": {
+    "en": "Make a winning prediction",
+    "fr": "Fais une prédiction gagnante"
+  },
+  "tutorial.guessWin.body": {
+    "en": "Tap the highlighted card. This illustrates a good prediction and the reward feedback.",
+    "fr": "Touche la carte surlignée. Cela montre une bonne prédiction et le retour de récompense."
+  },
+  "tutorial.resultWin.title": {
+    "en": "Points pop on the reveal",
+    "fr": "Les points apparaissent sur la révélation"
+  },
+  "tutorial.resultWin.body": {
+    "en": "The reveal shows the drawn card, and the point popup shows what was added to your score.",
+    "fr": "La révélation montre la carte piochée, et la bulle de points indique ce qui est ajouté à ton score."
+  },
+  "tutorial.guessCombo.title": {
+    "en": "Chain another success",
+    "fr": "Enchaîne un autre succès"
+  },
+  "tutorial.guessCombo.body": {
+    "en": "Tap the highlighted card again. A second success creates a combo.",
+    "fr": "Touche encore la carte surlignée. Un deuxième succès crée un combo."
+  },
+  "tutorial.comboMultideck.title": {
+    "en": "Combo opens multidecks",
+    "fr": "Le combo ouvre plusieurs decks"
+  },
+  "tutorial.comboMultideck.body": {
+    "en": "The combo duplicates the active table. More decks mean a prediction can be checked in several places at once.",
+    "fr": "Le combo duplique la table active. Plus de decks signifie qu'une prédiction peut être vérifiée à plusieurs endroits à la fois."
+  },
+  "tutorial.guessLoss.title": {
+    "en": "See a miss too",
+    "fr": "Observe aussi un échec"
+  },
+  "tutorial.guessLoss.body": {
+    "en": "Tap the highlighted card. This illustrates a miss so you can see how a combo breaks.",
+    "fr": "Touche la carte surlignée. Cela montre un échec pour voir comment un combo se casse."
+  },
+  "tutorial.lossResult.title": {
+    "en": "Miss and combo break",
+    "fr": "Échec et combo perdu"
+  },
+  "tutorial.lossResult.body": {
+    "en": "A wrong prediction marks the reveal as a miss and collapses the combo back toward one deck.",
+    "fr": "Une mauvaise prédiction marque la révélation comme ratée et ramène le combo vers un seul deck."
+  },
+  "tutorial.infoButton.title": {
+    "en": "Recent messages",
+    "fr": "Messages récents"
+  },
+  "tutorial.infoButton.body": {
+    "en": "The i button opens the latest feedback when you want to review what just happened.",
+    "fr": "Le bouton i ouvre les derniers retours quand tu veux revoir ce qui vient de se passer."
+  },
+  "tutorial.logsAfterAction.title": {
+    "en": "Check the feedback",
+    "fr": "Vérifie les retours"
+  },
+  "tutorial.logsAfterAction.body": {
+    "en": "The recent messages are held on screen now, so you can see what your last action triggered.",
+    "fr": "Les messages récents restent maintenant à l'écran pour montrer ce que ta dernière action a déclenché."
+  },
+  "tutorial.status.title": {
+    "en": "Star targets",
+    "fr": "Objectifs d'étoiles"
+  },
+  "tutorial.status.body": {
+    "en": "The three cards show your Success, Score and Precision progress: the same three criteria used for stars.",
+    "fr": "Les trois cartes montrent ta progression Succès, Score et Précision : les mêmes trois critères utilisés pour les étoiles."
+  },
+  "tutorial.done.title": {
+    "en": "You are ready",
+    "fr": "Tu es prêt"
+  },
+  "tutorial.done.body": {
+    "en": "Keep playing until the deck is empty. Replay the tutorial from Home whenever you want.",
+    "fr": "Continue à jouer jusqu'à ce que le deck soit vide. Relance le tutoriel depuis l'accueil quand tu veux."
+  },
+  "achievements.closeMenu": {
+    "en": "Close achievements menu",
+    "fr": "Fermer le menu des succès"
+  },
+  "achievements.endOfDeck": {
+    "en": "End of deck",
+    "fr": "Fin du deck"
+  },
+  "achievements.title": {
+    "en": "Achievements",
+    "fr": "Succès"
+  },
+  "achievements.summary": {
+    "en": "earned this game · unlocked the achievement star",
+    "fr": "gagné pendant cette partie · débloque l'étoile des succès"
+  },
+  "achievements.rewardLabel": {
+    "en": "Game reward",
+    "fr": "Récompense de partie"
+  },
+  "achievements.column.achievement": {
+    "en": "Achievement",
+    "fr": "Succès"
+  },
+  "achievements.column.how": {
+    "en": "How to unlock",
+    "fr": "Comment débloquer"
+  },
+  "achievements.column.points": {
+    "en": "Points",
+    "fr": "Points"
+  },
+  "achievementCriterion.comboThreshold": {
+    "en": "Reach a x{target} combo",
+    "fr": "Atteindre un combo x{target}"
+  },
+  "achievementCriterion.topValuePair": {
+    "en": "Match card {card} {count} times in a row",
+    "fr": "Trouver la carte {card} {count} fois d'affilée"
+  },
+  "achievementCriterion.rankStreak": {
+    "en": "Match card {card} {count} times in a row",
+    "fr": "Trouver la carte {card} {count} fois d'affilée"
+  },
+  "achievementName.big_bang_maker": {
+    "en": "Big Bang Maker",
+    "fr": "Créateur de Big Bang"
+  },
+  "achievementName.big_loot": {
+    "en": "Big Loot",
+    "fr": "Gros butin"
+  },
+  "achievementName.brelan": {
+    "en": "Brelan",
+    "fr": "Brelan"
+  },
+  "achievementName.call_the_doctor": {
+    "en": "Call the Doctor",
+    "fr": "Appelez le docteur"
+  },
+  "achievementName.call_the_police": {
+    "en": "Call the Police!",
+    "fr": "Appelez la police !"
+  },
+  "achievementName.combos_bingo": {
+    "en": "Combos Bingo",
+    "fr": "Bingo des combos"
+  },
+  "achievementName.combos_time": {
+    "en": "Combos Time",
+    "fr": "Temps des combos"
+  },
+  "achievementName.comboska_que_pasa": {
+    "en": "Comboska Qué Pasa",
+    "fr": "Comboska Qué Pasa"
+  },
+  "achievementName.confident": {
+    "en": "Confident",
+    "fr": "Confiant"
+  },
+  "achievementName.cosmic_player": {
+    "en": "Cosmic Player",
+    "fr": "Joueur cosmique"
+  },
+  "achievementName.deus": {
+    "en": "Deus",
+    "fr": "Deus"
+  },
+  "achievementName.flow_of_the_multiverse": {
+    "en": "Flow of the Multiverse",
+    "fr": "Flux du multivers"
+  },
+  "achievementName.hacker": {
+    "en": "Hacker",
+    "fr": "Hacker"
+  },
+  "achievementName.master": {
+    "en": "Master",
+    "fr": "Maître"
+  },
+  "achievementName.source_of_life": {
+    "en": "Source of Life",
+    "fr": "Source de vie"
+  },
+  "achievementName.straight": {
+    "en": "Straight",
+    "fr": "Suite"
+  },
+  "achievementName.three_unique_matches": {
+    "en": "Variety",
+    "fr": "Variété"
+  },
+  "achievementName.two_big_ones": {
+    "en": "2 Big Ones",
+    "fr": "2 gros coups"
+  },
+  "achievementDescription.big_bang_maker": {
+    "en": "Match the Big Bang rank twice in a row",
+    "fr": "Trouver le rang Big Bang deux fois d'affilée"
+  },
+  "achievementDescription.big_loot": {
+    "en": "Match the second-highest rank twice in a row",
+    "fr": "Trouver le deuxième meilleur rang deux fois d'affilée"
+  },
+  "achievementDescription.brelan": {
+    "en": "Match the same non-minimum rank 3 times in a row",
+    "fr": "Trouver le même rang non minimum 3 fois d'affilée"
+  },
+  "achievementDescription.call_the_doctor": {
+    "en": "Reach a x20 combo",
+    "fr": "Atteindre un combo x20"
+  },
+  "achievementDescription.call_the_police": {
+    "en": "Reach a x25 combo",
+    "fr": "Atteindre un combo x25"
+  },
+  "achievementDescription.combos_bingo": {
+    "en": "Reach a x10 combo",
+    "fr": "Atteindre un combo x10"
+  },
+  "achievementDescription.combos_time": {
+    "en": "Reach a x5 combo",
+    "fr": "Atteindre un combo x5"
+  },
+  "achievementDescription.comboska_que_pasa": {
+    "en": "Reach a x15 combo",
+    "fr": "Atteindre un combo x15"
+  },
+  "achievementDescription.confident": {
+    "en": "Match the confident rank twice in a row",
+    "fr": "Trouver le rang confiant deux fois d'affilée"
+  },
+  "achievementDescription.cosmic_player": {
+    "en": "Match the cosmic rank twice in a row",
+    "fr": "Trouver le rang cosmique deux fois d'affilée"
+  },
+  "achievementDescription.deus": {
+    "en": "Match the Deus rank twice in a row",
+    "fr": "Trouver le rang Deus deux fois d'affilée"
+  },
+  "achievementDescription.flow_of_the_multiverse": {
+    "en": "Match the multiverse rank twice in a row",
+    "fr": "Trouver le rang multivers deux fois d'affilée"
+  },
+  "achievementDescription.hacker": {
+    "en": "Match the lowest rank 8 times in a row",
+    "fr": "Trouver le plus petit rang 8 fois d'affilée"
+  },
+  "achievementDescription.master": {
+    "en": "Match the master rank twice in a row",
+    "fr": "Trouver le rang maître deux fois d'affilée"
+  },
+  "achievementDescription.source_of_life": {
+    "en": "Match the source-of-life rank twice in a row",
+    "fr": "Trouver le rang source de vie deux fois d'affilée"
+  },
+  "achievementDescription.straight": {
+    "en": "Match 3 consecutive ranks in ascending order",
+    "fr": "Trouver 3 rangs consécutifs dans l'ordre croissant"
+  },
+  "achievementDescription.three_unique_matches": {
+    "en": "Match 3 different ranks in a row",
+    "fr": "Trouver 3 rangs différents d'affilée"
+  },
+  "achievementDescription.two_big_ones": {
+    "en": "Match the highest rank twice in a row",
+    "fr": "Trouver le meilleur rang deux fois d'affilée"
+  },
+  "star.successTarget": {
+    "en": "{target} Success",
+    "fr": "{target} Succès"
+  },
+  "star.scoreTarget": {
+    "en": "{target} Score",
+    "fr": "{target} Score"
+  },
+  "star.precisionTarget": {
+    "en": "{target}% Precision",
+    "fr": "{target}% Précision"
+  },
+  "star.unlocked": {
+    "en": "UNLOCKED",
+    "fr": "DÉBLOQUÉE"
+  },
+  "star.lost": {
+    "en": "LOST",
+    "fr": "PERDUE"
+  },
+  "share.scoreTitle": {
+    "en": "60game score",
+    "fr": "Score 60game"
+  },
+  "share.scoreHeader": {
+    "en": "60GAME SCORE",
+    "fr": "SCORE 60GAME"
+  },
+  "share.sharedFrom": {
+    "en": "Shared from 60game",
+    "fr": "Partagé depuis 60game"
+  },
+  "startup.errorTitle": {
+    "en": "60game",
+    "fr": "60game"
+  },
+  "startup.errorBody": {
+    "en": "Unable to load the game. Please refresh the page.",
+    "fr": "Impossible de charger le jeu. Rafraîchis la page."
+  },
+  "common.deckUpper": {
+    "en": "DECK",
+    "fr": "DECK"
+  },
+  "common.decksUpper": {
+    "en": "DECKS",
+    "fr": "DECKS"
+  },
+  "star.label": {
+    "en": "STAR",
+    "fr": "ÉTOILE"
+  },
+  "comboLabel.great": {
+    "en": "GREAT",
+    "fr": "SUPER"
+  },
+  "comboLabel.amazing": {
+    "en": "AMAZING",
+    "fr": "INCROYABLE"
+  },
+  "comboLabel.impressive": {
+    "en": "IMPRESSIVE",
+    "fr": "IMPRESSIONNANT"
+  },
+  "comboLabel.awesome": {
+    "en": "AWESOME",
+    "fr": "GÉNIAL"
+  },
+  "comboLabel.god": {
+    "en": "GOD IS PLAYING",
+    "fr": "DIEU JOUE"
+  }
+}

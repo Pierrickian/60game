@@ -20,7 +20,7 @@ const server = await createServer({
 try {
   const { App } = await server.ssrLoadModule('/src/main.jsx')
   const html = renderToString(React.createElement(App))
-  if (!html.includes('Select a level')) throw new Error('Expected the initial level selection screen to render.')
+  if (!html.includes('Choisis un niveau')) throw new Error('Expected the default French level selection screen to render.')
   console.log('Validated app startup render.')
 } finally {
   await server.close()

@@ -16,8 +16,9 @@ import { DeckReconciliationError, applyDeckMutationToTables, countCardsByLabel, 
 import { getMoreLessHintDirection } from './runtime/moreLessHints'
 import { formatCardProbability, getCardProbabilityModel, getMostLikelyCardLabels } from './runtime/cardProbabilities'
 import { TUTORIAL_STORAGE_KEY, TUTORIAL_STEPS, getNextTutorialStepId, getTutorialStep } from './runtime/tutorial'
+import { DEFAULT_LANGUAGE, LANGUAGE_STORAGE_KEY, makeTranslator, normalizeLanguage } from './localization/i18n'
 
-const COMBO_LABELS = { 2: 'GREAT', 3: 'AMAZING', 4: 'IMPRESSIVE', 5: 'AWESOME', 6: 'GOD IS PLAYING' }
+const COMBO_LABEL_KEYS = { 2: 'comboLabel.great', 3: 'comboLabel.amazing', 4: 'comboLabel.impressive', 5: 'comboLabel.awesome', 6: 'comboLabel.god' }
 const POST_GOD_LABELS = ['HAPPY BIRTHDAY', 'MY LORD', 'CHIRURGICAL', 'FIN LIMIER', 'OISEAU RARE', 'RENARD', 'LOUP', 'TIGRE', 'LION', 'DINOSAURE', 'METEORITE', 'SOLEIL', 'GALAXIE', 'COSMOS', 'UNIVERS', 'MULTIVERS', 'TROU NOIR', 'BIG BANG', 'QUANTIC AWERENESS', 'SOURCE VIBRATION', 'LOVE', 'PEACE', 'VOID', 'PURE ENERGY', 'PURE BODY', 'PURE MIND', 'PURE HEART', 'PURE SOUL', 'ANGEL', 'ARCHANGEL', 'DIVINE', 'DIVINE 2', 'DIVINE 3', 'DIVINE 4', 'DIVINE 5', 'DIVINE 6', 'DIVINE 7', 'DIVINE 8', 'DIVINE 9', 'DIVINE 10', 'DIVINE 1000', 'DIVINE 1M', 'DIVINE 1B', 'DIVINE 999T']
 const SCORE_SCREEN_DELAY_MS = 2000
 const GAME_OVER_BANNER_LEAD_MS = 1000
@@ -28,9 +29,35 @@ const COMBO_BREAK_COUNTDOWN_REFRESH_MS = 100
 const GAMEPLAY_LOG_DURATION_MS = 2200
 const POINT_REWARD_POPUP_DURATION_MS = 1600
 const MORE_LESS_HINT_DURATION_MS = 1800
-const PREDICTION_MISS_LABELS = ['no', 'retry', 'again']
+const PREDICTION_MISS_LABEL_KEYS = ['feedback.no', 'feedback.retry', 'feedback.again']
+
+const STARTUP_T = makeTranslator(DEFAULT_LANGUAGE)
 
 const THEME_BY_INDEX = ['green', 'blue', 'purple', 'orange', 'red', 'cyan', 'gold']
+
+function localizedDifficulty(level, t) {
+  return t(`difficulty.${level?.difficulty || 'Hard'}`)
+}
+
+function localizedLevelName(level, t) {
+  return t(`levelName.${level?.id}`)
+}
+
+function localizedDeckSummary(level, deckSize, jokerCount, t) {
+  return `${localizedDifficulty(level, t)} • ${deckSize} ${t('common.cards')} • ${jokerCount} ${t('common.jokers')}`
+}
+
+function localizedStarTargetText(star, t) {
+  if (star.id === 'success') return t('star.successTarget', { target: star.target })
+  if (star.id === 'score') return t('star.scoreTarget', { target: star.target })
+  if (star.id === 'precision') return t('star.precisionTarget', { target: Math.round(Number(star.target || 0) * 100) })
+  return star.targetText
+}
+
+function LanguageToggle({ language, onToggle, t }) {
+  const isEnglish = language === 'en'
+  return <button type="button" className="language-toggle" onClick={onToggle} aria-label={isEnglish ? t('language.switchToFrench') : t('language.switchToEnglish')}><span aria-hidden="true">{isEnglish ? '🇫🇷' : '🇬🇧'}</span></button>
+}
 
 function cardTypesFromLevel(levelConfig) {
   return Object.entries(levelConfig.startingDeck).map(([rawLabel], index) => {
@@ -45,8 +72,8 @@ function buildDeckForLevel(levelConfig) {
   return shuffle(types.flatMap((type) => Array.from({ length: type.count }, (_, index) => ({ ...type, id: `${type.label}-${index}` }))))
 }
 const getCardType = (cardTypes, label) => cardTypes.find((card) => card.label === label)
-function comboText(combo) {
-  if (combo <= 6) return COMBO_LABELS[combo]
+function comboText(combo, t) {
+  if (combo <= 6) return t(COMBO_LABEL_KEYS[combo])
   return POST_GOD_LABELS[(combo - 7) % POST_GOD_LABELS.length]
 }
 
@@ -99,12 +126,12 @@ function isCardInMoreLessRange(card, range) {
   return false
 }
 
-function levelShareDetails(levelNumber, levelConfig) {
+function levelShareDetails(levelNumber, levelConfig, t) {
   const deckSize = Object.values(levelConfig.startingDeck).reduce((sum, amount) => sum + amount, 0)
   const jokerCount = levelConfig.startingDeck.joker || 0
   return {
-    title: `LEVEL ${levelNumber} · ${levelConfig.name}`,
-    summary: `${levelConfig.difficulty || 'Hard'} · ${deckSize} cards · ${jokerCount} jokers`
+    title: `${t('common.level').toUpperCase()} ${levelNumber} · ${localizedLevelName(levelConfig, t)}`,
+    summary: `${localizedDifficulty(levelConfig, t)} · ${deckSize} ${t('common.cards')} · ${jokerCount} ${t('common.jokers')}`
   }
 }
 
@@ -115,12 +142,12 @@ function scoreShareMetrics(stars) {
   }
 }
 
-function scoreShareText(score, best, stats, levelNumber, levelConfig, metrics) {
-  const level = levelShareDetails(levelNumber, levelConfig)
-  return `60game\n${level.title}\n${level.summary}\nScore ${score}\nBest ${best}\nHits ${stats.hits}\nBest combo x${Math.max(1, stats.bestCombo)}\nAchievements ${metrics.achievements}\nPrecision ${metrics.precision}`
+function scoreShareText(score, best, stats, levelNumber, levelConfig, metrics, t) {
+  const level = levelShareDetails(levelNumber, levelConfig, t)
+  return `60game\n${level.title}\n${level.summary}\n${t('common.score')} ${score}\n${t('common.best')} ${best}\n${t('common.hits')} ${stats.hits}\n${t('common.bestCombo')} x${Math.max(1, stats.bestCombo)}\n${t('common.achievements')} ${metrics.achievements}\n${t('common.precision')} ${metrics.precision}`
 }
 
-function makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics) {
+function makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics, t) {
   return new Promise((resolve) => {
     const canvas = document.createElement('canvas')
     const width = 900
@@ -158,7 +185,7 @@ function makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics) {
     context.textAlign = 'center'
     context.fillStyle = 'rgba(255, 255, 255, 0.72)'
     context.font = '700 34px system-ui, sans-serif'
-    context.fillText('60GAME SCORE', width / 2, 190)
+    context.fillText(t('share.scoreHeader'), width / 2, 190)
 
     context.fillStyle = '#ffffff'
     context.font = '900 180px system-ui, sans-serif'
@@ -166,9 +193,9 @@ function makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics) {
 
     context.fillStyle = '#ffe680'
     context.font = '900 54px system-ui, sans-serif'
-    context.fillText(`BEST ${best}`, width / 2, 480)
+    context.fillText(`${t('common.best').toUpperCase()} ${best}`, width / 2, 480)
 
-    const level = levelShareDetails(levelNumber, levelConfig)
+    const level = levelShareDetails(levelNumber, levelConfig, t)
     context.fillStyle = '#ffffff'
     context.font = '900 32px system-ui, sans-serif'
     context.fillText(level.title, width / 2, 545)
@@ -177,10 +204,10 @@ function makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics) {
     context.fillText(level.summary.toUpperCase(), width / 2, 585)
 
     const rows = [
-      ['Hits', stats.hits],
-      ['Best combo', `x${Math.max(1, stats.bestCombo)}`],
-      ['Achievements', metrics.achievements],
-      ['Precision', metrics.precision]
+      [t('common.hits'), stats.hits],
+      [t('common.bestCombo'), `x${Math.max(1, stats.bestCombo)}`],
+      [t('common.achievements'), metrics.achievements],
+      [t('common.precision'), metrics.precision]
     ]
     context.textAlign = 'left'
     rows.forEach(([label, value], index) => {
@@ -202,7 +229,7 @@ function makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics) {
     context.textAlign = 'center'
     context.fillStyle = 'rgba(255, 255, 255, 0.54)'
     context.font = '700 28px system-ui, sans-serif'
-    context.fillText('Shared from 60game', width / 2, 1080)
+    context.fillText(t('share.sharedFrom'), width / 2, 1080)
 
     canvas.toBlob((blob) => {
       if (!blob) {
@@ -214,8 +241,8 @@ function makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics) {
   })
 }
 
-async function shareScore(score, best, stats, levelNumber, levelConfig, metrics) {
-  const file = await makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics)
+async function shareScore(score, best, stats, levelNumber, levelConfig, metrics, t) {
+  const file = await makeScoreImage(score, best, stats, levelNumber, levelConfig, metrics, t)
   if (file && navigator.canShare?.({ files: [file] }) && navigator.share) {
     try {
       await navigator.share({ files: [file] })
@@ -225,10 +252,10 @@ async function shareScore(score, best, stats, levelNumber, levelConfig, metrics)
     }
   }
 
-  const text = scoreShareText(score, best, stats, levelNumber, levelConfig, metrics)
+  const text = scoreShareText(score, best, stats, levelNumber, levelConfig, metrics, t)
   if (navigator.share) {
     try {
-      await navigator.share({ title: '60game score', text })
+      await navigator.share({ title: t('share.scoreTitle'), text })
       return
     } catch {
       return
@@ -247,13 +274,13 @@ function Stat({ tone, icon, label, value, bumpKey }) {
   return <motion.div key={`${label}-${bumpKey || 0}`} className={`stat-card ${tone}`} initial={{ scale: 1 }} animate={{ scale: bumpKey ? [1, 1.1, 1] : 1 }} transition={{ duration: .24 }}><span className="stat-icon">{icon}</span><span className="stat-label">{label}</span><strong>{value}</strong></motion.div>
 }
 
-function ComboStatus({ combo }) {
-  return <div className="combo-status"><span>{combo >= 2 ? `${activeTableCount(combo)} DECKS` : '1 DECK'}</span></div>
+function ComboStatus({ combo, t }) {
+  return <div className="combo-status"><span>{combo >= 2 ? `${activeTableCount(combo)} ${t('common.decksUpper')}` : `1 ${t('common.deckUpper')}`}</span></div>
 }
 
-function DeckStack({ remaining, isMain, totalCards, tutorialTarget }) {
+function DeckStack({ remaining, isMain, totalCards, tutorialTarget, t }) {
   const highlighted = tutorialTarget === 'table'
-  return <div className="deck-zone"><div className="plate plate-blue" /><div className={`deck-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className={`deck-back ${isMain ? 'primary-deck' : ''}`}><span className="deck-logo">{totalCards}</span><span className="deck-subtitle">GAME</span>{isMain ? <small>{remaining}</small> : null}</div></div></div>
+  return <div className="deck-zone"><div className="plate plate-blue" /><div className={`deck-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className={`deck-back ${isMain ? 'primary-deck' : ''}`}><span className="deck-brand"><span className="deck-logo">{totalCards}</span><span className="deck-subtitle">{t('deck.game')}</span></span>{isMain ? <small>{remaining}</small> : null}</div></div></div>
 }
 
 const MemoDeckStack = React.memo(DeckStack)
@@ -289,7 +316,7 @@ function DiscardPile({ card, won, miss, revealId, showCombo, tutorialTarget }) {
 
 const MemoDiscardPile = React.memo(DiscardPile)
 
-function PredictionCard({ card, index, remaining, onGuess, bumpKey, probability, isMostLikely, tutorialAllowedLabel }) {
+function PredictionCard({ card, index, remaining, onGuess, bumpKey, probability, isMostLikely, tutorialAllowedLabel, t }) {
   const tutorialLocked = !isTutorialPredictionAllowed(card, tutorialAllowedLabel)
   const unavailable = remaining <= 0 || tutorialLocked
   function handlePress(event) {
@@ -300,7 +327,7 @@ function PredictionCard({ card, index, remaining, onGuess, bumpKey, probability,
     }
     onGuess(card, index)
   }
-  return <motion.button key={`${card.label}-${bumpKey || 0}`} className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''} ${isMostLikely ? 'most-likely' : ''} ${tutorialLocked ? 'tutorial-card-locked' : ''}`} aria-disabled={unavailable} onClick={handlePress} whileTap={{ scale: unavailable ? 1 : 0.96 }} initial={{ scale: 1 }} animate={{ scale: bumpKey ? [1, 1.12, 0.96, 1] : 1 }} transition={{ duration: 0.34 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span>{probability !== undefined ? <span className="prediction-probability">{formatCardProbability(probability)}</span> : null}<span className="prediction-left">{remaining} LEFT</span></motion.button>
+  return <motion.button key={`${card.label}-${bumpKey || 0}`} className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''} ${isMostLikely ? 'most-likely' : ''} ${tutorialLocked ? 'tutorial-card-locked' : ''}`} aria-disabled={unavailable} onClick={handlePress} whileTap={{ scale: unavailable ? 1 : 0.96 }} initial={{ scale: 1 }} animate={{ scale: bumpKey ? [1, 1.12, 0.96, 1] : 1 }} transition={{ duration: 0.34 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span>{probability !== undefined ? <span className="prediction-probability">{formatCardProbability(probability)}</span> : null}<span className="prediction-left">{remaining} {t('common.left')}</span></motion.button>
 }
 
 function BetClone({ bet }) {
@@ -313,22 +340,22 @@ function BetClone({ bet }) {
   return <motion.div className={`bet-clone theme-${bet.card.theme} bet-${bet.result}`} initial={{ x: startX, y: startY, scale: 0.66, opacity: 0.94 }} animate={animate} exit={{ opacity: 0, scale: 0.45 }} transition={{ duration: bet.result === 'pending' ? 0.18 : 0.32, ease: 'easeOut' }}><span>{bet.card.label}</span><small>{bet.card.icon}</small></motion.div>
 }
 
-function TableSlot({ table, totalCards, tutorialTarget }) {
-  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><MemoDeckStack remaining={table.deck.length} isMain={table.isMain} totalCards={totalCards} tutorialTarget={tutorialTarget} /><div className="arc-ribbon mini-ribbon" /><MemoDiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} revealId={table.revealId} showCombo={table.showCombo} tutorialTarget={tutorialTarget} /></motion.div>
+function TableSlot({ table, totalCards, tutorialTarget, t }) {
+  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><MemoDeckStack remaining={table.deck.length} isMain={table.isMain} totalCards={totalCards} tutorialTarget={tutorialTarget} t={t} /><div className="arc-ribbon mini-ribbon" /><MemoDiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} revealId={table.revealId} showCombo={table.showCombo} tutorialTarget={tutorialTarget} /></motion.div>
 }
 
 const MemoTableSlot = React.memo(TableSlot)
 
-function LevelIntroCard({ level, levelNumber, totalCards, probabilitiesEnabled, onProbabilitiesChange, onClassic, onMoreLess, highlighted }) {
+function LevelIntroCard({ level, levelNumber, totalCards, probabilitiesEnabled, onProbabilitiesChange, onClassic, onMoreLess, highlighted, t }) {
   const jokerCount = level.startingDeck.joker || 0
   const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker')
-  return <section className="level-intro-overlay"><article className={`level-intro-card ${highlighted ? 'tutorial-ui-highlight' : ''}`}><span>Level {levelNumber}</span><em>{level.difficulty || 'Hard'} • {totalCards} cards • {jokerCount} jokers</em><p>{nonJoker.join(' / ')}</p><label className={`probability-option ${probabilitiesEnabled ? 'enabled' : ''}`}><input type="checkbox" checked={probabilitiesEnabled} onChange={(event) => onProbabilitiesChange(event.target.checked)} /><span className="probability-check" aria-hidden="true">✓</span><span className="probability-option-copy"><strong>Show draw probabilities</strong><small>Display each card's odds and highlight the best bet.</small></span></label><div className="level-intro-actions"><button className="level-intro-play level-intro-classic" onClick={onClassic}>Classic</button><button className="level-intro-play level-intro-more-less" onClick={onMoreLess}>More or less</button></div></article></section>
+  return <section className="level-intro-overlay"><article className={`level-intro-card ${highlighted ? 'tutorial-ui-highlight' : ''}`}><span>{t('common.level')} {levelNumber}</span><em>{localizedDeckSummary(level, totalCards, jokerCount, t)}</em><p>{nonJoker.join(' / ')}</p><label className={`probability-option ${probabilitiesEnabled ? 'enabled' : ''}`}><input type="checkbox" checked={probabilitiesEnabled} onChange={(event) => onProbabilitiesChange(event.target.checked)} /><span className="probability-check" aria-hidden="true">✓</span><span className="probability-option-copy"><strong>{t('probabilities.show')}</strong><small>{t('probabilities.hint')}</small></span></label><div className="level-intro-actions"><button className="level-intro-play level-intro-classic" onClick={onClassic}>{t('mode.classic')}</button><button className="level-intro-play level-intro-more-less" onClick={onMoreLess}>{t('mode.moreLess')}</button></div></article></section>
 }
 
 
-function MoreLessHintPopup({ hint }) {
+function MoreLessHintPopup({ hint, t }) {
   if (!hint) return null
-  return <motion.div key={hint.id} className={`more-less-hint more-less-${hint.direction.toLowerCase()}`} initial={{ opacity: 0, y: 18, scale: .76 }} animate={{ opacity: [0, 1, 1, 0], y: [18, 0, -4, -18], scale: [.76, 1.08, 1, .92] }} exit={{ opacity: 0, y: -24, scale: .88 }} transition={{ duration: 1.5, times: [0, .16, .72, 1], ease: 'easeOut' }}><small>Next card</small><strong>{hint.direction}</strong></motion.div>
+  return <motion.div key={hint.id} className={`more-less-hint more-less-${hint.direction.toLowerCase()}`} initial={{ opacity: 0, y: 18, scale: .76 }} animate={{ opacity: [0, 1, 1, 0], y: [18, 0, -4, -18], scale: [.76, 1.08, 1, .92] }} exit={{ opacity: 0, y: -24, scale: .88 }} transition={{ duration: 1.5, times: [0, .16, .72, 1], ease: 'easeOut' }}><small>{t('moreLess.nextCard')}</small><strong>{t(`moreLess.${hint.direction}`)}</strong></motion.div>
 }
 
 function ComboBreakCountdown({ from }) {
@@ -347,20 +374,20 @@ function ComboBreakCountdown({ from }) {
   return <span className={value === 0 ? 'break-countdown zero' : 'break-countdown'}>x{value}</span>
 }
 
-function ComboBreakOverlay({ breakFx }) {
+function ComboBreakOverlay({ breakFx, t }) {
   if (!breakFx) return null
-  return <div className="combo-break-overlay"><motion.div initial={{ opacity: 0, y: -26, scale: .68 }} animate={{ opacity: 1, y: 0, scale: [1, 1.06, 1] }} exit={{ opacity: 0, y: 34, scale: .88 }} transition={{ duration: .34 }}><strong>COMBO BREAK</strong><ComboBreakCountdown from={breakFx.from} /></motion.div></div>
+  return <div className="combo-break-overlay"><motion.div initial={{ opacity: 0, y: -26, scale: .68 }} animate={{ opacity: 1, y: 0, scale: [1, 1.06, 1] }} exit={{ opacity: 0, y: 34, scale: .88 }} transition={{ duration: .34 }}><strong>{t('combo.break')}</strong><ComboBreakCountdown from={breakFx.from} /></motion.div></div>
 }
 
-function PointRewardStack({ rewards }) {
-  return <div className="point-reward-stack"><AnimatePresence initial={false}>{rewards.map((reward) => <motion.div key={reward.id} className="point-reward-popup" initial={{ opacity: 0, x: 34, scale: .8 }} animate={{ opacity: [0, 1, 1, 0], x: [34, 0, 0, 18], scale: [.8, 1.08, 1, .94] }} exit={{ opacity: 0, x: 24, scale: .9 }} transition={{ duration: 1.5, times: [0, .16, .7, 1], ease: 'easeOut' }}><small>SUCCESS</small><strong>+{reward.points}</strong><span>{reward.label}</span></motion.div>)}</AnimatePresence></div>
+function PointRewardStack({ rewards, t }) {
+  return <div className="point-reward-stack"><AnimatePresence initial={false}>{rewards.map((reward) => <motion.div key={reward.id} className="point-reward-popup" initial={{ opacity: 0, x: 34, scale: .8 }} animate={{ opacity: [0, 1, 1, 0], x: [34, 0, 0, 18], scale: [.8, 1.08, 1, .94] }} exit={{ opacity: 0, x: 24, scale: .9 }} transition={{ duration: 1.5, times: [0, .16, .7, 1], ease: 'easeOut' }}><small>{t('reward.success')}</small><strong>+{reward.points}</strong><span>{reward.label}</span></motion.div>)}</AnimatePresence></div>
 }
 
-function GameInfoButton({ isPressed, onPressChange, highlighted }) {
-  return <button className={`game-info-button ${isPressed ? 'pressed' : ''} ${highlighted ? 'tutorial-ui-highlight' : ''}`} type="button" aria-label="Show recent logs" aria-pressed={isPressed} onPointerDown={() => onPressChange(true)} onPointerUp={() => onPressChange(false)} onPointerLeave={() => onPressChange(false)} onPointerCancel={() => onPressChange(false)}>i</button>
+function GameInfoButton({ isPressed, onPressChange, highlighted, t }) {
+  return <button className={`game-info-button ${isPressed ? 'pressed' : ''} ${highlighted ? 'tutorial-ui-highlight' : ''}`} type="button" aria-label={t('gameInfo.showRecentLogs')} aria-pressed={isPressed} onPointerDown={() => onPressChange(true)} onPointerUp={() => onPressChange(false)} onPointerLeave={() => onPressChange(false)} onPointerCancel={() => onPressChange(false)}>i</button>
 }
 
-function GameplayLogStack({ logs, onDismissOverflow, highlighted }) {
+function GameplayLogStack({ logs, onDismissOverflow, highlighted, t }) {
   const stackRef = useRef(null)
 
   useLayoutEffect(() => {
@@ -382,10 +409,10 @@ function GameplayLogStack({ logs, onDismissOverflow, highlighted }) {
     }
   }, [logs, onDismissOverflow, highlighted])
 
-  return <div ref={stackRef} className={`gameplay-log-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}><AnimatePresence initial={false}>{logs.map((log) => <motion.div layout data-gameplay-log-id={log.id} key={log.id} className={`gameplay-log gameplay-log-${log.tone || log.category}`} initial={{ opacity: 0, y: -28, scale: .94 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30, scale: .96 }} transition={{ duration: .3, ease: 'easeOut', layout: { duration: .24 } }}><span className="gameplay-log-marker">›</span><small>{log.category}</small><strong>{log.text}</strong></motion.div>)}</AnimatePresence></div>
+  return <div ref={stackRef} className={`gameplay-log-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}><AnimatePresence initial={false}>{logs.map((log) => <motion.div layout data-gameplay-log-id={log.id} key={log.id} className={`gameplay-log gameplay-log-${log.tone || log.category}`} initial={{ opacity: 0, y: -28, scale: .94 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30, scale: .96 }} transition={{ duration: .3, ease: 'easeOut', layout: { duration: .24 } }}><span className="gameplay-log-marker">›</span><small>{t(`gameLog.${log.category}`)}</small><strong>{log.text}</strong></motion.div>)}</AnimatePresence></div>
 }
 
-function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNext, onHome, stars, achievements }) {
+function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNext, onHome, stars, achievements, t }) {
   const unlockedStarsCount = stars.filter((star) => star.unlocked).length
   const shareMetrics = scoreShareMetrics(stars)
   const [showWinOverlay, setShowWinOverlay] = useState(unlockedStarsCount > 0)
@@ -401,12 +428,21 @@ function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNe
     return () => window.clearTimeout(timer)
   }, [unlockedStarsCount])
 
-  return <section className="end-screen session-panel"><AnimatePresence>{showWinOverlay ? <motion.div className="win-overlay" initial={{ opacity: 0, scale: 0.66, y: 26 }} animate={{ opacity: 1, scale: [1.12, 0.96, 1], y: 0 }} exit={{ opacity: 0, scale: 1.16, y: -28 }} transition={{ duration: 0.62, ease: 'easeOut' }}><div className="win-overlay-card"><span className="win-kicker">★ VICTORY ★</span><strong className="win-title">WIN</strong><small className="win-subtitle">DECK CLEARED</small></div></motion.div> : null}</AnimatePresence><span>Level {levelNumber}</span><strong>{score}</strong><em>Best {best}</em><div className="star-panel">{stars.map((star, index) => <motion.div key={star.id} className={`star-row ${star.unlocked ? 'on' : ''}`} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.25 + 0.1, duration: 0.25 }}><AnimatedMetric value={star.id === 'precision' ? Math.round(Number(star.value || 0) * 100) : star.value} suffix={star.id === 'precision' ? '%' : ''} className={`metric-${star.id} ${star.id === 'score' && Number(star.value || 0) >= 1000 ? 'metric-score-fit' : ''}`} bumpKey={`${star.id}-${star.unlocked ? 'on' : 'off'}`} /><StarDisplay unlocked={star.unlocked} size="lg" /><small>{star.targetText}</small></motion.div>)}</div><div className="session-stats"><div><small>Hits</small><b>{stats.hits}</b></div><div><small>Best combo</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>Achievements</small><b>{shareMetrics.achievements}</b></div><div><small>Precision</small><b>{shareMetrics.precision}</b></div></div><div className="session-actions"><div className="session-actions-row"><button onClick={onReplay}>Replay</button><button onClick={onNext}>Next</button></div><div className="session-actions-row session-actions-home"><button onClick={onHome}>Home</button></div><div className="session-actions-row"><button className="achievements-open" onClick={() => setShowAchievements(true)}>Achievements</button><button className="share-score" onClick={() => shareScore(score, best, stats, levelNumber, levelConfig, shareMetrics)}><WhatsAppIcon />Share</button></div></div><AnimatePresence>{showAchievements ? <AchievementsMenu achievements={achievements} levelConfig={levelConfig} onClose={() => setShowAchievements(false)} /> : null}</AnimatePresence></section>
+  return <section className="end-screen session-panel"><AnimatePresence>{showWinOverlay ? <motion.div className="win-overlay" initial={{ opacity: 0, scale: 0.66, y: 26 }} animate={{ opacity: 1, scale: [1.12, 0.96, 1], y: 0 }} exit={{ opacity: 0, scale: 1.16, y: -28 }} transition={{ duration: 0.62, ease: 'easeOut' }}><div className="win-overlay-card"><span className="win-kicker">{t('win.victory')}</span><strong className="win-title">{t('win.win')}</strong><small className="win-subtitle">{t('win.deckCleared')}</small></div></motion.div> : null}</AnimatePresence><span>{t('common.level')} {levelNumber}</span><strong>{score}</strong><em>{t('common.best')} {best}</em><div className="star-panel">{stars.map((star, index) => <motion.div key={star.id} className={`star-row ${star.unlocked ? 'on' : ''}`} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.25 + 0.1, duration: 0.25 }}><AnimatedMetric value={star.id === 'precision' ? Math.round(Number(star.value || 0) * 100) : star.value} suffix={star.id === 'precision' ? '%' : ''} className={`metric-${star.id} ${star.id === 'score' && Number(star.value || 0) >= 1000 ? 'metric-score-fit' : ''}`} bumpKey={`${star.id}-${star.unlocked ? 'on' : 'off'}`} /><StarDisplay unlocked={star.unlocked} size="lg" /><small>{localizedStarTargetText(star, t)}</small></motion.div>)}</div><div className="session-stats"><div><small>{t('common.hits')}</small><b>{stats.hits}</b></div><div><small>{t('common.bestCombo')}</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>{t('common.achievements')}</small><b>{shareMetrics.achievements}</b></div><div><small>{t('common.precision')}</small><b>{shareMetrics.precision}</b></div></div><div className="session-actions"><div className="session-actions-row"><button onClick={onReplay}>{t('common.replay')}</button><button onClick={onNext}>{t('common.next')}</button></div><div className="session-actions-row session-actions-home"><button onClick={onHome}>{t('common.home')}</button></div><div className="session-actions-row"><button className="achievements-open" onClick={() => setShowAchievements(true)}>{t('common.achievements')}</button><button className="share-score" onClick={() => shareScore(score, best, stats, levelNumber, levelConfig, shareMetrics, t)}><WhatsAppIcon />{t('common.share')}</button></div></div><AnimatePresence>{showAchievements ? <AchievementsMenu achievements={achievements} levelConfig={levelConfig} onClose={() => setShowAchievements(false)} t={t} /> : null}</AnimatePresence></section>
 }
 
 function App() {
   const orderedLevelIds = useMemo(() => levelsRegistry.levels.map(({ id }) => id).filter((id) => levelConfigs[id]), [])
   const [selectedLevelId, setSelectedLevelId] = useState(levelsRegistry.startingLevel)
+  const [language, setLanguage] = useState(() => normalizeLanguage(globalThis.localStorage?.getItem(LANGUAGE_STORAGE_KEY) || DEFAULT_LANGUAGE))
+  const t = useMemo(() => makeTranslator(language), [language])
+  const toggleLanguage = useCallback(() => {
+    setLanguage((currentLanguage) => {
+      const nextLanguage = currentLanguage === 'en' ? 'fr' : 'en'
+      writeStoredValue(LANGUAGE_STORAGE_KEY, nextLanguage)
+      return nextLanguage
+    })
+  }, [])
   const currentLevel = levelConfigs[selectedLevelId] ?? levelConfigs[levelsRegistry.startingLevel]
   const cardTypes = useMemo(() => cardTypesFromLevel(currentLevel), [currentLevel])
   const [started, setStarted] = useState(false)
@@ -495,7 +531,7 @@ function App() {
   }, [])
 
   function showPredictionReaction(type) {
-    const text = type === 'success' ? 'YES!' : PREDICTION_MISS_LABELS[predictionMissRef.current++ % PREDICTION_MISS_LABELS.length]
+    const text = type === 'success' ? t('feedback.yes') : t(PREDICTION_MISS_LABEL_KEYS[predictionMissRef.current++ % PREDICTION_MISS_LABEL_KEYS.length])
     showGameplayLog('hit', text)
   }
 
@@ -648,7 +684,7 @@ function App() {
         setBreakFx(null)
         setStats((currentStats) => ({ hits: currentStats.hits + hits.length, bestCombo: Math.max(currentStats.bestCombo, nextCombo), maxDecks: Math.max(currentStats.maxDecks, nextCount), jokers: currentStats.jokers + jokerHits }))
         const unlockedAchievements = evaluateAchievements(achievementRuntime, { isWin: true, card: hits[0]?.lastCard, combo: nextCombo, levelConfig: currentLevel })
-        unlockedAchievements.forEach((achievement) => showGameplayLog('success', `★ ${achievement.name}  +${achievement.pointsReward}`, 'success', Number(achievement.pointsReward || 0)))
+        unlockedAchievements.forEach((achievement) => showGameplayLog('success', `★ ${t(`achievementName.${achievement.id}`)}  +${achievement.pointsReward}`, 'success', Number(achievement.pointsReward || 0)))
 
         if (jokerTriggered) {
           const selectedPower = chooseWeightedJokerPower()
@@ -684,7 +720,7 @@ function App() {
         setScoreBump((value) => value + 1)
         showMoreLessHint(referenceTable.lastCard, referenceDeck, nextCount, currentTables.length)
         if (nextCombo >= 2) {
-          const title = comboText(nextCombo) || 'COMBO'
+          const title = comboText(nextCombo, t) || 'COMBO'
           showGameplayLog('combo', `${title}  x${nextCombo}`)
         }
         scheduleFxClear(fxToken, 430)
@@ -697,7 +733,7 @@ function App() {
       comboRef.current = 0
       setCombo(0)
       showMoreLessHint(referenceTable.lastCard, referenceDeck, 1, currentTables.length)
-      if (previousCombo >= 2) showGameplayLog('combo', `COMBO BREAK  x${previousCombo}`, 'combo-break')
+      if (previousCombo >= 2) showGameplayLog('combo-break', `${t('combo.break')}  x${previousCombo}`, 'combo-break')
       setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo } : null)
       scheduleFxClear(fxToken, previousCombo >= 2 ? 2400 : 220)
       if (fxTokenRef.current === fxToken && referenceDeck.length === 0) triggerEndSequence(fxToken)
@@ -759,10 +795,10 @@ function App() {
     const hasDrawnHalfDeck = totalDrawn >= Math.ceil(totalCards / 2)
     freshlyUnlocked.forEach((star, index) => {
       if (star.id === 'precision' && !hasDrawnHalfDeck) return
-      starLogEntries.push({ id: `star-${star.id}-${ts}-${index}-${Math.random().toString(36).slice(2, 6)}`, name: star.name, state: 'unlocked' })
+      starLogEntries.push({ id: `star-${star.id}-${ts}-${index}-${Math.random().toString(36).slice(2, 6)}`, name: t(`common.${star.id}`), state: 'unlocked' })
     })
-    if (lostPrecision && hasDrawnHalfDeck) starLogEntries.push({ id: `star-precision-lost-${ts}-${Math.random().toString(36).slice(2, 6)}`, name: 'Precision', state: 'lost' })
-    starLogEntries.forEach((entry) => showGameplayLog(entry.state === 'lost' ? 'hit' : 'success', `★ ${entry.name} STAR  ${entry.state === 'lost' ? 'LOST' : 'UNLOCKED'}`))
+    if (lostPrecision && hasDrawnHalfDeck) starLogEntries.push({ id: `star-precision-lost-${ts}-${Math.random().toString(36).slice(2, 6)}`, name: t('common.precision'), state: 'lost' })
+    starLogEntries.forEach((entry) => showGameplayLog(entry.state === 'lost' ? 'hit' : 'success', `★ ${entry.name} ${t('star.label')}  ${entry.state === 'lost' ? t('star.lost') : t('star.unlocked')}`))
     previousUnlockedStarsRef.current = new Set(nextUnlocked.map((s) => s.id))
   }, [started, showEnd, unlockedStarIds, totalDrawn, totalCards])
   useEffect(() => {
@@ -789,11 +825,11 @@ function App() {
   const gameOver = started && showEnd
   return <main className={`game-shell ${started ? 'in-game' : 'home-mode'} ${tutorialActive ? 'tutorial-running' : ''} ${tutorialTarget ? `tutorial-focus-${tutorialTarget}` : ''}`}>
     <div className="cinematic-bg" />
+    <LanguageToggle language={language} onToggle={toggleLanguage} t={t} />
     {!started ? <section className="start-screen level-select">
-      <span>60game</span>
-      <strong>60 Game</strong>
-      <em>Select a level</em>
-      <TutorialHomePanel onStart={startTutorial} />
+      <strong>{t('brand.60Game')}</strong>
+      <em>{t('home.selectLevel')}</em>
+      <TutorialHomePanel onStart={startTutorial} t={t} />
       <div className="level-select-grid">{orderedLevelIds.map((id) => {
         const level = levelConfigs[id]
         if (!level) return null
@@ -802,24 +838,24 @@ function App() {
         const jokerCount = level.startingDeck.joker || 0
         const active = selectedLevelId === id
         const saved = progression[id] || {}
-        return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{level.name}</b><small>{level.difficulty || 'Hard'} • {deckSize} cards • {jokerCount} jokers</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button>
+        return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{localizedLevelName(level, t)}</b><small>{localizedDeckSummary(level, deckSize, jokerCount, t)}</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button>
       })}</div>
-    </section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} achievements={achievementRuntime} /> : <>
-      <header className="game-header"><section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section><section className={`top-stats ${tutorialHighlight('hud')}`}><Stat tone="purple" icon="★" label="Success" value={successCount} bumpKey={successCount} /><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="green" icon="◎" label="Precision" value={precisionPercentage} /></section></header>
-      <ComboStatus combo={combo} />
+    </section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} achievements={achievementRuntime} t={t} /> : <>
+      <header className="game-header"><section className="quick-info"><div><span>{t('common.level').toUpperCase()}</span><strong>{levelNumber}</strong></div><div><span>{t('common.cardsUpper')}</span><strong>{totalCards}</strong></div></section><section className={`top-stats ${tutorialHighlight('hud')}`}><Stat tone="purple" icon="★" label={t('common.success')} value={successCount} bumpKey={successCount} /><Stat tone="gold" icon="🏆" label={t('common.score')} value={score} bumpKey={scoreBump} /><Stat tone="green" icon="◎" label={t('common.precision')} value={precisionPercentage} /></section></header>
+      <ComboStatus combo={combo} t={t} />
       {gameplayIsVisible ? <>
-        <section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} tutorialTarget={tutorialTarget} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section>
-        <GameInfoButton isPressed={showRecentLogs} onPressChange={setShowRecentLogs} highlighted={tutorialShowingInfoButton} />
-        <GameplayLogStack logs={visibleGameplayLogs} onDismissOverflow={dismissOverflowGameplayLogs} highlighted={tutorialShowingLogs} />
-        <PointRewardStack rewards={pointRewards} />
-        <AnimatePresence key={moreLessHintPresenceKey}>{moreLessHint ? <MoreLessHintPopup hint={moreLessHint} /> : null}</AnimatePresence>
-        <AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} /> : null}</AnimatePresence>
-        <section className={`prediction-grid ${tutorialHighlight('prediction-grid')}`}>{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label] ?? 0} probability={probabilitiesEnabled ? probabilityModel.percentages[card.label] : undefined} isMostLikely={highlightedProbabilityLabels.has(card.label)} onGuess={guess} bumpKey={cardCountBumps[card.label]} tutorialAllowedLabel={tutorialAllowedPredictionLabel} />)}</section>
+        <section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} tutorialTarget={tutorialTarget} t={t} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section>
+        <GameInfoButton isPressed={showRecentLogs} onPressChange={setShowRecentLogs} highlighted={tutorialShowingInfoButton} t={t} />
+        <GameplayLogStack logs={visibleGameplayLogs} onDismissOverflow={dismissOverflowGameplayLogs} highlighted={tutorialShowingLogs} t={t} />
+        <PointRewardStack rewards={pointRewards} t={t} />
+        <AnimatePresence key={moreLessHintPresenceKey}>{moreLessHint ? <MoreLessHintPopup hint={moreLessHint} t={t} /> : null}</AnimatePresence>
+        <AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} t={t} /> : null}</AnimatePresence>
+        <section className={`prediction-grid ${tutorialHighlight('prediction-grid')}`}>{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label] ?? 0} probability={probabilitiesEnabled ? probabilityModel.percentages[card.label] : undefined} isMostLikely={highlightedProbabilityLabels.has(card.label)} onGuess={guess} bumpKey={cardCountBumps[card.label]} tutorialAllowedLabel={tutorialAllowedPredictionLabel} t={t} />)}</section>
       </> : null}
-      <AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>END OF DECK</motion.div> : null}</AnimatePresence>
-      {showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} probabilitiesEnabled={probabilitiesEnabled} onProbabilitiesChange={setProbabilitiesEnabled} onClassic={() => startLevelIntro('classic')} onMoreLess={() => startLevelIntro('more-less')} highlighted={tutorialTarget === 'level-intro'} /> : null}
+      <AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>{t('game.endOfDeck')}</motion.div> : null}</AnimatePresence>
+      {showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} probabilitiesEnabled={probabilitiesEnabled} onProbabilitiesChange={setProbabilitiesEnabled} onClassic={() => startLevelIntro('classic')} onMoreLess={() => startLevelIntro('more-less')} highlighted={tutorialTarget === 'level-intro'} t={t} /> : null}
     </>}
-    <AnimatePresence>{tutorialActive ? <TutorialOverlay key={tutorialStep?.id} step={tutorialStep} steps={TUTORIAL_STEPS} active={tutorialActive} onNext={advanceTutorial} onFinish={finishTutorial} onClose={closeTutorial} /> : null}</AnimatePresence>
+    <AnimatePresence>{tutorialActive ? <TutorialOverlay key={tutorialStep?.id} step={tutorialStep} steps={TUTORIAL_STEPS} active={tutorialActive} onNext={advanceTutorial} onFinish={finishTutorial} onClose={closeTutorial} t={t} /> : null}</AnimatePresence>
   </main>
 }
 
@@ -835,7 +871,7 @@ class AppErrorBoundary extends React.Component {
   }
 
   render() {
-    if (this.state.error) return <main className="startup-error"><strong>60game</strong><p>Unable to load the game. Please refresh the page.</p></main>
+    if (this.state.error) return <main className="startup-error"><strong>{STARTUP_T('startup.errorTitle')}</strong><p>{STARTUP_T('startup.errorBody')}</p></main>
     return this.props.children
   }
 }
