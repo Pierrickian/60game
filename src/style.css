@@ -1122,3 +1122,365 @@ button {
   right: 7px;
   bottom: 7px;
 }
+
+.tutorial-home-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  margin: 16px 0 8px;
+  padding: 14px;
+  border: 1px solid rgba(124, 246, 255, .34);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 10% 0%, rgba(124, 246, 255, .16), transparent 46%),
+    rgba(7, 12, 30, .7);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 14px 34px rgba(0,0,0,.24);
+}
+
+
+.tutorial-home-panel strong {
+  display: block;
+  font-size: .92rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.tutorial-home-panel p {
+  margin: 4px 0 0;
+  color: rgba(255,255,255,.72);
+  font-size: .78rem;
+  line-height: 1.35;
+}
+
+
+.tutorial-start-button,
+.tutorial-primary {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 950;
+  cursor: pointer;
+}
+
+.tutorial-start-button,
+.tutorial-primary {
+  color: #06172a;
+  background: linear-gradient(135deg, #7cf6ff, #ffe86a);
+  box-shadow: 0 10px 26px rgba(124, 246, 255, .24);
+}
+
+.tutorial-start-button:disabled {
+  cursor: not-allowed;
+  color: rgba(255,255,255,.54);
+  background: rgba(255,255,255,.09);
+  box-shadow: none;
+}
+
+
+.tutorial-overlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  z-index: 2400;
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  pointer-events: none;
+}
+
+.tutorial-target-level-intro,
+.tutorial-target-controls {
+  top: max(10px, env(safe-area-inset-top));
+}
+
+.tutorial-target-hud {
+  bottom: calc(76px + env(safe-area-inset-bottom));
+}
+
+.tutorial-target-table,
+.tutorial-target-discard {
+  bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.tutorial-target-info-button {
+  bottom: calc(34px + env(safe-area-inset-bottom));
+}
+
+.tutorial-target-prediction-grid {
+  top: max(10px, env(safe-area-inset-top));
+}
+
+.tutorial-target-logs {
+  bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.tutorial-card {
+  position: relative;
+  width: min(92vw, 460px);
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 24px;
+  padding: 18px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255,230,128,.2), transparent 42%),
+    linear-gradient(145deg, rgba(24, 34, 75, .97), rgba(6, 9, 24, .97));
+  box-shadow: 0 24px 80px rgba(0,0,0,.54), inset 0 1px 0 rgba(255,255,255,.2);
+  pointer-events: auto;
+}
+
+.tutorial-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255,255,255,.08);
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.tutorial-progress {
+  display: flex;
+  gap: 5px;
+  width: calc(100% - 40px);
+  margin-bottom: 12px;
+}
+
+.tutorial-progress span {
+  height: 5px;
+  flex: 1;
+  border-radius: 999px;
+  background: rgba(255,255,255,.16);
+}
+
+.tutorial-progress span.active {
+  background: linear-gradient(90deg, #7cf6ff, #ffe86a);
+}
+
+.tutorial-kicker,
+.tutorial-waiting {
+  display: block;
+  color: #7cf6ff;
+  font-size: .68rem;
+  font-weight: 950;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.tutorial-card strong {
+  display: block;
+  margin-top: 6px;
+  font-size: clamp(1.2rem, 5vw, 1.8rem);
+  line-height: 1.05;
+}
+
+.tutorial-card p {
+  margin: 10px 0 0;
+  color: rgba(255,255,255,.82);
+  line-height: 1.42;
+}
+
+.tutorial-waiting {
+  margin-top: 12px;
+  color: #ffe680;
+}
+
+.tutorial-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.tutorial-running .prediction-grid,
+.tutorial-running .level-intro-actions {
+  position: relative;
+  z-index: 1900;
+}
+
+@media (max-width: 560px) {
+  .tutorial-home-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .tutorial-target-table,
+  .tutorial-target-discard,
+  .tutorial-target-logs,
+  .tutorial-target-info-button {
+    bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}
+
+.tutorial-ui-highlight {
+  outline: 2px solid rgba(255, 232, 106, .92);
+  outline-offset: 5px;
+  border-radius: 20px;
+  box-shadow: 0 0 0 7px rgba(255, 232, 106, .12), 0 0 34px rgba(124, 246, 255, .22) !important;
+}
+
+.tutorial-running .tutorial-ui-highlight:not(.game-info-button):not(.gameplay-log-stack) {
+  position: relative;
+  z-index: 1900;
+}
+
+.tutorial-running .game-info-button.tutorial-ui-highlight,
+.tutorial-running .gameplay-log-stack.tutorial-ui-highlight {
+  z-index: 1900;
+}
+
+.gameplay-log-stack.tutorial-ui-highlight {
+  max-height: 34dvh;
+  overflow: visible;
+  mask-image: none;
+}
+
+.game-header {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+}
+
+.prediction-card.tutorial-card-locked {
+  opacity: .28;
+  filter: saturate(.55);
+}
+
+.game-header .quick-info div {
+  height: 30px;
+}
+
+.tutorial-card {
+  max-width: min(88vw, 430px);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255,230,128,.18), transparent 42%),
+    linear-gradient(145deg, rgba(24, 34, 75, .9), rgba(6, 9, 24, .9));
+}
+
+.tutorial-target-prediction-grid .tutorial-card,
+.tutorial-target-table .tutorial-card,
+.tutorial-target-discard .tutorial-card {
+  width: min(86vw, 390px);
+  padding: 13px 15px;
+}
+
+.tutorial-target-prediction-grid .tutorial-card strong,
+.tutorial-target-table .tutorial-card strong,
+.tutorial-target-discard .tutorial-card strong {
+  font-size: clamp(1rem, 4.2vw, 1.45rem);
+}
+
+.tutorial-target-prediction-grid .tutorial-card p,
+.tutorial-target-table .tutorial-card p,
+.tutorial-target-discard .tutorial-card p {
+  margin-top: 7px;
+  font-size: .9rem;
+  line-height: 1.32;
+}
+
+.tutorial-target-prediction-grid .tutorial-progress,
+.tutorial-target-table .tutorial-progress,
+.tutorial-target-discard .tutorial-progress {
+  margin-bottom: 8px;
+}
+
+.gameplay-log-stack {
+  z-index: 1450;
+}
+
+.tutorial-running .discard-zone.tutorial-ui-highlight,
+.tutorial-running .deck-zone.tutorial-ui-highlight,
+.tutorial-running .prediction-grid.tutorial-ui-highlight,
+.tutorial-running .top-stats.tutorial-ui-highlight {
+  z-index: 1900;
+}
+
+.game-shell .gameplay-log-stack {
+  z-index: 1450;
+}
+
+.game-header .quick-info div {
+  height: 38px;
+}
+
+.tutorial-focus-table .play-stage,
+.tutorial-focus-discard .play-stage,
+.tutorial-focus-prediction-grid .play-stage {
+  transform: scale(.92);
+  transform-origin: center bottom;
+}
+
+.tutorial-running .deck-stack.tutorial-ui-highlight,
+.tutorial-running .discard-card-wrap.tutorial-ui-highlight {
+  z-index: 1900;
+}
+
+.tutorial-running .deck-stack.tutorial-ui-highlight {
+  outline-offset: 6px;
+}
+
+.tutorial-running .discard-card-wrap.tutorial-ui-highlight {
+  outline-offset: 6px;
+}
+
+.in-game .multideck-stage {
+  transform: translateY(clamp(22px, 4.5dvh, 42px));
+}
+
+.tutorial-focus-table .multideck-stage,
+.tutorial-focus-discard .multideck-stage,
+.tutorial-focus-prediction-grid .multideck-stage {
+  transform: translateY(clamp(22px, 4.5dvh, 42px)) scale(.92);
+  transform-origin: center bottom;
+}
+
+.game-header .quick-info div {
+  height: 38px;
+}
+
+.game-shell .gameplay-log-stack {
+  z-index: 1200;
+  top: clamp(104px, 14dvh, 132px);
+  gap: 5px;
+  max-height: calc(55dvh - clamp(104px, 14dvh, 132px));
+}
+
+.game-shell .gameplay-log {
+  min-height: 32px;
+  gap: 6px;
+  padding: 5px 10px 5px 8px;
+  border-radius: 7px;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .22), inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+
+.game-shell .gameplay-log-marker {
+  font-size: .95rem;
+}
+
+.game-shell .gameplay-log small {
+  min-width: 46px;
+  font-size: .5rem;
+}
+
+.game-shell .gameplay-log strong {
+  font-size: clamp(.78rem, 3.2vw, 1rem);
+}
+
+.in-game .multideck-stage {
+  transform: translateY(clamp(50px, 8dvh, 76px));
+}
+
+.tutorial-focus-table .multideck-stage,
+.tutorial-focus-discard .multideck-stage,
+.tutorial-focus-prediction-grid .multideck-stage {
+  transform: translateY(clamp(50px, 8dvh, 76px)) scale(.9);
+  transform-origin: center bottom;
+}
+
+.tutorial-running .gameplay-log-stack.tutorial-ui-highlight {
+  z-index: 1900;
+}
