@@ -131,7 +131,7 @@
 }
 
 .tables-2 .combo-table:nth-child(1) { top: 2%; }
-.tables-2 .combo-table:nth-child(2) { top: 49%; }
+.tables-2 .combo-table:nth-child(2) { top: 45%; }
 
 .tables-2 .combo-table .deck-stack,
 .tables-2 .combo-table .discard-card-wrap {
@@ -149,8 +149,8 @@
 
 .tables-4 .combo-table:nth-child(1) { left: 0%; top: 2%; }
 .tables-4 .combo-table:nth-child(2) { left: 51%; top: 2%; }
-.tables-4 .combo-table:nth-child(3) { left: 0%; top: 49%; }
-.tables-4 .combo-table:nth-child(4) { left: 51%; top: 49%; }
+.tables-4 .combo-table:nth-child(3) { left: 0%; top: 45%; }
+.tables-4 .combo-table:nth-child(4) { left: 51%; top: 45%; }
 
 .tables-4 .combo-table .deck-stack,
 .tables-4 .combo-table .discard-card-wrap {
@@ -184,15 +184,15 @@
 .tables-6 .combo-table:nth-child(2),
 .tables-8 .combo-table:nth-child(2) { left: 51%; top: 0%; }
 .tables-6 .combo-table:nth-child(3),
-.tables-8 .combo-table:nth-child(3) { left: 0%; top: 24.5%; }
+.tables-8 .combo-table:nth-child(3) { left: 0%; top: 22.75%; }
 .tables-6 .combo-table:nth-child(4),
-.tables-8 .combo-table:nth-child(4) { left: 51%; top: 24.5%; }
+.tables-8 .combo-table:nth-child(4) { left: 51%; top: 22.75%; }
 .tables-6 .combo-table:nth-child(5),
-.tables-8 .combo-table:nth-child(5) { left: 0%; top: 49%; }
+.tables-8 .combo-table:nth-child(5) { left: 0%; top: 45.5%; }
 .tables-6 .combo-table:nth-child(6),
-.tables-8 .combo-table:nth-child(6) { left: 51%; top: 49%; }
-.tables-8 .combo-table:nth-child(7) { left: 0%; top: 73.5%; }
-.tables-8 .combo-table:nth-child(8) { left: 51%; top: 73.5%; }
+.tables-8 .combo-table:nth-child(6) { left: 51%; top: 45.5%; }
+.tables-8 .combo-table:nth-child(7) { left: 0%; top: 68.25%; }
+.tables-8 .combo-table:nth-child(8) { left: 51%; top: 68.25%; }
 
 .tables-6 .combo-table .deck-stack,
 .tables-6 .combo-table .discard-card-wrap,
