@@ -784,7 +784,7 @@ function App() {
   const visibleGameplayLogs = tutorialShowingLogs || showRecentLogs ? gameplayLogHistory : gameplayLogs
   const gameplayIsVisible = !showLevelIntro
   const gameOver = started && showEnd
-  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'} ${tutorialActive ? 'tutorial-running' : ''}`}>
+  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'} ${tutorialActive ? 'tutorial-running' : ''} ${tutorialTarget ? `tutorial-focus-${tutorialTarget}` : ''}`}>
     <div className="cinematic-bg" />
     {!started ? <section className="start-screen level-select">
       <span>60game</span>

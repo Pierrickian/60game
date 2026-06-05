@@ -29,7 +29,7 @@ export const TUTORIAL_STEPS = [
   {
     id: 'guess_win',
     title: 'Make a winning prediction',
-    body: 'Tap the highlighted card. This one is set up to succeed so you can see the reward feedback.',
+    body: 'Tap the highlighted card. This illustrates a good prediction and the reward feedback.',
     target: 'prediction-grid',
     action: 'guess',
     outcome: 'win'
@@ -59,7 +59,7 @@ export const TUTORIAL_STEPS = [
   {
     id: 'guess_loss',
     title: 'See a miss too',
-    body: 'Tap the highlighted card. This one is set up to miss so you can see how a combo breaks.',
+    body: 'Tap the highlighted card. This illustrates a miss so you can see how a combo breaks.',
     target: 'prediction-grid',
     action: 'guess',
     outcome: 'loss'

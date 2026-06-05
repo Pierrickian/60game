@@ -1349,3 +1349,56 @@ button {
   opacity: .28;
   filter: saturate(.55);
 }
+
+.game-header .quick-info div {
+  height: 30px;
+}
+
+.tutorial-card {
+  max-width: min(88vw, 430px);
+  background:
+    radial-gradient(circle at 14% 0%, rgba(255,230,128,.18), transparent 42%),
+    linear-gradient(145deg, rgba(24, 34, 75, .9), rgba(6, 9, 24, .9));
+}
+
+.tutorial-target-prediction-grid .tutorial-card,
+.tutorial-target-table .tutorial-card,
+.tutorial-target-discard .tutorial-card {
+  width: min(86vw, 390px);
+  padding: 13px 15px;
+}
+
+.tutorial-target-prediction-grid .tutorial-card strong,
+.tutorial-target-table .tutorial-card strong,
+.tutorial-target-discard .tutorial-card strong {
+  font-size: clamp(1rem, 4.2vw, 1.45rem);
+}
+
+.tutorial-target-prediction-grid .tutorial-card p,
+.tutorial-target-table .tutorial-card p,
+.tutorial-target-discard .tutorial-card p {
+  margin-top: 7px;
+  font-size: .9rem;
+  line-height: 1.32;
+}
+
+.tutorial-target-prediction-grid .tutorial-progress,
+.tutorial-target-table .tutorial-progress,
+.tutorial-target-discard .tutorial-progress {
+  margin-bottom: 8px;
+}
+
+.gameplay-log-stack {
+  z-index: 1450;
+}
+
+.tutorial-running .discard-zone.tutorial-ui-highlight,
+.tutorial-running .deck-zone.tutorial-ui-highlight,
+.tutorial-running .prediction-grid.tutorial-ui-highlight,
+.tutorial-running .top-stats.tutorial-ui-highlight {
+  z-index: 1900;
+}
+
+.game-shell .gameplay-log-stack {
+  z-index: 1450;
+}
