@@ -15,7 +15,7 @@ import { readStoredNumber, readStoredObject, writeStoredValue } from './runtime/
 import { DeckReconciliationError, applyDeckMutationToTables, countCardsByLabel, drawCard, makeTables, peekNextDrawCard, reconcileDeckAfterWinningDraw, resyncDeckFromPromoted, shuffle } from './runtime/tableDecks'
 import { getMoreLessHintDirection } from './runtime/moreLessHints'
 import { formatCardProbability, getCardProbabilityModel, getMostLikelyCardLabels } from './runtime/cardProbabilities'
-import { TUTORIAL_STORAGE_KEY, TUTORIAL_STEPS, getNextTutorialStepId, getTutorialStep, isTutorialDisabled } from './runtime/tutorial'
+import { TUTORIAL_STORAGE_KEY, TUTORIAL_STEPS, getNextTutorialStepId, getTutorialStep } from './runtime/tutorial'
 
 const COMBO_LABELS = { 2: 'GREAT', 3: 'AMAZING', 4: 'IMPRESSIVE', 5: 'AWESOME', 6: 'GOD IS PLAYING' }
 const POST_GOD_LABELS = ['HAPPY BIRTHDAY', 'MY LORD', 'CHIRURGICAL', 'FIN LIMIER', 'OISEAU RARE', 'RENARD', 'LOUP', 'TIGRE', 'LION', 'DINOSAURE', 'METEORITE', 'SOLEIL', 'GALAXIE', 'COSMOS', 'UNIVERS', 'MULTIVERS', 'TROU NOIR', 'BIG BANG', 'QUANTIC AWERENESS', 'SOURCE VIBRATION', 'LOVE', 'PEACE', 'VOID', 'PURE ENERGY', 'PURE BODY', 'PURE MIND', 'PURE HEART', 'PURE SOUL', 'ANGEL', 'ARCHANGEL', 'DIVINE', 'DIVINE 2', 'DIVINE 3', 'DIVINE 4', 'DIVINE 5', 'DIVINE 6', 'DIVINE 7', 'DIVINE 8', 'DIVINE 9', 'DIVINE 10', 'DIVINE 1000', 'DIVINE 1M', 'DIVINE 1B', 'DIVINE 999T']
@@ -411,7 +411,6 @@ function App() {
   const [tutorialSettings, setTutorialSettings] = useState(() => readStoredObject(TUTORIAL_STORAGE_KEY))
   const [tutorialActive, setTutorialActive] = useState(false)
   const [tutorialStepId, setTutorialStepId] = useState('mode')
-  const tutorialDisabled = isTutorialDisabled(tutorialSettings)
   const tutorialStep = tutorialActive ? getTutorialStep(tutorialStepId) : null
   const moreLessHintTokenRef = useRef(0)
   const levelNumber = orderedLevelIds.indexOf(selectedLevelId) + 1
@@ -496,14 +495,13 @@ function App() {
     writeStoredValue(TUTORIAL_STORAGE_KEY, JSON.stringify(nextSettings))
   }
 
-  function setTutorialDisabled(nextDisabled) {
-    const nextSettings = { ...tutorialSettings, disabled: nextDisabled }
-    saveTutorialSettings(nextSettings)
-    if (nextDisabled) setTutorialActive(false)
+  function clearStoredTutorialBlock() {
+    if (tutorialSettings?.disabled !== true) return
+    saveTutorialSettings({ ...tutorialSettings, disabled: false })
   }
 
   function startTutorial() {
-    if (tutorialDisabled) return
+    clearStoredTutorialBlock()
     setTutorialStepId('mode')
     setTutorialActive(true)
     newGame(selectedLevelId, { tutorial: true })
@@ -533,7 +531,7 @@ function App() {
 
   function newGame(levelId = selectedLevelId, options = {}) {
     const activeLevel = levelConfigs[levelId] ?? levelConfigs[levelsRegistry.startingLevel]
-    const shouldRunTutorial = options.tutorial === true && !tutorialDisabled
+    const shouldRunTutorial = options.tutorial === true
     if (!shouldRunTutorial) setTutorialActive(false)
     comboRef.current = 0
     fxTokenRef.current += 1
@@ -754,7 +752,7 @@ function App() {
       <span>60game</span>
       <strong>60 Game</strong>
       <em>Select a level</em>
-      {!tutorialDisabled ? <TutorialHomePanel onStart={startTutorial} /> : null}
+      <TutorialHomePanel onStart={startTutorial} />
       <div className="level-select-grid">{orderedLevelIds.map((id) => {
         const level = levelConfigs[id]
         if (!level) return null

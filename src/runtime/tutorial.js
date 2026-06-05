@@ -92,7 +92,3 @@ export function getNextTutorialStepId(stepId) {
   const index = TUTORIAL_STEPS.findIndex((step) => step.id === stepId)
   return TUTORIAL_STEPS[Math.min(index + 1, TUTORIAL_STEPS.length - 1)]?.id || TUTORIAL_STEPS[0].id
 }
-
-export function isTutorialDisabled(settings) {
-  return settings?.disabled === true
-}
