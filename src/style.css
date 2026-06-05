@@ -1155,8 +1155,7 @@ button {
 
 
 .tutorial-start-button,
-.tutorial-primary,
-.tutorial-secondary {
+.tutorial-primary {
   border: 0;
   border-radius: 999px;
   padding: 10px 14px;
@@ -1178,17 +1177,12 @@ button {
   box-shadow: none;
 }
 
-.tutorial-secondary {
-  color: #fff;
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.16);
-}
 
 .tutorial-overlay {
   position: fixed;
   left: 0;
   right: 0;
-  z-index: 1800;
+  z-index: 2400;
   display: flex;
   justify-content: center;
   padding: 12px;
@@ -1206,15 +1200,19 @@ button {
 
 .tutorial-target-table,
 .tutorial-target-discard {
-  bottom: calc(108px + env(safe-area-inset-bottom));
+  bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.tutorial-target-info-button {
+  bottom: calc(34px + env(safe-area-inset-bottom));
 }
 
 .tutorial-target-prediction-grid {
-  top: max(96px, 13dvh);
+  top: max(10px, env(safe-area-inset-top));
 }
 
 .tutorial-target-logs {
-  bottom: calc(64px + env(safe-area-inset-bottom));
+  bottom: max(10px, env(safe-area-inset-bottom));
 }
 
 .tutorial-card {
@@ -1301,7 +1299,7 @@ button {
 .tutorial-running .prediction-grid,
 .tutorial-running .level-intro-actions {
   position: relative;
-  z-index: 1810;
+  z-index: 1900;
 }
 
 @media (max-width: 560px) {
@@ -1310,8 +1308,10 @@ button {
   }
 
   .tutorial-target-table,
-  .tutorial-target-discard {
-    bottom: calc(96px + env(safe-area-inset-bottom));
+  .tutorial-target-discard,
+  .tutorial-target-logs,
+  .tutorial-target-info-button {
+    bottom: max(8px, env(safe-area-inset-bottom));
   }
 }
 
@@ -1324,12 +1324,12 @@ button {
 
 .tutorial-running .tutorial-ui-highlight:not(.game-info-button):not(.gameplay-log-stack) {
   position: relative;
-  z-index: 1810;
+  z-index: 1900;
 }
 
 .tutorial-running .game-info-button.tutorial-ui-highlight,
 .tutorial-running .gameplay-log-stack.tutorial-ui-highlight {
-  z-index: 1810;
+  z-index: 1900;
 }
 
 .gameplay-log-stack.tutorial-ui-highlight {

@@ -19,7 +19,7 @@ export function TutorialHomePanel({ onStart }) {
   </section>
 }
 
-export function TutorialOverlay({ step, steps, active, onNext, onFinish, onStop, onClose }) {
+export function TutorialOverlay({ step, steps, active, onNext, onFinish, onClose }) {
   if (!active || !step) return null
 
   const waitsForPlayer = step.action === 'guess' || step.action === 'choose-mode'
@@ -35,7 +35,6 @@ export function TutorialOverlay({ step, steps, active, onNext, onFinish, onStop,
       {waitsForPlayer ? <small className="tutorial-waiting">{TUTORIAL_TEXT.waiting}</small> : null}
       <div className="tutorial-actions">
         {isFinal ? <button type="button" className="tutorial-primary" onClick={onFinish}>{TUTORIAL_TEXT.finish}</button> : waitsForPlayer ? null : <button type="button" className="tutorial-primary" onClick={onNext}>{TUTORIAL_TEXT.next}</button>}
-        <button type="button" className="tutorial-secondary" onClick={onStop}>{TUTORIAL_TEXT.stop}</button>
       </div>
     </div>
   </motion.aside>

@@ -8,7 +8,6 @@ export const TUTORIAL_TEXT = {
   waiting: 'Your turn…',
   next: 'Next',
   finish: 'Play',
-  stop: 'Forever',
   close: 'Close tutorial'
 }
 
@@ -47,6 +46,13 @@ export const TUTORIAL_STEPS = [
     body: 'Card counts changed after the draw. Use what remains to choose again.',
     target: 'prediction-grid',
     action: 'guess'
+  },
+  {
+    id: 'info_button',
+    title: 'Recent messages',
+    body: 'The i button opens the latest feedback when you want to review what just happened.',
+    target: 'info-button',
+    action: 'next'
   },
   {
     id: 'logs_after_action',

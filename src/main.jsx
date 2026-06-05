@@ -518,10 +518,6 @@ function App() {
     setShowRecentLogs(false)
   }
 
-  function stopTutorialForever() {
-    setTutorialDisabled(true)
-    setShowRecentLogs(false)
-  }
 
   function closeTutorial() {
     setTutorialActive(false)
@@ -748,6 +744,7 @@ function App() {
   const tutorialTarget = tutorialActive ? tutorialStep?.target : null
   const tutorialHighlight = (target) => tutorialTarget === target ? 'tutorial-ui-highlight' : ''
   const tutorialShowingLogs = tutorialTarget === 'logs'
+  const tutorialShowingInfoButton = tutorialTarget === 'info-button'
   const visibleGameplayLogs = tutorialShowingLogs || showRecentLogs ? gameplayLogHistory : gameplayLogs
   const gameplayIsVisible = !showLevelIntro
   const gameOver = started && showEnd
@@ -774,7 +771,7 @@ function App() {
       <section className={`quick-info ${tutorialHighlight('hud')}`}><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section>
       {gameplayIsVisible ? <>
         <section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} tutorialTarget={tutorialTarget} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section>
-        <GameInfoButton isPressed={showRecentLogs} onPressChange={setShowRecentLogs} highlighted={tutorialShowingLogs} />
+        <GameInfoButton isPressed={showRecentLogs} onPressChange={setShowRecentLogs} highlighted={tutorialShowingInfoButton} />
         <GameplayLogStack logs={visibleGameplayLogs} onDismissOverflow={dismissOverflowGameplayLogs} highlighted={tutorialShowingLogs} />
         <PointRewardStack rewards={pointRewards} />
         <AnimatePresence key={moreLessHintPresenceKey}>{moreLessHint ? <MoreLessHintPopup hint={moreLessHint} /> : null}</AnimatePresence>
@@ -784,7 +781,7 @@ function App() {
       <AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>END OF DECK</motion.div> : null}</AnimatePresence>
       {showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} probabilitiesEnabled={probabilitiesEnabled} onProbabilitiesChange={setProbabilitiesEnabled} onClassic={() => startLevelIntro('classic')} onMoreLess={() => startLevelIntro('more-less')} highlighted={tutorialTarget === 'level-intro'} /> : null}
     </>}
-    <AnimatePresence>{tutorialActive ? <TutorialOverlay key={tutorialStep?.id} step={tutorialStep} steps={TUTORIAL_STEPS} active={tutorialActive} onNext={advanceTutorial} onFinish={finishTutorial} onStop={stopTutorialForever} onClose={closeTutorial} /> : null}</AnimatePresence>
+    <AnimatePresence>{tutorialActive ? <TutorialOverlay key={tutorialStep?.id} step={tutorialStep} steps={TUTORIAL_STEPS} active={tutorialActive} onNext={advanceTutorial} onFinish={finishTutorial} onClose={closeTutorial} /> : null}</AnimatePresence>
   </main>
 }
 
