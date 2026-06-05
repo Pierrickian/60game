@@ -1426,3 +1426,18 @@ button {
 .tutorial-running .discard-card-wrap.tutorial-ui-highlight {
   outline-offset: 6px;
 }
+
+.in-game .multideck-stage {
+  transform: translateY(clamp(22px, 4.5dvh, 42px));
+}
+
+.tutorial-focus-table .multideck-stage,
+.tutorial-focus-discard .multideck-stage,
+.tutorial-focus-prediction-grid .multideck-stage {
+  transform: translateY(clamp(22px, 4.5dvh, 42px)) scale(.92);
+  transform-origin: center bottom;
+}
+
+.game-header .quick-info div {
+  height: 38px;
+}
