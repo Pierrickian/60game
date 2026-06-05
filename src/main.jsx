@@ -253,7 +253,7 @@ function ComboStatus({ combo }) {
 
 function DeckStack({ remaining, isMain, totalCards, tutorialTarget }) {
   const highlighted = tutorialTarget === 'table'
-  return <div className={`deck-zone ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div className="plate plate-blue" /><div className="deck-stack"><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className={`deck-back ${isMain ? 'primary-deck' : ''}`}><span className="deck-logo">{totalCards}</span><span className="deck-subtitle">GAME</span>{isMain ? <small>{remaining}</small> : null}</div></div></div>
+  return <div className="deck-zone"><div className="plate plate-blue" /><div className={`deck-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className={`deck-back ${isMain ? 'primary-deck' : ''}`}><span className="deck-logo">{totalCards}</span><span className="deck-subtitle">GAME</span>{isMain ? <small>{remaining}</small> : null}</div></div></div>
 }
 
 const MemoDeckStack = React.memo(DeckStack)
@@ -265,9 +265,11 @@ function FaceCard({ card, empty = false }) {
 
 const MemoFaceCard = React.memo(FaceCard)
 
-function DeckGainPopup({ label, revealId, tone = 'points' }) {
+function DeckGainPopup({ label, revealId, tone = 'points', hold = false }) {
   if (!label) return null
-  return <motion.div key={`gain-${revealId}-${label}`} className={`gain-pop gain-pop-${tone}`} initial={{ opacity: 0, x: -8, y: 10, scale: .72 }} animate={{ opacity: [0, 1, 1, 0], x: [-8, 0, 5, 10], y: [10, -4, -14, -24], scale: [.72, 1.16, 1, .92] }} transition={{ duration: 1.05, times: [0, .18, .62, 1], ease: 'easeOut' }}>{label}</motion.div>
+  const animate = hold ? { opacity: 1, x: 0, y: -10, scale: 1.12 } : { opacity: [0, 1, 1, 0], x: [-8, 0, 5, 10], y: [10, -4, -14, -24], scale: [.72, 1.16, 1, .92] }
+  const transition = hold ? { duration: .18, ease: 'easeOut' } : { duration: 1.05, times: [0, .18, .62, 1], ease: 'easeOut' }
+  return <motion.div key={`gain-${revealId}-${label}-${hold ? 'hold' : 'pop'}`} className={`gain-pop gain-pop-${tone}`} initial={{ opacity: 0, x: -8, y: 10, scale: .72 }} animate={animate} transition={transition}>{label}</motion.div>
 }
 
 function getDeckGainPopup(card, won) {
@@ -280,8 +282,9 @@ function getDeckGainPopup(card, won) {
 function DiscardPile({ card, won, miss, revealId, showCombo, tutorialTarget }) {
   const stateClass = won ? 'impact-lite' : miss ? 'miss-shake' : ''
   const highlighted = tutorialTarget === 'table' || tutorialTarget === 'discard'
+  const holdGainPopup = highlighted && won
   const gainPopup = getDeckGainPopup(card, won)
-  return <div className={`discard-zone ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div className="plate plate-purple" /><div className={`discard-card-wrap ${stateClass}`}><div key={revealId} className="discard-drop"><MemoFaceCard card={card} empty={!card} /></div><AnimatePresence>{showCombo ? <motion.div className="local-combo-label" initial={{ opacity: 0, y: 14, scale: .7 }} animate={{ opacity: 1, y: -18, scale: 1 }} exit={{ opacity: 0, y: -32, scale: .8 }} transition={{ duration: .25 }}>COMBO</motion.div> : null}<DeckGainPopup label={gainPopup?.label} tone={gainPopup?.tone} revealId={revealId} /></AnimatePresence></div></div>
+  return <div className="discard-zone"><div className="plate plate-purple" /><div className={`discard-card-wrap ${stateClass} ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div key={revealId} className="discard-drop"><MemoFaceCard card={card} empty={!card} /></div><AnimatePresence>{showCombo ? <motion.div className="local-combo-label" initial={{ opacity: 0, y: 14, scale: .7 }} animate={{ opacity: 1, y: -18, scale: 1 }} exit={{ opacity: 0, y: -32, scale: .8 }} transition={{ duration: .25 }}>COMBO</motion.div> : null}<DeckGainPopup label={gainPopup?.label} tone={gainPopup?.tone} revealId={revealId} hold={holdGainPopup} /></AnimatePresence></div></div>
 }
 
 const MemoDiscardPile = React.memo(DiscardPile)
@@ -802,7 +805,7 @@ function App() {
         return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{level.name}</b><small>{level.difficulty || 'Hard'} • {deckSize} cards • {jokerCount} jokers</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button>
       })}</div>
     </section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} achievements={achievementRuntime} /> : <>
-      <header className="game-header"><section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section><section className={`top-stats ${tutorialHighlight('hud')}`}><Stat tone="purple" icon="★" label="Success" value={successCount} bumpKey={successCount} /><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="green" icon="◎" label="Precision" value={precisionPercentage} /></section></header>
+      <header className="game-header"><section className={`top-stats ${tutorialHighlight('hud')}`}><Stat tone="purple" icon="★" label="Success" value={successCount} bumpKey={successCount} /><Stat tone="gold" icon="🏆" label="Score" value={score} bumpKey={scoreBump} /><Stat tone="green" icon="◎" label="Precision" value={precisionPercentage} /></section><section className="quick-info"><div><span>LEVEL</span><strong>{levelNumber}</strong></div><div><span>CARDS</span><strong>{totalCards}</strong></div></section></header>
       <ComboStatus combo={combo} />
       {gameplayIsVisible ? <>
         <section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} tutorialTarget={tutorialTarget} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section>

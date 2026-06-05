@@ -1402,3 +1402,27 @@ button {
 .game-shell .gameplay-log-stack {
   z-index: 1450;
 }
+
+.game-header .quick-info div {
+  height: 38px;
+}
+
+.tutorial-focus-table .play-stage,
+.tutorial-focus-discard .play-stage,
+.tutorial-focus-prediction-grid .play-stage {
+  transform: scale(.92);
+  transform-origin: center bottom;
+}
+
+.tutorial-running .deck-stack.tutorial-ui-highlight,
+.tutorial-running .discard-card-wrap.tutorial-ui-highlight {
+  z-index: 1900;
+}
+
+.tutorial-running .deck-stack.tutorial-ui-highlight {
+  outline-offset: 6px;
+}
+
+.tutorial-running .discard-card-wrap.tutorial-ui-highlight {
+  outline-offset: 6px;
+}
