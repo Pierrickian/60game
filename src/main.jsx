@@ -30,6 +30,10 @@ const COMBO_BREAK_MAX_DURATION_MS = 900
 const COMBO_BREAK_TABLE_COLLAPSE_PAD_MS = 80
 const COMBO_BREAK_EXIT_PAD_MS = 180
 const GAMEPLAY_LOG_DURATION_MS = 2200
+const GAMEPLAY_LOG_FADE_OUT_MS = 300
+const GAMEPLAY_LOG_TOTAL_MS = GAMEPLAY_LOG_DURATION_MS + GAMEPLAY_LOG_FADE_OUT_MS
+const MAX_VISIBLE_GAMEPLAY_LOGS = 4
+const GAMEPLAY_LOG_OVERLAP_INDEX = 3
 const POINT_REWARD_POPUP_DURATION_MS = 1600
 const MORE_LESS_HINT_DURATION_MS = 1800
 const PREDICTION_MISS_LABEL_KEYS = ['feedback.no', 'feedback.retry', 'feedback.again']
@@ -443,16 +447,20 @@ function GameInfoButton({ isPressed, onPressChange, highlighted, t }) {
   return <button className={`game-info-button ${isPressed ? 'pressed' : ''} ${highlighted ? 'tutorial-ui-highlight' : ''}`} type="button" aria-label={t('gameInfo.showRecentLogs')} aria-pressed={isPressed} onPointerDown={() => onPressChange(true)} onPointerUp={() => onPressChange(false)} onPointerLeave={() => onPressChange(false)} onPointerCancel={() => onPressChange(false)}>i</button>
 }
 
-function GameplayLogStack({ logs, onDismissOverflow, highlighted, t }) {
+function GameplayLogStack({ logs, onDismissOverflow, highlighted, persistent = false, t }) {
   const stackRef = useRef(null)
+  const stableRatio = GAMEPLAY_LOG_DURATION_MS / GAMEPLAY_LOG_TOTAL_MS
 
   useLayoutEffect(() => {
     function dismissOverflowLogs() {
-      if (highlighted) return
+      if (highlighted || persistent) return
       const midpoint = window.innerHeight / 2
       const activeIds = new Set(logs.map((log) => log.id))
       const overflowingIds = Array.from(stackRef.current?.querySelectorAll('[data-gameplay-log-id]') || [])
-        .filter((element) => activeIds.has(element.dataset.gameplayLogId) && element.getBoundingClientRect().bottom > midpoint)
+        .filter((element) => {
+          const index = Number(element.dataset.gameplayLogIndex || 0)
+          return index >= GAMEPLAY_LOG_OVERLAP_INDEX && activeIds.has(element.dataset.gameplayLogId) && element.getBoundingClientRect().bottom > midpoint
+        })
         .map((element) => element.dataset.gameplayLogId)
       if (overflowingIds.length > 0) onDismissOverflow(overflowingIds)
     }
@@ -463,9 +471,9 @@ function GameplayLogStack({ logs, onDismissOverflow, highlighted, t }) {
       window.cancelAnimationFrame(frameId)
       window.removeEventListener('resize', dismissOverflowLogs)
     }
-  }, [logs, onDismissOverflow, highlighted])
+  }, [logs, onDismissOverflow, highlighted, persistent])
 
-  return <div ref={stackRef} className={`gameplay-log-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}><AnimatePresence initial={false}>{logs.map((log) => <motion.div layout data-gameplay-log-id={log.id} key={log.id} className={`gameplay-log gameplay-log-${log.tone || log.category}`} initial={{ opacity: 0, y: -28, scale: .94 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 30, scale: .96 }} transition={{ duration: .3, ease: 'easeOut', layout: { duration: .24 } }}><span className="gameplay-log-marker">›</span><small>{t(`gameLog.${log.category}`)}</small><strong>{log.text}</strong></motion.div>)}</AnimatePresence></div>
+  return <div ref={stackRef} className={`gameplay-log-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}>{logs.map((log, index) => <motion.div layout data-gameplay-log-id={log.id} data-gameplay-log-index={index} key={log.id} className={`gameplay-log gameplay-log-${log.tone || log.category}`} initial={{ opacity: 0, y: -28, scale: .94 }} animate={persistent ? { opacity: 1, y: 0, scale: 1 } : { opacity: [0, 1, 1, 0], y: [-28, 0, 0, 10], scale: [.94, 1, 1, .96] }} transition={persistent ? { duration: .3, ease: 'easeOut', layout: { duration: .24 } } : { duration: GAMEPLAY_LOG_TOTAL_MS / 1000, times: [0, .12, stableRatio, 1], ease: 'easeOut', layout: { duration: .24 } }}><span className="gameplay-log-marker">›</span><small>{t(`gameLog.${log.category}`)}</small><strong>{log.text}</strong></motion.div>)}</div>
 }
 
 function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNext, onHome, stars, achievements, t }) {
@@ -620,9 +628,9 @@ function App() {
   function showGameplayLog(category, text, tone = category, points = 0) {
     const id = `gameplay-log-${++gameplayLogTokenRef.current}`
     const log = { id, category, tone, text }
-    setGameplayLogs((items) => [log, ...items].slice(0, 5))
-    setGameplayLogHistory((items) => [log, ...items.filter((item) => item.id !== id)].slice(0, 5))
-    window.setTimeout(() => setGameplayLogs((items) => items.filter((item) => item.id !== id)), GAMEPLAY_LOG_DURATION_MS)
+    setGameplayLogs((items) => [log, ...items].slice(0, MAX_VISIBLE_GAMEPLAY_LOGS))
+    setGameplayLogHistory((items) => [log, ...items.filter((item) => item.id !== id)].slice(0, MAX_VISIBLE_GAMEPLAY_LOGS))
+    window.setTimeout(() => setGameplayLogs((items) => items.filter((item) => item.id !== id)), GAMEPLAY_LOG_TOTAL_MS)
     if (points > 0) {
       const reward = { id: `point-reward-${id}`, points, label: text.replace(/\s+\+\d+$/, '') }
       setPointRewards((items) => [...items, reward].slice(-4))
@@ -969,7 +977,7 @@ function App() {
       {gameplayIsVisible ? <>
         <section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} tutorialTarget={tutorialTarget} t={t} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section>
         <GameInfoButton isPressed={showRecentLogs} onPressChange={setShowRecentLogs} highlighted={tutorialShowingInfoButton} t={t} />
-        <GameplayLogStack logs={visibleGameplayLogs} onDismissOverflow={dismissOverflowGameplayLogs} highlighted={tutorialShowingLogs} t={t} />
+        <GameplayLogStack logs={visibleGameplayLogs} onDismissOverflow={dismissOverflowGameplayLogs} highlighted={tutorialShowingLogs} persistent={tutorialShowingLogs || showRecentLogs} t={t} />
         <PointRewardStack rewards={pointRewards} t={t} />
         <AnimatePresence key={moreLessHintPresenceKey}>{moreLessHint ? <MoreLessHintPopup hint={moreLessHint} t={t} /> : null}</AnimatePresence>
         <AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} t={t} /> : null}</AnimatePresence>
