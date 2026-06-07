@@ -487,6 +487,10 @@ function EndPanel({ score, best, stats, levelNumber, levelConfig, onReplay, onNe
   return <section className="end-screen session-panel"><AnimatePresence>{showWinOverlay ? <motion.div className="win-overlay" initial={{ opacity: 0, scale: 0.66, y: 26 }} animate={{ opacity: 1, scale: [1.12, 0.96, 1], y: 0 }} exit={{ opacity: 0, scale: 1.16, y: -28 }} transition={{ duration: 0.62, ease: 'easeOut' }}><div className="win-overlay-card"><span className="win-kicker">{t('win.victory')}</span><strong className="win-title">{t('win.win')}</strong><small className="win-subtitle">{t('win.deckCleared')}</small></div></motion.div> : null}</AnimatePresence><span>{t('common.level')} {levelNumber}</span><strong>{score}</strong><em>{t('common.best')} {best}</em><div className="star-panel">{stars.map((star, index) => <motion.div key={star.id} className={`star-row ${star.unlocked ? 'on' : ''}`} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.25 + 0.1, duration: 0.25 }}><AnimatedMetric value={star.id === 'precision' ? Math.round(Number(star.value || 0) * 100) : star.value} suffix={star.id === 'precision' ? '%' : ''} className={`metric-${star.id} ${star.id === 'score' && Number(star.value || 0) >= 1000 ? 'metric-score-fit' : ''}`} bumpKey={`${star.id}-${star.unlocked ? 'on' : 'off'}`} /><StarDisplay unlocked={star.unlocked} size="lg" /><small>{localizedStarTargetText(star, t)}</small></motion.div>)}</div><div className="session-stats"><div><small>{t('common.hits')}</small><b>{stats.hits}</b></div><div><small>{t('common.bestCombo')}</small><b>x{Math.max(1, stats.bestCombo)}</b></div><div><small>{t('common.achievements')}</small><b>{shareMetrics.achievements}</b></div><div><small>{t('common.precision')}</small><b>{shareMetrics.precision}</b></div></div><div className="session-actions"><div className="session-actions-row"><button onClick={onReplay}>{t('common.replay')}</button><button onClick={onNext}>{t('common.next')}</button></div><div className="session-actions-row session-actions-home"><button onClick={onHome}>{t('common.home')}</button></div><div className="session-actions-row"><button className="achievements-open" onClick={() => setShowAchievements(true)}>{t('common.achievements')}</button><button className="share-score" onClick={() => shareScore(score, best, stats, levelNumber, levelConfig, shareMetrics, t)}><WhatsAppIcon />{t('common.share')}</button></div></div><AnimatePresence>{showAchievements ? <AchievementsMenu achievements={achievements} levelConfig={levelConfig} onClose={() => setShowAchievements(false)} t={t} /> : null}</AnimatePresence></section>
 }
 
+function preventNativeGameCallout(event) {
+  event.preventDefault()
+}
+
 function App() {
   const orderedLevelIds = useMemo(() => levelsRegistry.levels.map(({ id }) => id).filter((id) => levelConfigs[id]), [])
   const [selectedLevelId, setSelectedLevelId] = useState(levelsRegistry.startingLevel)
@@ -940,7 +944,7 @@ function App() {
   const visibleGameplayLogs = tutorialShowingLogs || showRecentLogs ? gameplayLogHistory : gameplayLogs
   const gameplayIsVisible = !showLevelIntro
   const gameOver = started && showEnd
-  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'} ${tutorialActive ? 'tutorial-running' : ''} ${tutorialTarget ? `tutorial-focus-${tutorialTarget}` : ''}`}>
+  return <main className={`game-shell ${started ? 'in-game' : 'home-mode'} ${tutorialActive ? 'tutorial-running' : ''} ${tutorialTarget ? `tutorial-focus-${tutorialTarget}` : ''}`} onContextMenu={preventNativeGameCallout}>
     <div className="cinematic-bg" />
     {!started ? <>
       <LanguageToggle language={language} onToggle={toggleLanguage} t={t} />

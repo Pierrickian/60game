@@ -5,13 +5,22 @@
   color: #fff;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
 html,
 body,
 #app {
   width: 100%;
   height: 100%;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 body {
@@ -24,6 +33,7 @@ body {
 button {
   font: inherit;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .game-shell {
