@@ -430,7 +430,7 @@ function ComboBreakCountdown({ from, durationMs }) {
 function ComboBreakOverlay({ breakFx, t }) {
   if (!breakFx) return null
   const durationMs = breakFx.durationMs || comboBreakDurationMs(breakFx.from)
-  return <div className="combo-break-overlay"><motion.div className="combo-break-card" initial={{ opacity: 0, y: -26, scale: .68 }} animate={{ opacity: 1, y: 0, scale: [1.08, 1.02, .96] }} exit={{ opacity: 0, y: 34, scale: .88 }} transition={{ duration: durationMs / 1000, ease: 'easeIn' }}><strong>{t('combo.break')}</strong><ComboBreakCountdown from={breakFx.from} durationMs={durationMs} /><div className="combo-break-fragments" aria-hidden="true">{Array.from({ length: 10 }, (_, index) => <i key={index} />)}</div></motion.div></div>
+  return <div className="combo-break-overlay"><motion.div className="combo-break-card" initial={{ opacity: 1, y: -8, scale: 1.08 }} animate={{ opacity: 1, y: 0, scale: [1.08, 1.02, .96] }} exit={{ opacity: 0, y: 34, scale: .88 }} transition={{ opacity: { duration: .01 }, y: { duration: .12, ease: 'easeOut' }, scale: { duration: durationMs / 1000, ease: 'easeIn' } }}><strong>{t('combo.break')}</strong><ComboBreakCountdown from={breakFx.from} durationMs={durationMs} /><div className="combo-break-fragments" aria-hidden="true">{Array.from({ length: 10 }, (_, index) => <i key={index} />)}</div></motion.div></div>
 }
 
 function PointRewardStack({ rewards, t }) {
