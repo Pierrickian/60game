@@ -27,6 +27,7 @@ const MULTI_DECK_COMBO_BREAK_HOLD_MS = 1000
 const COMBO_BREAK_INITIAL_HOLD_MS = 140
 const COMBO_BREAK_MIN_DURATION_MS = 350
 const COMBO_BREAK_MAX_DURATION_MS = 900
+const COMBO_BREAK_TABLE_COLLAPSE_PAD_MS = 80
 const COMBO_BREAK_EXIT_PAD_MS = 180
 const GAMEPLAY_LOG_DURATION_MS = 2200
 const POINT_REWARD_POPUP_DURATION_MS = 1600
@@ -857,8 +858,8 @@ function App() {
           if (fxTokenRef.current !== fxToken) return
           comboBreakHoldRef.current = false
           setTables(makeTables(referenceDeck, 1, [referenceTable], referenceTable.id))
-        }, MULTI_DECK_COMBO_BREAK_HOLD_MS)
-        return revealedTables
+        }, comboBreakDuration + COMBO_BREAK_TABLE_COLLAPSE_PAD_MS)
+        return currentTables
       }
       return makeTables(referenceDeck, 1, [referenceTable], referenceTable.id)
     })
