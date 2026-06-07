@@ -46,7 +46,8 @@ function localizedDifficulty(level, t) {
   return t(`difficulty.${level?.difficulty || 'Hard'}`)
 }
 
-function localizedLevelName(level, t) {
+function localizedLevelName(level, t, levelNumber) {
+  if (Number.isInteger(levelNumber) && levelNumber > 0) return t('levelName.generic', { number: levelNumber })
   return t(`levelName.${level?.id}`)
 }
 
@@ -150,7 +151,7 @@ function levelShareDetails(levelNumber, levelConfig, t) {
   const deckSize = Object.values(levelConfig.startingDeck).reduce((sum, amount) => sum + amount, 0)
   const jokerCount = levelConfig.startingDeck.joker || 0
   return {
-    title: `${t('common.level').toUpperCase()} ${levelNumber} · ${localizedLevelName(levelConfig, t)}`,
+    title: localizedLevelName(levelConfig, t, levelNumber),
     summary: `${localizedDifficulty(levelConfig, t)} · ${deckSize} ${t('common.cards')} · ${jokerCount} ${t('common.jokers')}`
   }
 }
@@ -960,7 +961,7 @@ function App() {
       <strong>{t('brand.60Game')}</strong>
       <em>{t('home.selectLevel')}</em>
       <TutorialHomePanel onStart={startTutorial} t={t} />
-      <div className="level-select-grid">{orderedLevelIds.map((id) => {
+      <div className="level-select-grid">{orderedLevelIds.map((id, index) => {
         const level = levelConfigs[id]
         if (!level) return null
         const nonJoker = Object.keys(level.startingDeck).filter((label) => label !== 'joker')
@@ -968,7 +969,8 @@ function App() {
         const jokerCount = level.startingDeck.joker || 0
         const active = selectedLevelId === id
         const saved = progression[id] || {}
-        return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{localizedLevelName(level, t)}</b><small>{localizedDeckSummary(level, deckSize, jokerCount, t)}</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button>
+        const levelNumber = index + 1
+        return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{localizedLevelName(level, t, levelNumber)}</b><small>{localizedDeckSummary(level, deckSize, jokerCount, t)}</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button>
       })}</div>
     </section>
     </> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} achievements={achievementRuntime} t={t} /> : <>
