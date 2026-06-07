@@ -316,18 +316,40 @@ function DiscardPile({ card, won, miss, revealId, showCombo, tutorialTarget }) {
 
 const MemoDiscardPile = React.memo(DiscardPile)
 
-function PredictionCard({ card, index, remaining, onGuess, bumpKey, probability, isMostLikely, tutorialAllowedLabel, t }) {
+function PredictionCard({ card, index, remaining, onPressStart, onPressEnd, bumpKey, probability, isMostLikely, tutorialAllowedLabel, t }) {
   const tutorialLocked = !isTutorialPredictionAllowed(card, tutorialAllowedLabel)
   const unavailable = remaining <= 0 || tutorialLocked
-  function handlePress(event) {
+  function warnUnavailable(event) {
+    event.preventDefault()
+    if (navigator.vibrate) navigator.vibrate([90, 35, 90])
+  }
+  function handlePressStart(event) {
     if (unavailable) {
-      event.preventDefault()
-      if (navigator.vibrate) navigator.vibrate([90, 35, 90])
+      warnUnavailable(event)
       return
     }
-    onGuess(card, index)
+    event.preventDefault()
+    if (event.currentTarget.setPointerCapture && event.pointerId !== undefined) {
+      event.currentTarget.setPointerCapture(event.pointerId)
+    }
+    onPressStart(card, index)
   }
-  return <motion.button key={`${card.label}-${bumpKey || 0}`} className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''} ${isMostLikely ? 'most-likely' : ''} ${tutorialLocked ? 'tutorial-card-locked' : ''}`} aria-disabled={unavailable} onClick={handlePress} whileTap={{ scale: unavailable ? 1 : 0.96 }} initial={{ scale: 1 }} animate={{ scale: bumpKey ? [1, 1.12, 0.96, 1] : 1 }} transition={{ duration: 0.34 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span>{probability !== undefined ? <span className="prediction-probability">{formatCardProbability(probability)}</span> : null}<span className="prediction-left">{remaining} {t('common.left')}</span></motion.button>
+  function handlePressEnd() {
+    onPressEnd(card, index)
+  }
+  function handleKeyDown(event) {
+    if (event.repeat || (event.key !== 'Enter' && event.key !== ' ')) return
+    if (unavailable) {
+      warnUnavailable(event)
+      return
+    }
+    onPressStart(card, index)
+  }
+  function handleKeyUp(event) {
+    if (event.key !== 'Enter' && event.key !== ' ') return
+    onPressEnd(card, index)
+  }
+  return <motion.button key={`${card.label}-${bumpKey || 0}`} className={`prediction-card theme-${card.theme} ${card.theme === 'joker' ? 'joker-prediction-card' : ''} ${isMostLikely ? 'most-likely' : ''} ${tutorialLocked ? 'tutorial-card-locked' : ''}`} aria-disabled={unavailable} onPointerDown={handlePressStart} onPointerUp={handlePressEnd} onPointerCancel={handlePressEnd} onLostPointerCapture={handlePressEnd} onKeyDown={handleKeyDown} onKeyUp={handleKeyUp} whileTap={{ scale: unavailable ? 1 : 0.96 }} initial={{ scale: 1 }} animate={{ scale: bumpKey ? [1, 1.12, 0.96, 1] : 1 }} transition={{ duration: 0.34 }}><span className="prediction-value">{card.label}</span><span className="prediction-icon">{card.icon}</span>{probability !== undefined ? <span className="prediction-probability">{formatCardProbability(probability)}</span> : null}<span className="prediction-left">{remaining} {t('common.left')}</span></motion.button>
 }
 
 function BetClone({ bet }) {
@@ -470,6 +492,10 @@ function App() {
   const [moreLessHintPresenceKey, setMoreLessHintPresenceKey] = useState(0)
   const gameplayLogTokenRef = useRef(0)
   const predictionMissRef = useRef(0)
+  const heldPredictionRef = useRef(null)
+  const predictionInputReadyRef = useRef(true)
+  const predictionReadyTimerRef = useRef(null)
+  const guessRef = useRef(null)
   const [cardCountBumps, setCardCountBumps] = useState({})
   const comboBreakHoldRef = useRef(false)
   const [showGameOverBanner, setShowGameOverBanner] = useState(false)
@@ -500,6 +526,50 @@ function App() {
     const preferredCard = cardTypes.find((card) => isCardAvailable(card, remainingByType[card.label] || 0))
     return preferredCard?.label || cardTypes.find((card) => isCardDrawableForTutorial(card, remainingByType[card.label] || 0))?.label || null
   }, [tutorialStep, cardTypes, remainingByType])
+
+  function canAcceptPrediction(label) {
+    if (!label || !predictionInputReadyRef.current) return false
+    if (showEnd || showLevelIntro || comboBreakHoldRef.current) return false
+    if (tutorialActive && tutorialStep?.action !== 'guess') return false
+    if (tutorialActive && tutorialAllowedPredictionLabel && label !== tutorialAllowedPredictionLabel) return false
+    return (remainingByType[label] || 0) > 0
+  }
+
+  function clearPredictionReadyTimer() {
+    if (!predictionReadyTimerRef.current) return
+    window.clearTimeout(predictionReadyTimerRef.current)
+    predictionReadyTimerRef.current = null
+  }
+
+  function releaseHeldPrediction(card, index) {
+    const heldPrediction = heldPredictionRef.current
+    if (!heldPrediction) return
+    if (heldPrediction.card?.label !== card?.label || heldPrediction.index !== index) return
+    heldPredictionRef.current = null
+  }
+
+  function schedulePredictionInputReady(token, delay) {
+    clearPredictionReadyTimer()
+    predictionReadyTimerRef.current = window.setTimeout(() => {
+      predictionReadyTimerRef.current = null
+      if (fxTokenRef.current !== token) return
+      predictionInputReadyRef.current = true
+      const heldPrediction = heldPredictionRef.current
+      if (!heldPrediction) return
+      window.requestAnimationFrame(() => guessRef.current?.(heldPrediction.card, heldPrediction.index))
+    }, delay)
+  }
+
+  function resetPredictionInput() {
+    clearPredictionReadyTimer()
+    heldPredictionRef.current = null
+    predictionInputReadyRef.current = true
+  }
+
+  function pressPrediction(card, index) {
+    heldPredictionRef.current = { card, index }
+    guessRef.current?.(card, index)
+  }
 
   function scheduleFxClear(token, delay = 430) {
     window.setTimeout(() => {
@@ -609,6 +679,7 @@ function App() {
     comboRef.current = 0
     fxTokenRef.current += 1
     comboBreakHoldRef.current = false
+    resetPredictionInput()
     predictionMissRef.current = 0
     previousUnlockedStarsRef.current = new Set()
     setMoreLessMode(false)
@@ -632,14 +703,17 @@ function App() {
 
   function guess(predictedCard, buttonIndex) {
     const label = predictedCard?.label
-    if (showEnd || showLevelIntro || comboBreakHoldRef.current) return
-    if (tutorialActive && tutorialStep?.action !== 'guess') return
-    if (tutorialActive && tutorialAllowedPredictionLabel && label !== tutorialAllowedPredictionLabel) return
+    if (!canAcceptPrediction(label)) return
+    predictionInputReadyRef.current = false
+    clearPredictionReadyTimer()
     fxTokenRef.current += 1
     const fxToken = fxTokenRef.current
     setTables((currentTables) => {
       const currentMain = currentTables.find((table) => table.isMain) || currentTables[0]
-      if (!currentMain || currentMain.deck.length === 0) return currentTables
+      if (!currentMain || currentMain.deck.length === 0) {
+        predictionInputReadyRef.current = true
+        return currentTables
+      }
       const previousCombo = comboRef.current
       const tutorialOutcome = tutorialActive && tutorialStep?.action === 'guess' ? tutorialStep.outcome : null
       const betId = `bet-${Date.now()}-${buttonIndex}-${Math.random().toString(36).slice(2)}`
@@ -723,7 +797,9 @@ function App() {
           const title = comboText(nextCombo, t) || 'COMBO'
           showGameplayLog('combo', `${title}  x${nextCombo}`)
         }
+        const successReadyDelay = tutorialActive && tutorialStep?.action === 'guess' ? 500 : 430
         scheduleFxClear(fxToken, 430)
+        schedulePredictionInputReady(fxToken, successReadyDelay)
         if (fxTokenRef.current === fxToken && referenceDeck.length === 0) triggerEndSequence(fxToken)
         if (tutorialActive && tutorialStep?.action === 'guess') window.setTimeout(() => setTutorialStepId((stepId) => getNextTutorialStepId(stepId)), 460)
         return makeTables(referenceDeck, nextCount, orderedPrevious, referenceTable.id)
@@ -735,7 +811,10 @@ function App() {
       showMoreLessHint(referenceTable.lastCard, referenceDeck, 1, currentTables.length)
       if (previousCombo >= 2) showGameplayLog('combo-break', `${t('combo.break')}  x${previousCombo}`, 'combo-break')
       setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo } : null)
+      const baseMissReadyDelay = previousCombo >= 2 ? Math.max(2400, MULTI_DECK_COMBO_BREAK_HOLD_MS) : 220
+      const missReadyDelay = tutorialActive && tutorialStep?.action === 'guess' ? Math.max(baseMissReadyDelay, 500) : baseMissReadyDelay
       scheduleFxClear(fxToken, previousCombo >= 2 ? 2400 : 220)
+      schedulePredictionInputReady(fxToken, missReadyDelay)
       if (fxTokenRef.current === fxToken && referenceDeck.length === 0) triggerEndSequence(fxToken)
       if (tutorialActive && tutorialStep?.action === 'guess') window.setTimeout(() => setTutorialStepId((stepId) => getNextTutorialStepId(stepId)), 460)
       if (currentTables.length > 1) {
@@ -751,6 +830,8 @@ function App() {
     })
   }
 
+  guessRef.current = guess
+
   function nextLevel() {
     const index = orderedLevelIds.indexOf(selectedLevelId)
     const nextId = index >= 0 ? orderedLevelIds[(index + 1) % orderedLevelIds.length] : levelsRegistry.startingLevel
@@ -761,6 +842,7 @@ function App() {
   function goHome() {
     fxTokenRef.current += 1
     comboBreakHoldRef.current = false
+    resetPredictionInput()
     setStarted(false)
     setShowEnd(false)
     setBreakFx(null)
@@ -850,7 +932,7 @@ function App() {
         <PointRewardStack rewards={pointRewards} t={t} />
         <AnimatePresence key={moreLessHintPresenceKey}>{moreLessHint ? <MoreLessHintPopup hint={moreLessHint} t={t} /> : null}</AnimatePresence>
         <AnimatePresence>{breakFx ? <ComboBreakOverlay key={breakFx.id} breakFx={breakFx} t={t} /> : null}</AnimatePresence>
-        <section className={`prediction-grid ${tutorialHighlight('prediction-grid')}`}>{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label] ?? 0} probability={probabilitiesEnabled ? probabilityModel.percentages[card.label] : undefined} isMostLikely={highlightedProbabilityLabels.has(card.label)} onGuess={guess} bumpKey={cardCountBumps[card.label]} tutorialAllowedLabel={tutorialAllowedPredictionLabel} t={t} />)}</section>
+        <section className={`prediction-grid ${tutorialHighlight('prediction-grid')}`}>{cardTypes.map((card, index) => <PredictionCard key={card.label} card={card} index={index} remaining={remainingByType[card.label] ?? 0} probability={probabilitiesEnabled ? probabilityModel.percentages[card.label] : undefined} isMostLikely={highlightedProbabilityLabels.has(card.label)} onPressStart={pressPrediction} onPressEnd={releaseHeldPrediction} bumpKey={cardCountBumps[card.label]} tutorialAllowedLabel={tutorialAllowedPredictionLabel} t={t} />)}</section>
       </> : null}
       <AnimatePresence>{showGameOverBanner ? <motion.div className='game-over-banner' initial={{ opacity: 0, scale: 0.8, y: 20 }} animate={{ opacity: 1, scale: [1.1, 1], y: 0 }} exit={{ opacity: 0, scale: 1.2, y: -26 }} transition={{ duration: 0.42, ease: 'easeOut' }}>{t('game.endOfDeck')}</motion.div> : null}</AnimatePresence>
       {showLevelIntro ? <LevelIntroCard level={currentLevel} levelNumber={levelNumber} totalCards={totalCards} probabilitiesEnabled={probabilitiesEnabled} onProbabilitiesChange={setProbabilitiesEnabled} onClassic={() => startLevelIntro('classic')} onMoreLess={() => startLevelIntro('more-less')} highlighted={tutorialTarget === 'level-intro'} t={t} /> : null}
