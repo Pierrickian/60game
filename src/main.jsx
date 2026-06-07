@@ -294,9 +294,9 @@ function ComboStatus({ combo, t }) {
   return <div className="combo-status"><span>{combo >= 2 ? `${activeTableCount(combo)} ${t('common.decksUpper')}` : `1 ${t('common.deckUpper')}`}</span></div>
 }
 
-function DeckStack({ remaining, isMain, totalCards, tutorialTarget, t }) {
+function DeckStack({ isMain, totalCards, tutorialTarget, t }) {
   const highlighted = tutorialTarget === 'table'
-  return <div className="deck-zone"><div className="plate plate-blue" /><div className={`deck-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className={`deck-back ${isMain ? 'primary-deck' : ''}`}><span className="deck-brand"><span className="deck-logo">{totalCards}</span><span className="deck-subtitle">{t('deck.game')}</span></span>{isMain ? <small>{remaining}</small> : null}</div></div></div>
+  return <div className="deck-zone"><div className="plate plate-blue" /><div className={`deck-stack ${highlighted ? 'tutorial-ui-highlight' : ''}`}><div className="deck-shadow-card card-layer-4" /><div className="deck-shadow-card card-layer-3" /><div className="deck-shadow-card card-layer-2" /><div className={`deck-back ${isMain ? 'primary-deck' : ''}`}><span className="deck-brand"><span className="deck-logo">{totalCards}</span><span className="deck-subtitle">{t('deck.game')}</span></span></div></div></div>
 }
 
 const MemoDeckStack = React.memo(DeckStack)
@@ -379,7 +379,7 @@ function BetClone({ bet }) {
 }
 
 function TableSlot({ table, totalCards, tutorialTarget, t }) {
-  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><MemoDeckStack remaining={table.deck.length} isMain={table.isMain} totalCards={totalCards} tutorialTarget={tutorialTarget} t={t} /><div className="arc-ribbon mini-ribbon" /><MemoDiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} revealId={table.revealId} showCombo={table.showCombo} tutorialTarget={tutorialTarget} /></motion.div>
+  return <motion.div className={`combo-table ${table.isMain ? 'main-combo-table' : ''} ${table.lastMiss ? 'combo-table-miss' : ''}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: .1 }}><MemoDeckStack isMain={table.isMain} totalCards={totalCards} tutorialTarget={tutorialTarget} t={t} /><div className="arc-ribbon mini-ribbon" /><MemoDiscardPile card={table.lastCard} won={table.lastHit} miss={table.lastMiss} revealId={table.revealId} showCombo={table.showCombo} tutorialTarget={tutorialTarget} /></motion.div>
 }
 
 const MemoTableSlot = React.memo(TableSlot)
@@ -942,8 +942,9 @@ function App() {
   const gameOver = started && showEnd
   return <main className={`game-shell ${started ? 'in-game' : 'home-mode'} ${tutorialActive ? 'tutorial-running' : ''} ${tutorialTarget ? `tutorial-focus-${tutorialTarget}` : ''}`}>
     <div className="cinematic-bg" />
-    <LanguageToggle language={language} onToggle={toggleLanguage} t={t} />
-    {!started ? <section className="start-screen level-select">
+    {!started ? <>
+      <LanguageToggle language={language} onToggle={toggleLanguage} t={t} />
+      <section className="start-screen level-select">
       <strong>{t('brand.60Game')}</strong>
       <em>{t('home.selectLevel')}</em>
       <TutorialHomePanel onStart={startTutorial} t={t} />
@@ -957,8 +958,9 @@ function App() {
         const saved = progression[id] || {}
         return <button key={id} className={`level-pick ${active ? 'active' : ''}`} onClick={() => { setSelectedLevelId(id); newGame(id) }}><b>{localizedLevelName(level, t)}</b><small>{localizedDeckSummary(level, deckSize, jokerCount, t)}</small><span>{nonJoker.join(' / ')}</span><div className='mini-stars'>{[0,1,2].map((i)=><StarDisplay key={i} unlocked={(saved.stars||0)>i} size="md" className="mini-star" />)}</div></button>
       })}</div>
-    </section> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} achievements={achievementRuntime} t={t} /> : <>
-      <header className="game-header"><section className="quick-info"><div><span>{t('common.level').toUpperCase()}</span><strong>{levelNumber}</strong></div><div><span>{t('common.cardsUpper')}</span><strong>{totalCards}</strong></div></section><section className={`top-stats ${tutorialHighlight('hud')}`}><Stat tone="purple" icon="★" label={t('common.success')} value={successCount} bumpKey={successCount} /><Stat tone="gold" icon="🏆" label={t('common.score')} value={score} bumpKey={scoreBump} /><Stat tone="green" icon="◎" label={t('common.precision')} value={precisionPercentage} /></section></header>
+    </section>
+    </> : gameOver ? <EndPanel score={score} best={best} stats={stats} levelNumber={levelNumber} levelConfig={currentLevel} onReplay={() => newGame(selectedLevelId)} onNext={nextLevel} onHome={goHome} stars={runtimeStars} achievements={achievementRuntime} t={t} /> : <>
+      <header className="game-header"><section className="quick-info"><div><span>{t('common.level').toUpperCase()}</span><strong>{levelNumber}</strong></div><div><span>{t('common.cardsUpper')}</span><strong>{mainDeck.length}/{totalCards}</strong></div></section><section className={`top-stats ${tutorialHighlight('hud')}`}><Stat tone="purple" icon="★" label={t('common.success')} value={successCount} bumpKey={successCount} /><Stat tone="gold" icon="🏆" label={t('common.score')} value={score} bumpKey={scoreBump} /><Stat tone="green" icon="◎" label={t('common.precision')} value={precisionPercentage} /></section></header>
       <ComboStatus combo={combo} t={t} />
       {gameplayIsVisible ? <>
         <section className={`play-stage multideck-stage ${tableLayoutClass(tables.length)}`}><AnimatePresence>{tables.map((table) => <MemoTableSlot key={table.id} table={table} totalCards={totalCards} tutorialTarget={tutorialTarget} t={t} />)}</AnimatePresence><AnimatePresence>{bets.map((bet) => <BetClone key={bet.id} bet={bet} />)}</AnimatePresence></section>
