@@ -92,8 +92,9 @@ function comboBreakDurationMs(combo) {
   return Math.round(clamp(320 + Math.sqrt(Math.max(0, combo)) * 90, COMBO_BREAK_MIN_DURATION_MS, COMBO_BREAK_MAX_DURATION_MS))
 }
 
-function easeInCubic(progress) {
-  return progress * progress * progress
+function easeComboBreakProgress(progress) {
+  const clampedProgress = clamp(progress, 0, 1)
+  return clampedProgress * clampedProgress
 }
 
 function tableLayoutClass(count) {
@@ -404,7 +405,7 @@ function ComboBreakCountdown({ from, durationMs }) {
     function tick(now) {
       const elapsed = now - startedAt
       const fallProgress = clamp((elapsed - COMBO_BREAK_INITIAL_HOLD_MS) / fallDuration, 0, 1)
-      const easedProgress = easeInCubic(fallProgress)
+      const easedProgress = easeComboBreakProgress(fallProgress)
       const nextValue = elapsed < COMBO_BREAK_INITIAL_HOLD_MS ? from : Math.max(0, Math.ceil(from * (1 - easedProgress)))
       setFrame((currentFrame) => currentFrame.value === nextValue && currentFrame.progress === easedProgress ? currentFrame : { value: nextValue, progress: easedProgress })
       if (elapsed < durationMs) animationFrame = window.requestAnimationFrame(tick)
