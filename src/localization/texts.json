@@ -119,6 +119,10 @@
     "en": "Hard",
     "fr": "Difficile"
   },
+  "levelName.generic": {
+    "en": "Level {number}",
+    "fr": "Niveau {number}"
+  },
   "levelName.classic_60": {
     "en": "Classic 60",
     "fr": "Classique 60"
