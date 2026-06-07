@@ -4,9 +4,17 @@ function numericLabels(levelConfig: { startingDeck: Record<string, number> }): n
   return Object.keys(levelConfig.startingDeck).filter((key) => key !== 'joker').map(Number).filter(Number.isFinite).sort((a, b) => a - b)
 }
 
+function getRandomInDeckIndex(deckLength: number): number {
+  // drawCard reads the top at the end of the array; use indexes before that top card.
+  if (deckLength <= 0) return 0
+  return Math.floor(Math.random() * deckLength)
+}
+
 function addCards(deck: ReturnType<JokerPowerHandler['apply']>, count: number, label: string, makeCardFromLabel: (label: string) => ReturnType<JokerPowerHandler['apply']>[number]) {
-  const additions = Array.from({ length: Math.max(0, count) }, () => makeCardFromLabel(label))
-  return [...deck, ...additions]
+  return Array.from({ length: Math.max(0, count) }, () => makeCardFromLabel(label)).reduce((nextDeck, card) => {
+    const insertIndex = getRandomInDeckIndex(nextDeck.length)
+    return [...nextDeck.slice(0, insertIndex), card, ...nextDeck.slice(insertIndex)]
+  }, [...deck])
 }
 
 export const addHighestCard: JokerPowerHandler = {

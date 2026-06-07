@@ -54,7 +54,7 @@ export function applyDeckMutationToTables(tables, promotedId, mutateDeck) {
 
   return tables.map((table) => ({
     ...table,
-    deck: table.id === promotedId ? promotedDeck : resyncDeckFromPromoted(promotedDeck)
+    deck: table.id === promotedId ? promotedDeck : mutateDeck(table.deck, table)
   }))
 }
 
