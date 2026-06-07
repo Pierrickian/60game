@@ -24,8 +24,10 @@ const SCORE_SCREEN_DELAY_MS = 2000
 const GAME_OVER_BANNER_LEAD_MS = 1000
 const WIN_OVERLAY_DURATION_MS = 1500
 const MULTI_DECK_COMBO_BREAK_HOLD_MS = 1000
-const COMBO_BREAK_COUNTDOWN_DURATION_MS = 2000
-const COMBO_BREAK_COUNTDOWN_REFRESH_MS = 100
+const COMBO_BREAK_INITIAL_HOLD_MS = 140
+const COMBO_BREAK_MIN_DURATION_MS = 350
+const COMBO_BREAK_MAX_DURATION_MS = 900
+const COMBO_BREAK_EXIT_PAD_MS = 180
 const GAMEPLAY_LOG_DURATION_MS = 2200
 const POINT_REWARD_POPUP_DURATION_MS = 1600
 const MORE_LESS_HINT_DURATION_MS = 1800
@@ -80,6 +82,18 @@ function comboText(combo, t) {
 function activeTableCount(combo) {
   if (combo < 2) return 1
   return Math.min(combo, 8)
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function comboBreakDurationMs(combo) {
+  return Math.round(clamp(320 + Math.sqrt(Math.max(0, combo)) * 90, COMBO_BREAK_MIN_DURATION_MS, COMBO_BREAK_MAX_DURATION_MS))
+}
+
+function easeInCubic(progress) {
+  return progress * progress * progress
 }
 
 function tableLayoutClass(count) {
@@ -380,25 +394,43 @@ function MoreLessHintPopup({ hint, t }) {
   return <motion.div key={hint.id} className={`more-less-hint more-less-${hint.direction.toLowerCase()}`} initial={{ opacity: 0, y: 18, scale: .76 }} animate={{ opacity: [0, 1, 1, 0], y: [18, 0, -4, -18], scale: [.76, 1.08, 1, .92] }} exit={{ opacity: 0, y: -24, scale: .88 }} transition={{ duration: 1.5, times: [0, .16, .72, 1], ease: 'easeOut' }}><small>{t('moreLess.nextCard')}</small><strong>{t(`moreLess.${hint.direction}`)}</strong></motion.div>
 }
 
-function ComboBreakCountdown({ from }) {
-  const [value, setValue] = useState(from)
+function ComboBreakCountdown({ from, durationMs }) {
+  const [frame, setFrame] = useState({ value: from, progress: 0 })
   useEffect(() => {
     const startedAt = performance.now()
-    setValue(from)
-    const timer = window.setInterval(() => {
-      const elapsed = performance.now() - startedAt
-      const nextValue = Math.max(0, Math.ceil(from * (1 - elapsed / COMBO_BREAK_COUNTDOWN_DURATION_MS)))
-      setValue((currentValue) => currentValue === nextValue ? currentValue : nextValue)
-      if (nextValue === 0) window.clearInterval(timer)
-    }, COMBO_BREAK_COUNTDOWN_REFRESH_MS)
-    return () => window.clearInterval(timer)
-  }, [from])
-  return <span className={value === 0 ? 'break-countdown zero' : 'break-countdown'}>x{value}</span>
+    const fallDuration = Math.max(1, durationMs - COMBO_BREAK_INITIAL_HOLD_MS)
+    let animationFrame = 0
+
+    function tick(now) {
+      const elapsed = now - startedAt
+      const fallProgress = clamp((elapsed - COMBO_BREAK_INITIAL_HOLD_MS) / fallDuration, 0, 1)
+      const easedProgress = easeInCubic(fallProgress)
+      const nextValue = elapsed < COMBO_BREAK_INITIAL_HOLD_MS ? from : Math.max(0, Math.ceil(from * (1 - easedProgress)))
+      setFrame((currentFrame) => currentFrame.value === nextValue && currentFrame.progress === easedProgress ? currentFrame : { value: nextValue, progress: easedProgress })
+      if (elapsed < durationMs) animationFrame = window.requestAnimationFrame(tick)
+    }
+
+    setFrame({ value: from, progress: 0 })
+    animationFrame = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(animationFrame)
+  }, [durationMs, from])
+
+  const scale = 1.1 - frame.progress * 0.2
+  const glow = 1 - frame.progress
+  const countdownStyle = {
+    '--break-scale': scale,
+    '--break-glow-blur': `${6 + 18 * glow}px`,
+    '--break-glow-alpha': 0.22 + 0.6 * glow,
+    '--break-shadow-y': `${1 + 10 * (1 - glow)}px`,
+    '--break-saturation': 0.7 + 0.5 * glow,
+  }
+  return <span className={frame.value === 0 ? 'break-countdown zero' : 'break-countdown'} style={countdownStyle}>x{frame.value}</span>
 }
 
 function ComboBreakOverlay({ breakFx, t }) {
   if (!breakFx) return null
-  return <div className="combo-break-overlay"><motion.div initial={{ opacity: 0, y: -26, scale: .68 }} animate={{ opacity: 1, y: 0, scale: [1, 1.06, 1] }} exit={{ opacity: 0, y: 34, scale: .88 }} transition={{ duration: .34 }}><strong>{t('combo.break')}</strong><ComboBreakCountdown from={breakFx.from} /></motion.div></div>
+  const durationMs = breakFx.durationMs || comboBreakDurationMs(breakFx.from)
+  return <div className="combo-break-overlay"><motion.div className="combo-break-card" initial={{ opacity: 0, y: -26, scale: .68 }} animate={{ opacity: 1, y: 0, scale: [1.08, 1.02, .96] }} exit={{ opacity: 0, y: 34, scale: .88 }} transition={{ duration: durationMs / 1000, ease: 'easeIn' }}><strong>{t('combo.break')}</strong><ComboBreakCountdown from={breakFx.from} durationMs={durationMs} /><div className="combo-break-fragments" aria-hidden="true">{Array.from({ length: 10 }, (_, index) => <i key={index} />)}</div></motion.div></div>
 }
 
 function PointRewardStack({ rewards, t }) {
@@ -810,10 +842,11 @@ function App() {
       setCombo(0)
       showMoreLessHint(referenceTable.lastCard, referenceDeck, 1, currentTables.length)
       if (previousCombo >= 2) showGameplayLog('combo-break', `${t('combo.break')}  x${previousCombo}`, 'combo-break')
-      setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo } : null)
-      const baseMissReadyDelay = previousCombo >= 2 ? Math.max(2400, MULTI_DECK_COMBO_BREAK_HOLD_MS) : 220
+      const comboBreakDuration = comboBreakDurationMs(previousCombo)
+      setBreakFx(previousCombo >= 2 ? { id: fxToken, from: previousCombo, durationMs: comboBreakDuration } : null)
+      const baseMissReadyDelay = previousCombo >= 2 ? Math.max(comboBreakDuration + COMBO_BREAK_EXIT_PAD_MS, MULTI_DECK_COMBO_BREAK_HOLD_MS) : 220
       const missReadyDelay = tutorialActive && tutorialStep?.action === 'guess' ? Math.max(baseMissReadyDelay, 500) : baseMissReadyDelay
-      scheduleFxClear(fxToken, previousCombo >= 2 ? 2400 : 220)
+      scheduleFxClear(fxToken, previousCombo >= 2 ? comboBreakDuration + COMBO_BREAK_EXIT_PAD_MS : 220)
       schedulePredictionInputReady(fxToken, missReadyDelay)
       if (fxTokenRef.current === fxToken && referenceDeck.length === 0) triggerEndSequence(fxToken)
       if (tutorialActive && tutorialStep?.action === 'guess') window.setTimeout(() => setTutorialStepId((stepId) => getNextTutorialStepId(stepId)), 460)
