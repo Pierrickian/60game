@@ -1,0 +1,1 @@
+{"id":"add_joker_x2","name":"Double Wild Return","popupText":"+2 JOKERS","handler":"addJoker","weight":1,"params":{"count":2}}

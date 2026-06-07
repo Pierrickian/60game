@@ -111,9 +111,9 @@ const jokerMutatedDecks = applyDeckMutationToTables(reconciledWinningTables, fir
   jokerMutationCalls += 1
   return [...deck, card('2', `joker-add-${table.id}`)]
 })
-expect(jokerMutationCalls === 1, 'Expected an explicit Joker mutation to be applied only to the promoted deck.')
+expect(jokerMutationCalls === reconciledWinningTables.length, 'Expected explicit Joker mutations to be recomputed for every active deck.')
 expect(jokerMutatedDecks.every((table) => haveSameDeckComposition(table.deck, jokerMutatedDecks[0].deck)), 'Expected an explicit Joker mutation to keep every active deck synchronized by composition.')
-expect(new Set(jokerMutatedDecks.map((table) => labels(table.deck))).size === 1, 'Expected Joker mutations to propagate from the promoted deck without recomputing sibling decks.')
+expect(new Set(jokerMutatedDecks.map((table) => labels(table.deck))).size > 1, 'Expected Joker mutations to preserve each active deck order instead of copying promoted positions.')
 const jokerCounts = countCardsByLabel(jokerMutatedDecks[0].deck, ['2', '3', '5', '7'])
 expect(jokerCounts['2'] === 1, 'Expected an explicit Joker mutation to make an exhausted prediction label legitimately reappear.')
 const unchangedTables = applyDeckMutationToTables(reconciledWinningTables, firstWinningTable.id, (deck) => deck)
